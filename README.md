@@ -55,5 +55,10 @@ In order to ensure that the Laravel community is welcoming to all, please review
 If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
 
 ## License
-
+Laravel 12
+Web server
+Apache/2.4.62 (Win64) OpenSSL/3.0.15 PHP/8.3.16
+Database client version: libmysql - mysqlnd 8.3.16
+PHP extension: mysqli Documentation curl Documentation mbstring Documentation sodium Documentation
+PHP version: 8.3.16
 The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
