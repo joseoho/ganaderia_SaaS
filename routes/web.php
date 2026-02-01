@@ -25,4 +25,6 @@ Route::resource('animales', App\Http\Controllers\AnimalController::class)
      ->parameters(['compras' => 'compra']);
 Route::resource('ventas', App\Http\Controllers\VentaController::class)
      ->parameters(['ventas' => 'venta']);
+     Route::get('/dashboard', [App\Http\Controllers\DashboardController::class, 'index'])
+     ->name('dashboard');
 });

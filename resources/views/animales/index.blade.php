@@ -43,7 +43,8 @@
         
     </div>
     <div class="col-md-2">
-        <a href="{{ route('animales.index') }}" class="btn btn-secondary w-100">Limpiar</a> 
+        <a href="{{ route('animales.index') }}" class="btn btn-secondary">
+        <i class="fas fa-broom"></i> Limpiar</a> 
     </div>    
 </form>
 

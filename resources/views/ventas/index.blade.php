@@ -19,6 +19,9 @@
     <div class="col-md-2">
         <button type="submit" class="btn btn-primary w-100">Filtrar</button>
     </div>
+    <div class="col-md-2">
+        <a href="{{ route('ventas.index') }}" class="btn btn-secondary w-100">Limpiar</a> 
+    </div>   
 </form>
 
 <a href="{{ route('ventas.create') }}" class="btn btn-success mb-3">Registrar Venta</a>
