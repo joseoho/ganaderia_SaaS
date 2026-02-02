@@ -11,16 +11,7 @@ class Animal extends Model
     protected $table ='animales';
     protected $fillable = ['inquilino_id','codigo_interno','categoria','raza','fecha_nacimiento','sexo','peso_actual','estado'];
     
-    protected static function booted() 
-    
-    { static::addGlobalScope('inquilino', function ($query) 
-        { 
-            if (app()->has('inquilino_id')) 
-            { $query->where('inquilino_id', app('inquilino_id')); 
-            } 
-        }); 
-    } 
-    
+
     public function inquilino() 
     { 
         return $this->belongsTo(Inquilino::class); 

@@ -114,9 +114,9 @@
               Ventas
             </a>
         <li class="nav-item">
-          <a class="nav-link" href="/geneologia">
+          <a class="nav-link" href="/genealogia">
             <span data-feather="layers"></span>
-            Geneologia
+            Genealogía
           </a>
         </li> 
         <li class="nav-item">

@@ -6,6 +6,8 @@ use App\Http\Controllers\NotificacionController;
 use App\Http\Controllers\AnimalController;
 use App\Http\Controllers\CompraController;
 use App\Http\Controllers\VentaController;
+use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\GenealogiController;
 
 Route::get('/', function () {
     return view('welcome');
@@ -27,4 +29,6 @@ Route::resource('ventas', App\Http\Controllers\VentaController::class)
      ->parameters(['ventas' => 'venta']);
      Route::get('/dashboard', [App\Http\Controllers\DashboardController::class, 'index'])
      ->name('dashboard');
+     Route::resource('genealogia', App\Http\Controllers\GenealogiController::class)
+     ->parameters(['genealogia' => 'genealogium']);
 });
