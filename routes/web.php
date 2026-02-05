@@ -8,6 +8,8 @@ use App\Http\Controllers\CompraController;
 use App\Http\Controllers\VentaController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\GenealogiController;
+use App\Http\Controllers\InventarioInsumoController;
+use App\Http\Controllers\MovilizacionController;
 
 Route::get('/', function () {
     return view('welcome');
@@ -31,4 +33,8 @@ Route::resource('ventas', App\Http\Controllers\VentaController::class)
      ->name('dashboard');
      Route::resource('genealogia', App\Http\Controllers\GenealogiController::class)
      ->parameters(['genealogia' => 'genealogium']);
+     Route::resource('inventario', App\Http\Controllers\InventarioInsumoController::class)
+     ->parameters(['inventario' => 'inventario']);
+     Route::resource('movilizaciones', App\Http\Controllers\MovilizacionController::class)
+     ->parameters(['movilizaciones' => 'movilizacione']);
 });

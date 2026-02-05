@@ -120,7 +120,7 @@
           </a>
         </li> 
         <li class="nav-item">
-          <a class="nav-link" href="/inventarios_insumos">
+          <a class="nav-link" href="/inventario">
             <span data-feather="layers"></span>
             Inventarios Insumos
           </a>

@@ -7,16 +7,15 @@ use Illuminate\Database\Eloquent\Model;
 class InventarioInsumo extends Model
 {
     protected $table ='inventario_insumos';
-    protected $fillable = ['inquilino_id','nombre','cantidad','unidad'];
-    protected static function booted() 
-    { 
-        static::addGlobalScope('inquilino', function ($query) 
-        { if (app()->has('inquilino_id')) 
-            { $query->where('inquilino_id', app('inquilino_id')); 
-            } }); 
-    }
+    protected $fillable = ['inquilino_id','nombre','categoria','cantidad','unidad','minimo','ubicacion','fecha_ingreso','descripcion'];   
+  
     public function inquilino() 
     { 
         return $this->belongsTo(Inquilino::class); 
     }
+    public function estaBajo()
+    {
+        return $this->cantidad <= $this->minimo;
+    }
+
 }

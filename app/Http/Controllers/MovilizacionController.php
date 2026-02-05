@@ -3,64 +3,95 @@
 namespace App\Http\Controllers;
 
 use App\Models\Movilizacion;
-use App\Http\Requests\StoreMovilizacionRequest;
-use App\Http\Requests\UpdateMovilizacionRequest;
+use App\Models\Animal;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class MovilizacionController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
-    public function index()
+    public function index(Request $request)
     {
-        //
+        $query = Movilizacion::where('inquilino_id', Auth::user()->inquilino_id);
+
+        if ($request->filled('search')) {
+            $query->whereHas('animal', function($q) use ($request) {
+                $q->where('codigo_interno', 'like', '%' . $request->search . '%');
+            });
+        }
+
+        if ($request->filled('tipo')) {
+            $query->where('tipo', $request->tipo);
+        }
+
+        $movilizaciones = $query->orderBy('fecha', 'desc')->paginate(10);
+
+        return view('movilizacion.index', compact('movilizaciones'));
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
     public function create()
     {
-        //
+        $animales = Animal::where('inquilino_id', Auth::user()->inquilino_id)->get();
+        return view('movilizacion.create', compact('animales'));
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
-    public function store(StoreMovilizacionRequest $request)
+    public function store(Request $request)
     {
-        //
+        $request->validate([
+            'animal_id' => 'required',
+            'tipo' => 'required|string',
+            'fecha' => 'required|date',
+        ]);
+
+        Movilizacion::create([
+            'inquilino_id' => Auth::user()->inquilino_id,
+            'animal_id' => $request->animal_id,
+            'tipo' => $request->tipo,
+            'origen' => $request->origen,
+            'destino' => $request->destino,
+            'fecha' => $request->fecha,
+            'motivo' => $request->descripcion,
+        ]);
+
+        return redirect()->route('movilizaciones.index')->with('success', 'Movilización registrada');
     }
 
-    /**
-     * Display the specified resource.
-     */
-    public function show(Movilizacion $movilizacion)
+    public function show(Movilizacion $movilizacione)
     {
-        //
+        if ($movilizacione->inquilino_id !== Auth::user()->inquilino_id) abort(403);
+
+        return view('movilizacion.show', compact('movilizacione'));
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(Movilizacion $movilizacion)
+    public function edit(Movilizacion $movilizacione)
     {
-        //
+        if ($movilizacione->inquilino_id !== Auth::user()->inquilino_id) abort(403);
+
+        $animales = Animal::where('inquilino_id', Auth::user()->inquilino_id)->get();
+
+        return view('movilizacion.edit', compact('movilizacione', 'animales'));
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(UpdateMovilizacionRequest $request, Movilizacion $movilizacion)
+    public function update(Request $request, Movilizacion $movilizacione)
     {
-        //
+        if ($movilizacione->inquilino_id !== Auth::user()->inquilino_id) abort(403);
+
+        $request->validate([
+            'animal_id' => 'required',
+            'tipo' => 'required|string',
+            'fecha' => 'required|date',
+        ]);
+
+        $movilizacione->update($request->all());
+
+        return redirect()->route('movilizaciones.index')->with('success', 'Movilización actualizada');
     }
 
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(Movilizacion $movilizacion)
+    public function destroy(Movilizacion $movilizacione)
     {
-        //
+        if ($movilizacione->inquilino_id !== Auth::user()->inquilino_id) abort(403);
+
+        $movilizacione->delete();
+
+        return redirect()->route('movilizaciones.index')->with('success', 'Movilización eliminada');
     }
 }
