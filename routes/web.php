@@ -37,4 +37,6 @@ Route::resource('ventas', App\Http\Controllers\VentaController::class)
      ->parameters(['inventario' => 'inventario']);
      Route::resource('movilizaciones', App\Http\Controllers\MovilizacionController::class)
      ->parameters(['movilizaciones' => 'movilizacione']);
+     Route::resource('produccion', App\Http\Controllers\ProduccionCarneController::class)
+     ->parameters(['produccion' => 'produccion']);
 });

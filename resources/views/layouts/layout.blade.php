@@ -136,9 +136,9 @@
       
       <!-- Opciones para todos los usuarios -->
       <li class="nav-item">
-        <a class="nav-link" href="/inventario_carnes">
+        <a class="nav-link" href="/produccion">
           <span data-feather="droplet"></span>
-          Inventario carnes
+          Producción carnes
         </a>
       </li>
         <li class="nav-item">
