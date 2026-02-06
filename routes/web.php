@@ -10,6 +10,8 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\GenealogiController;
 use App\Http\Controllers\InventarioInsumoController;
 use App\Http\Controllers\MovilizacionController;
+use App\Http\Controllers\ProduccionCarneController;
+use App\Http\Controllers\ProduccionLecheController;
 
 Route::get('/', function () {
     return view('welcome');
@@ -39,4 +41,6 @@ Route::resource('ventas', App\Http\Controllers\VentaController::class)
      ->parameters(['movilizaciones' => 'movilizacione']);
      Route::resource('produccion', App\Http\Controllers\ProduccionCarneController::class)
      ->parameters(['produccion' => 'produccion']);
+     Route::resource('produccion_leche', App\Http\Controllers\ProduccionLecheController::class)
+     ->parameters(['produccion_leche' => 'produccion_leche']);
 });

@@ -142,9 +142,9 @@
         </a>
       </li>
         <li class="nav-item">
-          <a class="nav-link" href="/inventario_leche">
+          <a class="nav-link" href="/produccion_leche">
             <span data-feather="repeat"></span>
-            Inventario leche
+            Producción leche
           </a>
         </li>
         <li class="nav-item">
