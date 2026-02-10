@@ -9,10 +9,15 @@ class RegistroVacuna extends Model
 {
   protected $table ='registro_vacunas';
   protected $fillable = [
+    'inquilino_id',
     'animal_id',
-    'vacuna_id',
+    'nombre',
+    'lote',
+    'proveedor',
+    'via',
     'fecha_aplicacion',
-    'proxima_dosis']; 
+    'dosis',
+    'observaciones']; 
     public function animal() 
     { 
         return $this->belongsTo(Animal::class, 'animal_id');
@@ -20,5 +25,9 @@ class RegistroVacuna extends Model
      public function vacuna() 
      { 
         return $this->belongsTo(Vacuna::class, 'vacuna_id'); 
+    }
+    public function inquilino() 
+    { 
+        return $this->belongsTo(Inquilino::class, 'inquilino_id'); 
     }
 }

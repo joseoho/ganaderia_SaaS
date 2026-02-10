@@ -82,7 +82,7 @@ class ProduccionLecheController extends Controller
         if ($produccion_leche->inquilino_id !== Auth::user()->inquilino_id) abort(403);
 
         $animales = Animal::where('inquilino_id', Auth::user()->inquilino_id)
-                          ->where('sexo', 'hembra')
+                          ->where('sexo', 'h')
                           ->get();
 
         return view('produccion_leche.edit', compact('produccion_leche', 'animales'));

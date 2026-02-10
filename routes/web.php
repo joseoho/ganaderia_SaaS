@@ -12,6 +12,7 @@ use App\Http\Controllers\InventarioInsumoController;
 use App\Http\Controllers\MovilizacionController;
 use App\Http\Controllers\ProduccionCarneController;
 use App\Http\Controllers\ProduccionLecheController;
+use App\Http\Controllers\RegistroVacunaController;
 
 Route::get('/', function () {
     return view('welcome');
@@ -43,4 +44,8 @@ Route::resource('ventas', App\Http\Controllers\VentaController::class)
      ->parameters(['produccion' => 'produccion']);
      Route::resource('produccion_leche', App\Http\Controllers\ProduccionLecheController::class)
      ->parameters(['produccion_leche' => 'produccion_leche']);
+     // Route::resource('vacunas', App\Http\Controllers\VacunaController::class)
+     // ->parameters(['vacunas' => 'vacuna']);
+     Route::resource('registro_vacunas', App\Http\Controllers\RegistroVacunaController::class)
+     ->parameters(['registro_vacunas' => 'registro_vacuna']);
 });

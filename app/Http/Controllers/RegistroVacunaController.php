@@ -3,64 +3,97 @@
 namespace App\Http\Controllers;
 
 use App\Models\RegistroVacuna;
-use App\Http\Requests\StoreRegistroVacunaRequest;
-use App\Http\Requests\UpdateRegistroVacunaRequest;
+use App\Models\Animal;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class RegistroVacunaController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
-    public function index()
+    public function index(Request $request)
     {
-        //
+        $query = RegistroVacuna::where('inquilino_id', Auth::user()->inquilino_id);
+
+        if ($request->filled('search')) {
+            $query->whereHas('animal', function($q) use ($request) {
+                $q->where('codigo_interno', 'like', '%' . $request->search . '%');
+            });
+        }
+
+        if ($request->filled('nombre')) {
+            $query->where('nombre', 'like', '%' . $request->nombre . '%');
+        }
+
+        $vacunas = $query->orderBy('fecha_aplicacion', 'desc')->paginate(10);
+
+        return view('registro_vacunas.index', compact('vacunas'));
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
     public function create()
     {
-        //
+        $animales = Animal::where('inquilino_id', Auth::user()->inquilino_id)->get();
+        return view('registro_vacunas.create', compact('animales'));
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
-    public function store(StoreRegistroVacunaRequest $request)
+    public function store(Request $request)
     {
-        //
+        // $request->validate([
+        //     'animal_id' => 'required',
+        //     'nombre' => 'required|string|max:255',
+        //     'fecha_aplicacion' => 'required|date',
+        // ]);
+
+        RegistroVacuna::create([
+            'inquilino_id' => Auth::user()->inquilino_id,
+            'animal_id' => $request->animal_id,
+            'nombre' => $request->nombre,
+            'lote' => $request->lote,
+            'proveedor' => $request->proveedor,
+            'via' => $request->via,
+            'fecha_aplicacion' => $request->fecha,
+            'dosis' => $request->dosis,
+            'observaciones' => $request->observaciones,
+        ]);
+
+        return redirect()->route('registro_vacunas.index')->with('success', 'Vacuna registrada');
     }
 
-    /**
-     * Display the specified resource.
-     */
-    public function show(RegistroVacuna $registroVacuna)
+    public function show(RegistroVacuna $vacuna)
     {
-        //
+        if ($vacuna->inquilino_id !== Auth::user()->inquilino_id) abort(403);
+
+        return view('registro_vacunas.show', compact('vacuna'));
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(RegistroVacuna $registroVacuna)
+    public function edit(RegistroVacuna $vacuna)
     {
-        //
+        if ($vacuna->inquilino_id !== Auth::user()->inquilino_id) abort(403);
+
+        $animales = Animal::where('inquilino_id', Auth::user()->inquilino_id)->get();
+
+        return view('registro_vacunas.edit', compact('vacuna', 'animales'));
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(UpdateRegistroVacunaRequest $request, RegistroVacuna $registroVacuna)
+    public function update(Request $request, RegistroVacuna $vacuna)
     {
-        //
+        if ($vacuna->inquilino_id !== Auth::user()->inquilino_id) abort(403);
+
+        // $request->validate([
+        //     'animal_id' => 'required',
+        //     'nombre' => 'required|string|max:255',
+        //     'fecha_aplicacion' => 'required|date',
+        // ]);
+
+        $vacuna->update($request->all());
+
+        return redirect()->route('registro_vacunas.index')->with('success', 'Vacuna actualizada');
     }
 
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(RegistroVacuna $registroVacuna)
+    public function destroy(RegistroVacuna $vacuna)
     {
-        //
+        if ($vacuna->inquilino_id !== Auth::user()->inquilino_id) abort(403);
+
+        $vacuna->delete();
+
+        return redirect()->route('registro_vacunas.index')->with('success', 'Vacuna eliminada');
     }
 }
