@@ -47,6 +47,7 @@
                         <li class="list-group-item"><strong>Lote:</strong> {{ $v->lote ?? 'N/A' }}</li>
                         <li class="list-group-item"><strong>Fecha:</strong> {{ $v->fecha_aplicacion }}</li>
                         <li class="list-group-item"><strong>Vía:</strong> {{ $v->via ?? 'N/A' }}</li>
+                        <li class="list-group-item"><strong>Proxima Dosis:</strong> {{ $v->proxima_dosis ?? 'N/A' }}</li>
                     </ul>
 
                     <div class="d-flex justify-content-between">

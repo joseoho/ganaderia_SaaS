@@ -17,6 +17,7 @@ class RegistroVacuna extends Model
     'via',
     'fecha_aplicacion',
     'dosis',
+    'proxima_dosis',
     'observaciones']; 
     public function animal() 
     { 

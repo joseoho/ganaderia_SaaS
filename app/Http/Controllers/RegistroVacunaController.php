@@ -51,31 +51,32 @@ class RegistroVacunaController extends Controller
             'via' => $request->via,
             'fecha_aplicacion' => $request->fecha,
             'dosis' => $request->dosis,
+            'proxima_dosis' => $request->proxima_dosis,
             'observaciones' => $request->observaciones,
         ]);
 
         return redirect()->route('registro_vacunas.index')->with('success', 'Vacuna registrada');
     }
 
-    public function show(RegistroVacuna $vacuna)
+    public function show(RegistroVacuna $registro_vacuna)
     {
-        if ($vacuna->inquilino_id !== Auth::user()->inquilino_id) abort(403);
+        if ($registro_vacuna->inquilino_id !== Auth::user()->inquilino_id) abort(403);
 
-        return view('registro_vacunas.show', compact('vacuna'));
+        return view('registro_vacunas.show', compact('registro_vacuna'));
     }
 
-    public function edit(RegistroVacuna $vacuna)
+    public function edit(RegistroVacuna $registro_vacuna)
     {
-        if ($vacuna->inquilino_id !== Auth::user()->inquilino_id) abort(403);
+        if ($registro_vacuna->inquilino_id !== Auth::user()->inquilino_id) abort(403);
 
         $animales = Animal::where('inquilino_id', Auth::user()->inquilino_id)->get();
 
-        return view('registro_vacunas.edit', compact('vacuna', 'animales'));
+        return view('registro_vacunas.edit', compact('registro_vacuna', 'animales'));
     }
 
-    public function update(Request $request, RegistroVacuna $vacuna)
+    public function update(Request $request, RegistroVacuna $registro_vacuna)
     {
-        if ($vacuna->inquilino_id !== Auth::user()->inquilino_id) abort(403);
+        if ($registro_vacuna->inquilino_id !== Auth::user()->inquilino_id) abort(403);
 
         // $request->validate([
         //     'animal_id' => 'required',
@@ -83,16 +84,16 @@ class RegistroVacunaController extends Controller
         //     'fecha_aplicacion' => 'required|date',
         // ]);
 
-        $vacuna->update($request->all());
+        $registro_vacuna->update($request->all());
 
         return redirect()->route('registro_vacunas.index')->with('success', 'Vacuna actualizada');
     }
 
-    public function destroy(RegistroVacuna $vacuna)
+    public function destroy(RegistroVacuna $registro_vacuna)
     {
-        if ($vacuna->inquilino_id !== Auth::user()->inquilino_id) abort(403);
+        if ($registro_vacuna->inquilino_id !== Auth::user()->inquilino_id) abort(403);
 
-        $vacuna->delete();
+        $registro_vacuna->delete();
 
         return redirect()->route('registro_vacunas.index')->with('success', 'Vacuna eliminada');
     }

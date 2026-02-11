@@ -54,14 +54,14 @@
                 <input type="number" step="0.01" name="dosis" class="form-control">
             </div>
 
-           
+           <div class="mb-3">
+                <label class="form-label">Próxima dosis</label>
+                <input type="date" name="proxima_dosis" class="form-control" required>
+            </div>
 
             <div class="mb-3">
                 <label class="form-label">Observaciones</label>
                 <textarea name="observaciones" class="form-control"></textarea>
             </div>
-
-          
-
     </div>
 </div>
