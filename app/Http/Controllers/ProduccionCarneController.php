@@ -66,8 +66,16 @@ class ProduccionCarneController extends Controller
     public function show(ProduccionCarne $produccion)
     {
         if ($produccion->inquilino_id !== Auth::user()->inquilino_id) abort(403);
+            $mes = \Carbon\Carbon::parse($produccion->fecha)->month;
+            $anio = \Carbon\Carbon::parse($produccion->fecha)->year;
 
-        return view('produccion_carne.show', compact('produccion'));
+            $total_mes = \App\Models\ProduccionCarne::where('animal_id', $produccion->animal_id)
+                ->whereMonth('fecha', $mes)
+                ->whereYear('fecha', $anio)
+                ->sum('ganancia_diaria');
+
+            return view('produccion_carne.show', compact('produccion', 'total_mes'));
+
     }
 
     public function edit(ProduccionCarne $produccion)

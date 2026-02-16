@@ -85,6 +85,49 @@
             </ul>
         </div>
     </div>
+    <div class="col-md-4">
+    <div class="card shadow-sm text-center mb-4">
+        <div class="card-header bg-primary text-white">
+            Producción de Leche (Mes)
+        </div>
+        <div class="card-body">
+            <h2>{{ $totalLecheMes }} L</h2>
+        </div>
+    </div>
+</div>
+
+    <div class="col-md-4">
+        <div class="card shadow-sm text-center mb-4">
+            <div class="card-header bg-success text-white">
+                Ganancia de Carne (Mes)
+            </div>
+            <div class="card-body">
+                <h2>{{ number_format($totalCarneMes, 2) }} kg</h2>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+    <div class="card shadow-sm mb-4">
+        <div class="card-header bg-warning text-dark">
+            Partos próximos (30 días)
+        </div>
+        <ul class="list-group list-group-flush">
+            @forelse($partosProximos as $p)
+                @php
+                    $fpp = \Carbon\Carbon::parse($p->fecha)->addDays(283)->format('Y-m-d');
+                @endphp
+                <li class="list-group-item">
+                    <strong>{{ $p->animal->codigo_interno }}</strong>
+                    <span class="float-end">{{ $fpp }}</span>
+                </li>
+            @empty
+                <li class="list-group-item text-center text-muted">
+                    No hay partos próximos
+                </li>
+            @endforelse
+        </ul>
+    </div>
+</div>
 
 </div>
 

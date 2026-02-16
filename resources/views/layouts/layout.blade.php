@@ -67,7 +67,7 @@
                         <!-- Opciones principales -->
                         <li class="nav-item">
                             <a class="nav-link" href="/animales">
-                                <i class="fas fa-cow"></i> Animales
+                                <i class="fas fa-wine-bottle"></i> Animales
                             </a>
                         </li>
                         <li class="nav-item">

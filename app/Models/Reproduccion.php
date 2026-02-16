@@ -6,11 +6,23 @@ use Illuminate\Database\Eloquent\Model;
 
 class Reproduccion extends Model
 {
-    protected $table ='reproducciones';
-    protected $fillable = ['animal_id','tipo_evento','fecha_evento','resultado']; 
+    protected $table ='reproduccion';
+    protected $fillable = 
+    ['inquilino_id',
+    'animal_id',
+    'tipo',
+    'fecha',
+    'toro',
+    'resultado',
+    'observaciones'
+    ]; 
     
     public function animal() 
     {
          return $this->belongsTo(Animal::class, 'animal_id');
+    }
+    public function inquilino() 
+    {
+         return $this->belongsTo(Inquilino::class, 'inquilino_id');
     }
 }

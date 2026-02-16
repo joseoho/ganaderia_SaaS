@@ -17,6 +17,11 @@
             <li class="list-group-item"><strong>GDP:</strong> {{ $produccion->ganancia_diaria ? number_format($produccion->ganancia_diaria, 2) : 'N/A' }} kg/día</li>
             <li class="list-group-item"><strong>Fecha:</strong> {{ $produccion->fecha }}</li>
             <li class="list-group-item"><strong>Observaciones:</strong> {{ $produccion->observaciones ?? 'Sin observaciones' }}</li>
+            <li class="list-group-item">
+                    <strong>Ganancia total del mes:</strong>
+                    <span class="text-success">{{ number_format($total_mes, 2) }} kg</span>
+            </li>
+ 
         </ul>
 
         <a href="{{ route('produccion.index') }}" class="btn btn-secondary">Volver</a>

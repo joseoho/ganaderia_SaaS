@@ -18,6 +18,11 @@
             <li class="list-group-item"><strong>Turno:</strong> {{ ucfirst($produccion_leche->turno) }}</li>
             <li class="list-group-item"><strong>Fecha:</strong> {{ $produccion_leche->fecha }}</li>
             <li class="list-group-item"><strong>Observaciones:</strong> {{ $produccion_leche->observaciones ?? 'Sin observaciones' }}</li>
+            <li class="list-group-item">
+            <strong>Total producido en el mes:</strong>
+            <span class="text-primary">{{ $total_mes }} litros</span>
+            </li>
+
         </ul>
 
         <a href="{{ route('produccion_leche.index') }}" class="btn btn-secondary">Volver</a>

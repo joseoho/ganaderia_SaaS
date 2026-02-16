@@ -17,6 +17,16 @@ class DashboardController extends Controller
     public function index()
     {
          $inquilinoId = Auth::user()->inquilino_id;
+        // proximos partos
+        $partosProximos = \App\Models\Reproduccion::where('inquilino_id', $inquilinoId)
+            ->whereIn('tipo', ['monta', 'inseminación'])
+            ->get()
+            ->filter(function ($r) {
+                $fpp = \Carbon\Carbon::parse($r->fecha)->addDays(283);
+                $dias = now()->diffInDays($fpp, false);
+                return $dias <= 30 && $dias >= 0;
+            });
+
 
         // Totales filtrados por inquilino
         $totalAnimales = Animal::where('inquilino_id', $inquilinoId)->count();
@@ -36,6 +46,22 @@ class DashboardController extends Controller
                               ->orderBy('fecha', 'desc')
                               ->take(5)
                               ->get();
+                              //Totalizar leche y carne al mes
+                              $mesActual = now()->month;
+$anioActual = now()->year;
+
+        // Total leche del mes
+        $totalLecheMes = \App\Models\ProduccionLeche::where('inquilino_id', $inquilinoId)
+            ->whereMonth('fecha', $mesActual)
+            ->whereYear('fecha', $anioActual)
+            ->sum('litros');
+
+        // Total carne del mes (kg ganados)
+        $totalCarneMes = \App\Models\ProduccionCarne::where('inquilino_id', $inquilinoId)
+            ->whereMonth('fecha', $mesActual)
+            ->whereYear('fecha', $anioActual)
+            ->sum('ganancia_diaria');
+
 
         return view('dashboard.index', compact(
             'totalAnimales',
@@ -43,7 +69,9 @@ class DashboardController extends Controller
             'totalVentas',
             'notificacionesPendientes',
             'ultimasCompras',
-            'ultimasVentas'
+            'ultimasVentas',
+            'partosProximos'
+        ,   'totalLecheMes', 'totalCarneMes'
         ));
 
     }

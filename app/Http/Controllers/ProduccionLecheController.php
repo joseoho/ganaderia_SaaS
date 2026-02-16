@@ -74,7 +74,17 @@ class ProduccionLecheController extends Controller
     {
         if ($produccion_leche->inquilino_id !== Auth::user()->inquilino_id) abort(403);
 
-        return view('produccion_leche.show', compact('produccion_leche'));
+        // Calcular total mensual del animal
+            $mes = \Carbon\Carbon::parse($produccion_leche->fecha)->month;
+            $anio = \Carbon\Carbon::parse($produccion_leche->fecha)->year;
+
+            $total_mes = \App\Models\ProduccionLeche::where('animal_id', $produccion_leche->animal_id)
+                ->whereMonth('fecha', $mes)
+                ->whereYear('fecha', $anio)
+                ->sum('litros');
+
+            return view('produccion_leche.show', compact('produccion_leche', 'total_mes'));
+
     }
 
     public function edit(ProduccionLeche $produccion_leche)
