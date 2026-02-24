@@ -12,6 +12,7 @@
         </h5>
 
         <ul class="list-group list-group-flush mb-3">
+            <li class="list-group-item"><strong>Peso de Ingreso del Animal:</strong> {{ $produccion->animal->peso_entrada }} kg</li>
             <li class="list-group-item"><strong>Peso:</strong> {{ $produccion->peso }} kg</li>
             <li class="list-group-item"><strong>Peso anterior:</strong> {{ $produccion->peso_anterior ?? 'N/A' }} kg</li>
             <li class="list-group-item"><strong>GDP:</strong> {{ $produccion->ganancia_diaria ? number_format($produccion->ganancia_diaria, 2) : 'N/A' }} kg/día</li>
@@ -21,6 +22,12 @@
                     <strong>Ganancia total del mes:</strong>
                     <span class="text-success">{{ number_format($total_mes, 2) }} kg</span>
             </li>
+            @if($alerta_baja)
+                <li class="list-group-item">
+                    <strong class="text-danger">{{ $alerta_baja }}</strong>
+                </li>
+            @endif
+
  
         </ul>
 

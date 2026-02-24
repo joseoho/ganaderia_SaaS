@@ -60,6 +60,13 @@ class ProduccionCarneController extends Controller
             'observaciones' => $request->observaciones,
         ]);
 
+        
+        // Actualizar peso actual del animal
+            // $animal = Animal::find($request->animal_id);
+            // $animal->peso_actual = $animal->peso_actual + $request->peso;
+            // $animal->save();
+
+
         return redirect()->route('produccion.index')->with('success', 'Registro de producción guardado');
     }
 
@@ -73,8 +80,21 @@ class ProduccionCarneController extends Controller
                 ->whereMonth('fecha', $mes)
                 ->whereYear('fecha', $anio)
                 ->sum('ganancia_diaria');
+                 // ALERTA: pérdida de peso o GDP negativa
+                $alerta_baja = null;
 
-            return view('produccion_carne.show', compact('produccion', 'total_mes'));
+                if (!is_null($produccion->ganancia_diaria) && $produccion->ganancia_diaria < 0) {
+                    $alerta_baja = "Atención: este animal perdió peso recientemente.";
+                }
+
+                // ALERTA OPCIONAL: ganancia muy baja
+                if (!is_null($produccion->ganancia_diaria) && $produccion->ganancia_diaria >= 0 && $produccion->ganancia_diaria < 0.2) {
+                    $alerta_baja = "Advertencia: la ganancia diaria de peso es muy baja (" . number_format($produccion->ganancia_diaria, 2) . " kg/día).";
+                }
+
+
+
+            return view('produccion_carne.show', compact('produccion', 'total_mes','alerta_baja'));
 
     }
 

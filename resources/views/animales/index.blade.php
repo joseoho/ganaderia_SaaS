@@ -58,7 +58,7 @@
             <th>Raza</th>
             <th>Sexo</th>
             <th>Fecha Nacimiento</th>
-            <th>Peso Actual</th>
+            <th>Peso Entrada</th>
             <th>Estado</th>
             <th>Acciones</th>
         </tr>
@@ -71,7 +71,7 @@
             <td>{{ $animal->raza }}</td>
             <td>{{ $animal->sexo }}</td>
             <td>{{ $animal->fecha_nacimiento }}</td>
-            <td>{{ $animal->peso_actual }}</td>
+            <td>{{ $animal->peso_entrada }}</td>
             <td>{{ $animal->estado }}</td>
             <td>
                 <a href="{{ route('animales.show', $animal->id) }}" class="btn btn-info btn-sm">Ver</a>

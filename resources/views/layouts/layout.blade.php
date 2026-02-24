@@ -119,7 +119,7 @@
                                 </a>
                             </li> --}}
                             <li class="nav-item">
-                                <a class="nav-link" href="/reportes">
+                                <a class="nav-link" href="/reporte-general">
                                     <i class="fas fa-chart-bar"></i> Reportes
                                 </a>
                             </li>

@@ -66,7 +66,7 @@ class AnimalController extends Controller
             'raza' => 'required|string',
             'fecha_nacimiento' => 'required|date',
             'sexo' => 'required|string',
-            'peso_actual' => 'nullable|numeric',
+            'peso_entrada' => 'nullable|numeric',
             'estado' => 'required|string',
         ]);
 
@@ -77,7 +77,7 @@ class AnimalController extends Controller
             'raza' => $request->raza,
             'fecha_nacimiento' => $request->fecha_nacimiento,
             'sexo' => $request->sexo,
-            'peso_actual' => $request->peso_actual,
+            'peso_entrada' => $request->peso_actual,
             'estado' => $request->estado,
         ]);
 
@@ -108,7 +108,7 @@ class AnimalController extends Controller
             'raza' => 'required|string',
             'fecha_nacimiento' => 'required|date',
             'sexo' => 'required|string',
-            'peso_actual' => 'nullable|numeric',
+            'peso_entrada' => 'nullable|numeric',
             'estado' => 'required|string',
         ]);
 

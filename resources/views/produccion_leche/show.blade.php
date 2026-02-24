@@ -22,6 +22,12 @@
             <strong>Total producido en el mes:</strong>
             <span class="text-primary">{{ $total_mes }} litros</span>
             </li>
+            @if($alerta_baja)
+                <li class="list-group-item">
+                    <strong class="text-danger">{{ $alerta_baja }}</strong>
+                </li>
+            @endif
+
 
         </ul>
 

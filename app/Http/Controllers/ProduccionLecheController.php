@@ -82,8 +82,14 @@ class ProduccionLecheController extends Controller
                 ->whereMonth('fecha', $mes)
                 ->whereYear('fecha', $anio)
                 ->sum('litros');
+            // ALERTA: bajó la producción
+                $alerta_baja = null;
 
-            return view('produccion_leche.show', compact('produccion_leche', 'total_mes'));
+                if (!is_null($produccion_leche->variacion) && $produccion_leche->variacion < 0) {
+                    $alerta_baja = "Atención: este animal bajó su producción en " . abs($produccion_leche->variacion) . " litros.";
+                }
+
+            return view('produccion_leche.show', compact('produccion_leche', 'total_mes', 'alerta_baja'));
 
     }
 

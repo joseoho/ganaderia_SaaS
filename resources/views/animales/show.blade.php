@@ -34,8 +34,8 @@
                             <td>{{ \Carbon\Carbon::parse($animal->fecha_nacimiento)->age }} años</td>
                         </tr>
                         <tr>
-                            <th>Peso Actual:</th>
-                            <td>{{ $animal->peso_actual }} kg</td>
+                            <th>Peso Entrada:</th>
+                            <td>{{ $animal->peso_entrada }} kg</td>
                         </tr>
                     </table>
                 </div>
