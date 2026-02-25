@@ -118,10 +118,42 @@
                                     <i class="fas fa-syringe"></i> Vacunas
                                 </a>
                             </li> --}}
-                            <li class="nav-item">
+                            {{-- <li class="nav-item">
                                 <a class="nav-link" href="/reporte-general">
                                     <i class="fas fa-chart-bar"></i> Reportes
                                 </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="/reporte-general/animal">
+                                    <i class="fas fa-chart-bar"></i> Reportes por Animal
+                                </a>
+                            </li> --}}
+                            <li class="nav-item dropdown">
+                                <a class="nav-link dropdown-toggle" href="#" id="reportesDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                    Reportes
+                                </a>
+
+                                <ul class="dropdown-menu" aria-labelledby="reportesDropdown">
+
+                                    <li>
+                                        <a class="dropdown-item" href="{{ route('reporte.general') }}">
+                                            📄 Reporte General
+                                        </a>
+                                    </li>
+
+                                    <li>
+                                        <a class="dropdown-item" href="{{ route('reporte.porfechas') }}">
+                                            📅 Reporte Mensual
+                                        </a>
+                                    </li>
+
+                                    <li>
+                                        <a class="dropdown-item" href="{{ route('reporte.general.animal.select') }}">
+                                            🐄 Reporte por Animal
+                                        </a>
+                                    </li>
+
+                                </ul>
                             </li>
                             
                             

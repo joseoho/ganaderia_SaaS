@@ -9,7 +9,7 @@ class Animal extends Model
 {
     use HasFactory;
     protected $table ='animales';
-    protected $fillable = ['inquilino_id','codigo_interno','categoria','raza','fecha_nacimiento','sexo','peso_actual','estado'];
+    protected $fillable = ['inquilino_id','codigo_interno','categoria','raza','tipo','fecha_nacimiento','sexo','peso_entrada','estado'];
     
 
     public function inquilino() 

@@ -44,7 +44,24 @@
 }
 </style>
 {{--<div class="card shadow-sm p-4"> --}}
-    
+    <form method="GET" action="{{ route('reporte.general') }}" class="row mb-4">
+
+    <div class="col-md-4">
+        <label>Desde</label>
+        <input type="date" name="desde" class="form-control" value="{{ $desde }}">
+    </div>
+
+    <div class="col-md-4">
+        <label>Hasta</label>
+        <input type="date" name="hasta" class="form-control" value="{{ $hasta }}">
+    </div>
+
+    <div class="col-md-4 d-grid">
+        <label>&nbsp;</label>
+        <button class="btn btn-primary">Filtrar</button>
+    </div>
+
+</form>
 
  <div id="area-imprimir" class="card shadow-sm p-4">
 

@@ -56,6 +56,7 @@
             <th>Código</th>
             <th>Categoría</th>
             <th>Raza</th>
+            <th>Tipo</th>
             <th>Sexo</th>
             <th>Fecha Nacimiento</th>
             <th>Peso Entrada</th>
@@ -69,6 +70,7 @@
             <td>{{ $animal->codigo_interno }}</td>
             <td>{{ $animal->categoria }}</td>
             <td>{{ $animal->raza }}</td>
+            <td>{{ $animal->tipo }}</td>
             <td>{{ $animal->sexo }}</td>
             <td>{{ $animal->fecha_nacimiento }}</td>
             <td>{{ $animal->peso_entrada }}</td>

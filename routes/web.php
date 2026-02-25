@@ -57,4 +57,11 @@ Route::resource('ventas', App\Http\Controllers\VentaController::class)
      ->parameters(['tratamientos' => 'tratamiento']);
      Route::get('reporte-general', [App\Http\Controllers\ReporteController::class, 'index'])
     ->name('reporte.general');
+    Route::get('reporte-general/animal', [App\Http\Controllers\ReporteController::class, 'seleccionarAnimal'])
+    ->name('reporte.general.animal.select');
+     Route::get('reporte-general/animal/generar', [App\Http\Controllers\ReporteController::class, 'porAnimal'])
+    ->name('reporte.general.animal');
+     Route::get('reporte-porfecha', [App\Http\Controllers\ReporteController::class, 'porFechas'])
+    ->name('reporte.porfechas');
+
 });

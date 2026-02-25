@@ -41,6 +41,20 @@
     </div>
 
     <div class="col-md-6">
+        <label for="tipo" class="form-label">Tipo</label>
+        <select name="tipo" id="tipo" class="form-select @error('tipo') is-invalid @enderror" required>
+            <option value="">Seleccione...</option>
+            <option value="Madre" {{ old('tipo', $animal->tipo ?? '') == 'Madre' ? 'selected' : '' }}>Madre</option>
+            <option value="Padre" {{ old('tipo', $animal->tipo ?? '') == 'Padre' ? 'selected' : '' }}>Padre</option>
+            <option value="Becerro" {{ old('tipo', $animal->tipo ?? '') == 'Becerro' ? 'selected' : '' }}>Becerro</option>
+            <option value="Becerra" {{ old('tipo', $animal->tipo ?? '') == 'Becerra' ? 'selected' : '' }}>Becerra</option>
+            <option value="Maute" {{ old('tipo', $animal->tipo ?? '') == 'Maute' ? 'selected' : '' }}>Maute</option>
+            <option value="Novilla" {{ old('tipo', $animal->tipo ?? '') == 'Novilla' ? 'selected' : '' }}>Novilla</option>
+            <option value="Otras" {{ old('tipo', $animal->tipo ?? '') == 'Otras' ? 'selected' : '' }}>Otras</option>
+        </select>
+    </div>
+
+    <div class="col-md-6">
         <label for="fecha_nacimiento" class="form-label">Fecha de Nacimiento</label>
         <input type="date" name="fecha_nacimiento" id="fecha_nacimiento" 
                class="form-control @error('fecha_nacimiento') is-invalid @enderror" 
@@ -60,7 +74,7 @@
         <label for="peso_actual" class="form-label">Peso Actual (kg)</label>
         <input type="number" step="0.01" name="peso_actual" id="peso_actual" 
                class="form-control @error('peso_actual') is-invalid @enderror" 
-               value="{{ old('peso_actual', $animal->peso_actual ?? '') }}">
+               value="{{ old('peso_actual', $animal->peso_entrada ?? '') }}">
     </div>
 
     <div class="col-md-12">
