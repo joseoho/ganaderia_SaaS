@@ -131,4 +131,14 @@ class AnimalController extends Controller
         return redirect()->route('animales.index')->with('success', 'Animal eliminado');
 
     }
+
+    public function qr(Animal $animal)
+{
+    if ($animal->inquilino_id !== Auth::user()->inquilino_id) abort(403);
+
+    $url = route('animal.qr.show', $animal->id);
+
+    return view('animales.qr', compact('animal', 'url'));
+}
+
 }

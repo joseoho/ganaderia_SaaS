@@ -168,6 +168,12 @@
                                     <i class="fas fa-sitemap"></i> Genealogía
                                 </a>
                             </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="{{ route('animales.etiquetas') }}">
+                                    <i class="fas fa-barcode"></i> Etiquetas QR
+                                </a>
+                            </li>
+
                        {{-- @endif --}}
                         
                         <!-- Para todos los usuarios -->

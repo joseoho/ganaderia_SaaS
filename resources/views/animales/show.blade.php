@@ -37,6 +37,14 @@
                             <th>Peso Entrada:</th>
                             <td>{{ $animal->peso_entrada }} kg</td>
                         </tr>
+                        <tr>
+                            <th>QR:</th>
+                            <td>
+                                <a href="{{ route('animal.qr.show', $animal->id) }}" target="_blank">
+                                    {!! QrCode::size(100)->generate(route('animal.qr.show', $animal->id)) !!}
+                                </a>
+                            </td>
+                        </tr>
                     </table>
                 </div>
                 <div class="card-footer d-flex justify-content-between">

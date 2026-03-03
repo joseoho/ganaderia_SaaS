@@ -2,6 +2,7 @@
 
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Auth;
+
 use App\Http\Controllers\NotificacionController;
 use App\Http\Controllers\AnimalController;
 use App\Http\Controllers\CompraController;
@@ -16,52 +17,97 @@ use App\Http\Controllers\RegistroVacunaController;
 use App\Http\Controllers\ReproduccionController;
 use App\Http\Controllers\TratamientoController;
 use App\Http\Controllers\ReporteController;
+use App\Http\Controllers\AnimalQrController;
+use App\Http\Controllers\AnimalEtiquetaController;
 
 Route::get('/', function () {
     return view('welcome');
 });
+
 Auth::routes();
 
 Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name('home');
 
-Route::middleware(['auth', 'verified'])->group(function () {
-// Route::resource('notificaciones', App\Http\Controllers\NotificacionController::class);
-Route::resource('notificaciones', App\Http\Controllers\NotificacionController::class)
-     ->parameters(['notificaciones' => 'notificacion']);
-// Route::resource('animales', App\Http\Controllers\AnimalController::class);
-Route::resource('animales', App\Http\Controllers\AnimalController::class)
-     ->parameters(['animales' => 'animal']);
-     Route::resource('compras', App\Http\Controllers\CompraController::class)
-     ->parameters(['compras' => 'compra']);
-Route::resource('ventas', App\Http\Controllers\VentaController::class)
-     ->parameters(['ventas' => 'venta']);
-     Route::get('/dashboard', [App\Http\Controllers\DashboardController::class, 'index'])
-     ->name('dashboard');
-     Route::resource('genealogia', App\Http\Controllers\GenealogiController::class)
-     ->parameters(['genealogia' => 'genealogium']);
-     Route::resource('inventario', App\Http\Controllers\InventarioInsumoController::class)
-     ->parameters(['inventario' => 'inventario']);
-     Route::resource('movilizaciones', App\Http\Controllers\MovilizacionController::class)
-     ->parameters(['movilizaciones' => 'movilizacione']);
-     Route::resource('produccion', App\Http\Controllers\ProduccionCarneController::class)
-     ->parameters(['produccion' => 'produccion']);
-     Route::resource('produccion_leche', App\Http\Controllers\ProduccionLecheController::class)
-     ->parameters(['produccion_leche' => 'produccion_leche']);
-     // Route::resource('vacunas', App\Http\Controllers\VacunaController::class)
-     // ->parameters(['vacunas' => 'vacuna']);
-     Route::resource('registro_vacunas', App\Http\Controllers\RegistroVacunaController::class)
-     ->parameters(['registro_vacunas' => 'registro_vacuna']);
-     Route::resource('reproduccion', App\Http\Controllers\ReproduccionController::class)
-     ->parameters(['reproduccion' => 'reproduccion']);
-     Route::resource('tratamientos', App\Http\Controllers\TratamientoController::class)
-     ->parameters(['tratamientos' => 'tratamiento']);
-     Route::get('reporte-general', [App\Http\Controllers\ReporteController::class, 'index'])
-    ->name('reporte.general');
-    Route::get('reporte-general/animal', [App\Http\Controllers\ReporteController::class, 'seleccionarAnimal'])
-    ->name('reporte.general.animal.select');
-     Route::get('reporte-general/animal/generar', [App\Http\Controllers\ReporteController::class, 'porAnimal'])
-    ->name('reporte.general.animal');
-     Route::get('reporte-porfecha', [App\Http\Controllers\ReporteController::class, 'porFechas'])
-    ->name('reporte.porfechas');
 
-});
+// =============================
+//   RUTAS PROTEGIDAS
+// =============================
+Route::middleware(['auth', 'verified'])->group(function () {
+
+    Route::resource('notificaciones', NotificacionController::class)
+        ->parameters(['notificaciones' => 'notificacion']);
+
+    Route::resource('animales', AnimalController::class)
+        ->parameters(['animales' => 'animal']);
+
+    Route::resource('compras', CompraController::class)
+        ->parameters(['compras' => 'compra']);
+
+    Route::resource('ventas', VentaController::class)
+        ->parameters(['ventas' => 'venta']);
+
+    Route::get('/dashboard', [DashboardController::class, 'index'])
+        ->name('dashboard');
+
+    Route::resource('genealogia', GenealogiController::class)
+        ->parameters(['genealogia' => 'genealogium']);
+
+    Route::resource('inventario', InventarioInsumoController::class)
+        ->parameters(['inventario' => 'inventario']);
+
+    Route::resource('movilizaciones', MovilizacionController::class)
+        ->parameters(['movilizaciones' => 'movilizacione']);
+
+    Route::resource('produccion', ProduccionCarneController::class)
+        ->parameters(['produccion' => 'produccion']);
+
+    Route::resource('produccion_leche', ProduccionLecheController::class)
+        ->parameters(['produccion_leche' => 'produccion_leche']);
+
+    Route::resource('registro_vacunas', RegistroVacunaController::class)
+        ->parameters(['registro_vacunas' => 'registro_vacuna']);
+
+    Route::resource('reproduccion', ReproduccionController::class)
+        ->parameters(['reproduccion' => 'reproduccion']);
+
+    Route::resource('tratamientos', TratamientoController::class)
+        ->parameters(['tratamientos' => 'tratamiento']);
+
+
+    // =============================
+    //   REPORTES
+    // =============================
+    Route::get('reporte-general', [ReporteController::class, 'index'])
+        ->name('reporte.general');
+
+    Route::get('reporte-general/animal', [ReporteController::class, 'seleccionarAnimal'])
+        ->name('reporte.general.animal.select');
+
+    Route::get('reporte-general/animal/generar', [ReporteController::class, 'porAnimal'])
+        ->name('reporte.general.animal');
+
+    Route::get('reporte-porfecha', [ReporteController::class, 'porFechas'])
+        ->name('reporte.porfechas');
+
+
+    // =============================
+    //   QR DE ANIMALES
+    // =============================
+    Route::get('animales/{animal}/qr', [AnimalController::class, 'qr'])
+        ->name('animales.qr');
+
+    Route::get('animal/qr/{id}', [AnimalQrController::class, 'show'])
+        ->name('animal.qr.show');
+
+
+    // =============================
+    //   ETIQUETAS QR
+    // =============================
+Route::get('animales/etiquetas', [App\Http\Controllers\AnimalEtiquetaController::class, 'index'])
+    ->name('animales.etiquetas');
+
+Route::post('animales/etiquetas/generar', [App\Http\Controllers\AnimalEtiquetaController::class, 'generar'])
+    ->name('animales.etiquetas.generar');
+
+
+}); // ← ESTE ES EL ÚNICO CIERRE CORRECTO

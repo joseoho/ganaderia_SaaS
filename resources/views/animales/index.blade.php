@@ -21,7 +21,7 @@
         <select name="sexo" class="form-select">
             <option value="">-- Sexo --</option>
             <option value="M" {{ request('sexo')=='M' ? 'selected' : '' }}>Macho</option>
-            <option value="F" {{ request('sexo')=='F' ? 'selected' : '' }}>Hembra</option>
+            <option value="H" {{ request('sexo')=='H' ? 'selected' : '' }}>Hembra</option>
         </select>
     </div>
     <div class="col-md-2">
@@ -61,6 +61,7 @@
             <th>Fecha Nacimiento</th>
             <th>Peso Entrada</th>
             <th>Estado</th>
+            <th>QR</th>
             <th>Acciones</th>
         </tr>
     </thead>
@@ -75,6 +76,14 @@
             <td>{{ $animal->fecha_nacimiento }}</td>
             <td>{{ $animal->peso_entrada }}</td>
             <td>{{ $animal->estado }}</td>
+            <!-- QR DEL ANIMAL -->
+            <td class="text-center">
+                <a href="{{ route('animal.qr.show', $animal->id) }}" target="_blank">
+                    {!! QrCode::size(60)->generate(route('animal.qr.show', $animal->id)) !!}
+                </a>
+            </td>
+
+
             <td>
                 <a href="{{ route('animales.show', $animal->id) }}" class="btn btn-info btn-sm">Ver</a>
                 <a href="{{ route('animales.edit', $animal->id) }}" class="btn btn-warning btn-sm">Editar</a>
