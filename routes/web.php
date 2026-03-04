@@ -36,7 +36,15 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     Route::resource('notificaciones', NotificacionController::class)
         ->parameters(['notificaciones' => 'notificacion']);
+ // =============================
+    //   ETIQUETAS QR
+    // =============================
+    Route::get('/animales/etiquetas', [AnimalEtiquetaController::class, 'index'])
+        ->name('animales.etiquetas');
 
+    Route::post('/animales/etiquetas/generar', [AnimalEtiquetaController::class, 'generar'])
+        ->name('animales.etiquetas.generar');
+        
     Route::resource('animales', AnimalController::class)
         ->parameters(['animales' => 'animal']);
 
@@ -90,6 +98,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
         ->name('reporte.porfechas');
 
 
+
     // =============================
     //   QR DE ANIMALES
     // =============================
@@ -100,14 +109,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
         ->name('animal.qr.show');
 
 
-    // =============================
-    //   ETIQUETAS QR
-    // =============================
-Route::get('animales/etiquetas', [App\Http\Controllers\AnimalEtiquetaController::class, 'index'])
-    ->name('animales.etiquetas');
-
-Route::post('animales/etiquetas/generar', [App\Http\Controllers\AnimalEtiquetaController::class, 'generar'])
-    ->name('animales.etiquetas.generar');
+   
 
 
 }); // ← ESTE ES EL ÚNICO CIERRE CORRECTO

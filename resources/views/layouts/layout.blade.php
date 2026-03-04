@@ -169,7 +169,7 @@
                                 </a>
                             </li>
                             <li class="nav-item">
-                                <a class="nav-link" href="{{ route('animales.etiquetas') }}">
+                                <a class="nav-link" href="{{ url('/animales/etiquetas') }}">
                                     <i class="fas fa-barcode"></i> Etiquetas QR
                                 </a>
                             </li>

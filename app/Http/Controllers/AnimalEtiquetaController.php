@@ -14,8 +14,32 @@ class AnimalEtiquetaController extends Controller
      */
     public function index()
     {
-        $animales = Animal::where('inquilino_id', Auth::user()->inquilino_id)->get();
-        return view('etiquetas.index', compact('animales'));
+        try {
+            // Verificar si el usuario está autenticado
+            if (!Auth::check()) {
+                dd('Usuario no autenticado');
+            }
+
+            // Verificar el inquilino_id
+            $inquilino_id = Auth::user()->inquilino_id;
+            if (!$inquilino_id) {
+                dd('Usuario no tiene inquilino_id');
+            }
+
+            // Obtener animales
+            $animales = Animal::where('inquilino_id', $inquilino_id)->get();
+            
+            // Verificar si hay animales
+            if ($animales->isEmpty()) {
+                return view('etiquetas.index', ['animales' => collect([])])->with('mensaje', 'No hay animales registrados');
+            }
+
+            return view('etiquetas.index', compact('animales'));
+
+        } catch (\Exception $e) {
+            dd('Error: ' . $e->getMessage());
+        }
+
     }
 
 
@@ -69,7 +93,7 @@ class AnimalEtiquetaController extends Controller
 
      public function generar(Request $request)
     {
-        $request->validate([
+       $request->validate([
             'animales' => 'required|array'
         ]);
 
@@ -79,5 +103,6 @@ class AnimalEtiquetaController extends Controller
 
         return view('etiquetas.generar', compact('animales'));
     }
+    
 
 }
