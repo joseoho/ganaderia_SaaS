@@ -59,4 +59,8 @@
                     <a href="{{ route('animales.index') }}" class="btn btn-secondary">Regresar</a>
                 </div>
 
+                <a href="{{ route('animal.qr.editar.todo', $animal->id) }}"
+                style="display:block; margin-top:20px; text-align:center; font-weight:bold;">
+                ✏️ Editar todos los datos del animal
+                </a>
 @endsection

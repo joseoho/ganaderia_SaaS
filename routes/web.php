@@ -108,8 +108,16 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('animal/qr/{id}', [AnimalQrController::class, 'show'])
         ->name('animal.qr.show');
 
+        // =============================
+    //   QR PARA EDITAR LOS DATOS DEL ANIMAL
+    // =============================
 
-   
+   Route::get('animal/qr/{id}/editar-todo', [AnimalQrController::class, 'editarTodo'])
+    ->name('animal.qr.editar.todo');
+
+    Route::post('animal/qr/{id}/actualizar-todo', [AnimalQrController::class, 'actualizarTodo'])
+    ->name('animal.qr.actualizar.todo');
+
 
 
 }); // ← ESTE ES EL ÚNICO CIERRE CORRECTO

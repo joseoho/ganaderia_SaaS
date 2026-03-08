@@ -9,6 +9,8 @@ use App\Models\Tratamiento;
 use App\Models\RegistroVacuna;
 use App\Models\Reproduccion;
 use App\Models\Genealogia;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Http\Request;
 
 class AnimalQrController extends Controller
 {
@@ -33,4 +35,110 @@ class AnimalQrController extends Controller
             'genealogia'
         ));
     }
+
+    public function editarTodo($id)
+{
+    $animal = Animal::with([
+        'produccionLeche',
+        'produccionCarne',
+        'tratamientos',
+        'registrosVacunas',
+        'reproducciones',
+        'genealogia'
+    ])->findOrFail($id);
+
+    // Seguridad multi-tenant
+    if (Auth::check() && Auth::user()->inquilino_id !== $animal->inquilino_id) {
+        abort(403);
+    }
+
+    return view('animales.qr_edita_todo', compact('animal'));
+}
+
+public function actualizarTodo(Request $request, $id)
+{
+    $animal = Animal::with([
+        'produccionLeche',
+        'produccionCarne',
+        'tratamientos',
+        'registrosVacunas',
+        'reproducciones',
+        'genealogia'
+    ])->findOrFail($id);
+
+    if (Auth::check() && Auth::user()->inquilino_id !== $animal->inquilino_id) {
+        abort(403);
+    }
+
+    // 1) Actualizar datos del animal
+    $animal->update([
+        'codigo_interno'   => $request->codigo_interno,
+        'raza'             => $request->raza,
+        'sexo'             => $request->sexo,
+        'peso_entrada'     => $request->peso_actual,
+        'fecha_nacimiento' => $request->fecha_nacimiento,
+        'estado'           => $request->estado,
+    ]);
+
+    // 2) Genealogía (padre / madre)
+    if ($request->filled('padre_id') || $request->filled('madre_id')) {
+        $genealogia = $animal->genealogia ?: new Genealogia(['animal_id' => $animal->id]);
+
+        $genealogia->padre = $request->padre_id;
+        $genealogia->madre = $request->madre_id;
+        $genealogia->save();
+    }
+
+    // 3) Última producción de leche
+    if ($request->filled('ultima_leche')) {
+        $produccionLeche = $animal->produccionLeche->last() ?: new ProduccionLeche([
+            'animal_id' => $animal->id,
+            'fecha'     => now()->toDateString(),
+            'inquilino_id'=> Auth::user()->inquilino_id, // Agrega el inquilino_id aquí
+        ]);
+
+        $produccionLeche->litros = $request->ultima_leche;
+        $produccionLeche->save();
+    }
+
+    // 4) Última producción de carne
+    if ($request->filled('ultima_ganancia')) {
+        $produccionCarne = $animal->produccionCarne->last() ?: new ProduccionCarne([
+            'animal_id' => $animal->id,
+            'fecha'     => now()->toDateString(),
+            'inquilino_id'=> Auth::user()->inquilino_id, // Agrega el inquilino_id aquí
+        ]);
+
+        $produccionCarne->ganancia_diaria = $request->ultima_ganancia;
+        $produccionCarne->save();
+    }
+
+    // 5) Último tratamiento
+    if ($request->filled('ultimo_tratamiento')) {
+        $tratamiento = $animal->tratamientos->last() ?: new Tratamiento([
+            'animal_id'   => $animal->id,
+            'fecha_inicio'=> now()->toDateString(),
+            'inquilino_id'=> Auth::user()->inquilino_id, // Agrega el inquilino_id aquí
+        ]);
+
+        $tratamiento->motivo = $request->ultimo_tratamiento;
+        $tratamiento->save();
+    }
+
+    // 6) Última vacuna
+    if ($request->filled('ultima_vacuna')) {
+        $vacuna = $animal->registrosVacunas->last() ?: new RegistroVacuna([
+            'animal_id' => $animal->id,
+            'fecha'     => now()->toDateString(),
+            'inquilino_id'=> Auth::user()->inquilino_id, // Agrega el inquilino_id aquí
+        ]);
+
+        $vacuna->nombre = $request->ultima_vacuna;
+        $vacuna->save();
+    }
+
+    return redirect()
+        ->route('animal.qr.show', $animal->id)
+        ->with('success', 'Datos del animal actualizados correctamente');
+}
 }
