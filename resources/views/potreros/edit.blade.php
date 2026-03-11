@@ -1,0 +1,48 @@
+@extends('layouts.layout')
+
+@section('content')
+
+<div class="container">
+
+    <h2 class="mb-4">Editar Potrero</h2>
+
+    <div class="card shadow-sm p-4">
+
+        <form action="{{ route('potreros.update', $potrero->id) }}" method="POST">
+            @csrf
+            @method('PUT')
+
+            <div class="mb-3">
+                <label class="form-label">Nombre del potrero</label>
+                <input type="text" name="nombre" class="form-control" value="{{ $potrero->nombre }}" required>
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">Tamaño (hectáreas)</label>
+                <input type="number" step="0.01" name="tamaño" class="form-control" value="{{ $potrero->tamaño }}" required>
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">Tipo de pasto</label>
+                <input type="text" name="tipo_pasto" class="form-control" value="{{ $potrero->tipo_pasto }}">
+            </div>
+
+             <div class="mb-3">
+                <label class="form-label">Tipo</label>
+                <select name="estado" class="form-select" required>
+                    <option value="descanso">Descanso</option>
+                    <option value="ocupado">Ocupado</option>
+                    <option value="recuperacion">Recuperación</option>
+                </select>
+            </div>
+
+            <button class="btn btn-primary">Actualizar</button>
+            <a href="{{ route('potreros.index') }}" class="btn btn-secondary">Cancelar</a>
+
+        </form>
+
+    </div>
+
+</div>
+
+@endsection

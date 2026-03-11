@@ -38,6 +38,9 @@
                             <td>{{ $animal->peso_entrada }} kg</td>
                         </tr>
                         <tr>
+                            <p><strong>Potrero actual:</strong> {{ $animal->animalPotreros->last()->potrero->nombre }}</p>
+                            {{-- <a href="{{ route('potreros.asignar', $animal->id) }}">Mover a potrero</a> --}}
+                        </tr>
                             <th>QR:</th>
                             <td>
                                 <a href="{{ route('animal.qr.show', $animal->id) }}" target="_blank">

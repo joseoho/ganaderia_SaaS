@@ -19,6 +19,7 @@ use App\Http\Controllers\TratamientoController;
 use App\Http\Controllers\ReporteController;
 use App\Http\Controllers\AnimalQrController;
 use App\Http\Controllers\AnimalEtiquetaController;
+use App\Http\Controllers\PotreroController;
 
 Route::get('/', function () {
     return view('welcome');
@@ -118,6 +119,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::post('animal/qr/{id}/actualizar-todo', [AnimalQrController::class, 'actualizarTodo'])
     ->name('animal.qr.actualizar.todo');
 
-
-
+//////////potreros
+    Route::resource('potreros', PotreroController::class);
+    Route::post('potreros/{id}/asignar', [PotreroController::class, 'asignarAnimales'])
+        ->name('potreros.asignar');
+    Route::post('potreros/{id}/salida', [PotreroController::class, 'salidaAnimales'])
+        ->name('potreros.salida');
 }); // ← ESTE ES EL ÚNICO CIERRE CORRECTO

@@ -44,4 +44,8 @@ class Animal extends Model
     { 
         return $this->hasMany(RegistroVacuna::class);
      }
+        public function animalPotreros() 
+        { 
+            return $this->hasMany(AnimalPotrero::class); 
+        }
 }

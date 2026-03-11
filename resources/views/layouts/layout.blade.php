@@ -93,9 +93,14 @@
                                     <i class="fas fa-cash-register"></i> Ventas
                                 </a>
                             </li>
-                            <li class="nav-item">
+                            {{-- <li class="nav-item">
                                 <a class="nav-link" href="/movilizaciones">
                                     <i class="fas fa-truck-moving"></i> Movilizaciones
+                                </a>
+                            </li> --}}
+                            <li class="nav-item">
+                                <a class="nav-link" href="/potreros">
+                                    <i class="fas fa-truck-moving"></i> Potreros
                                 </a>
                             </li>
                             <li class="nav-item">
