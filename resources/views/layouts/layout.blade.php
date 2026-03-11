@@ -100,7 +100,7 @@
                             </li> --}}
                             <li class="nav-item">
                                 <a class="nav-link" href="/potreros">
-                                    <i class="fas fa-truck-moving"></i> Potreros
+                                    <i class="fas fa-truck-moving"></i> Potreros/Movilizaciones
                                 </a>
                             </li>
                             <li class="nav-item">
@@ -163,11 +163,11 @@
                             
                             
                             <!-- Gestión -->
-                            <li class="nav-item">
+                            {{-- <li class="nav-item">
                                 <a class="nav-link" href="/notificaciones">
                                     <i class="fas fa-bell"></i> Notificaciones
                                 </a>
-                            </li>
+                            </li> --}}
                             <li class="nav-item">
                                 <a class="nav-link" href="/genealogia">
                                     <i class="fas fa-sitemap"></i> Genealogía

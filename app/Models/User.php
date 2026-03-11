@@ -11,10 +11,10 @@ class User extends Authenticatable
     use HasFactory, Notifiable;
     protected $table = 'users';
     protected $fillable = [
-        'inquilino_id', // 👈 corregido (singular)
         'name',
         'email',
         'password',
+        'inquilino_id',
     ];
 
     protected static function booted()

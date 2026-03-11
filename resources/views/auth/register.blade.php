@@ -68,7 +68,7 @@
                                 <select name="inquilino" id="inquilino" class="form-control" required>
                                     <option value="">Seleccionar Inquilino</option>
                                     @foreach($inquilinos as $inquilino)
-                                        <option value="{{ $inquilino->inquilino_id }}">{{ $inquilino->nombre }}</option>
+                                        <option value="{{ $inquilino->id }}">{{ $inquilino->nombre }}</option>
                                     @endforeach
                                 </select>
                                 @error('inquilino')
