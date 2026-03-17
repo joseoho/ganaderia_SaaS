@@ -81,6 +81,14 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     Route::resource('tratamientos', TratamientoController::class)
         ->parameters(['tratamientos' => 'tratamiento']);
+      
+    Route::resource('potreros', PotreroController::class);
+    
+    Route::post('potreros/{id}/asignar', [PotreroController::class, 'asignarAnimales'])
+        ->name('potreros.asignar');
+    
+        Route::post('potreros/{id}/salida', [PotreroController::class, 'salidaAnimales'])
+        ->name('potreros.salida');
 
 
     // =============================
@@ -98,7 +106,28 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('reporte-porfecha', [ReporteController::class, 'porFechas'])
         ->name('reporte.porfechas');
 
+    // Reportes generales
+    Route::get('reportes', [ReporteController::class, 'index'])->name('reportes.index');
 
+    // Reporte animales en potreros
+    Route::get('reportes/potreros', [ReporteController::class, 'reportePotreros'])->name('reportes.potreros');
+    Route::get('reportes/potreros/generar', [ReporteController::class, 'generarPotreros'])->name('reportes.potreros.generar');
+
+    // Reporte compras
+    Route::get('reportes/compras', [ReporteController::class, 'reporteCompras'])->name('reportes.compras');
+    Route::get('reportes/compras/generar', [ReporteController::class, 'generarCompras'])->name('reportes.compras.generar');
+
+    // Reporte ventas
+    Route::get('reportes/ventas', [ReporteController::class, 'reporteVentas'])->name('reportes.ventas');
+    Route::get('reportes/ventas/generar', [ReporteController::class, 'generarVentas'])->name('reportes.ventas.generar');
+
+    // Reporte producción carne
+    Route::get('reportes/carne', [ReporteController::class, 'reporteCarne'])->name('reportes.carne');
+    Route::get('reportes/carne/generar', [ReporteController::class, 'generarCarne'])->name('reportes.carne.generar');
+
+    // Reporte producción leche
+    Route::get('reportes/leche', [ReporteController::class, 'reporteLeche'])->name('reportes.leche');
+    Route::get('reportes/leche/generar', [ReporteController::class, 'generarLeche'])->name('reportes.leche.generar');
 
     // =============================
     //   QR DE ANIMALES
@@ -119,10 +148,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::post('animal/qr/{id}/actualizar-todo', [AnimalQrController::class, 'actualizarTodo'])
     ->name('animal.qr.actualizar.todo');
 
-//////////potreros
-    Route::resource('potreros', PotreroController::class);
-    Route::post('potreros/{id}/asignar', [PotreroController::class, 'asignarAnimales'])
-        ->name('potreros.asignar');
-    Route::post('potreros/{id}/salida', [PotreroController::class, 'salidaAnimales'])
-        ->name('potreros.salida');
+
+////////dashboad reportes
+        Route::get('dashboard-reportes', [ReporteController::class, 'dashboard'])
+    ->name('reportes.dashboard');
 }); // ← ESTE ES EL ÚNICO CIERRE CORRECTO

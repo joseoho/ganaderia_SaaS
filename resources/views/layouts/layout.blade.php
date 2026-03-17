@@ -100,7 +100,7 @@
                             </li> --}}
                             <li class="nav-item">
                                 <a class="nav-link" href="/potreros">
-                                    <i class="fas fa-truck-moving"></i> Potreros/Movilizaciones
+                                    <i class="fas fa-truck-moving"></i> Potreros/Rotacion
                                 </a>
                             </li>
                             <li class="nav-item">
@@ -185,6 +185,12 @@
                         <li class="nav-item">
                             <a class="nav-link" href="/registro_vacunas">
                                 <i class="fas fa-shield-alt"></i> Registro Vacunas
+                            </a>
+                        </li>
+                        <!-- //////dashboard reportes -->
+                        <li class="nav-item">
+                            <a class="nav-link active" aria-current="page" href="/dashboard-reportes">
+                                <i class="fas fa-tachometer-alt"></i> Dashboard Reportes
                             </a>
                         </li>
                     </ul>

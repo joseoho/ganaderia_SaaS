@@ -13,7 +13,11 @@ use App\Models\InventarioInsumo;
 use App\Models\Tratamiento;
 use App\Models\RegistroVacuna;
 use App\Models\Genealogia;
+use App\Models\AnimalPotrero;
+use App\Models\Potrero;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+;
 use Illuminate\Support\Facades\Auth;
 
 class ReporteController extends Controller
@@ -223,4 +227,184 @@ class ReporteController extends Controller
         return view('reportes.seleccionaranimal', compact('animales'));
     }
 
+
+    // ============================
+    // 1. FORMULARIOS
+    // ============================
+
+    public function reportePotreros()
+    {
+        return view('reportes.potreros.form');
+    }
+
+    public function reporteCompras()
+    {
+        return view('reportes.compras.form');
+    }
+
+    public function reporteVentas()
+    {
+        return view('reportes.ventas.form');
+    }
+
+    public function reporteCarne()
+    {
+        return view('reportes.carne.form');
+    }
+
+    public function reporteLeche()
+    {
+        return view('reportes.leche.form');
+    }
+
+
+    // ============================
+    // 2. GENERADORES DE REPORTES
+    // ============================
+
+    public function generarPotreros(Request $request)
+{
+    $request->validate([
+        'desde' => 'required|date',
+        'hasta' => 'required|date'
+    ]);
+
+    $registros = AnimalPotrero::with('animal', 'potrero')
+        ->where('inquilino_id', Auth::user()->inquilino_id)
+        ->whereBetween('fecha_entrada', [$request->desde, $request->hasta])
+        ->get();
+
+    // Totales
+    $totalAnimales = $registros->count();
+    $totalPotreros = $registros->groupBy('potrero_id')->count();
+
+    return view('reportes.potreros.reporte', compact('registros', 'totalAnimales', 'totalPotreros'));
 }
+
+    public function generarCompras(Request $request)
+{
+    $request->validate([
+        'desde' => 'required|date',
+        'hasta' => 'required|date'
+    ]);
+
+    $compras = Compra::where('inquilino_id', Auth::user()->inquilino_id)
+        ->whereBetween('fecha', [$request->desde, $request->hasta])
+        ->get();
+
+    // Totales
+    $totalCompras = $compras->count();
+    $montoTotal = $compras->sum('monto');
+
+    return view('reportes.compras.reporte', compact('compras', 'totalCompras', 'montoTotal'));
+}
+
+    public function generarVentas(Request $request)
+{
+    $request->validate([
+        'desde' => 'required|date',
+        'hasta' => 'required|date'
+    ]);
+
+    $ventas = Venta::where('inquilino_id', Auth::user()->inquilino_id)
+        ->whereBetween('fecha', [$request->desde, $request->hasta])
+        ->get();
+
+    // Totales
+    $totalVentas = $ventas->count();
+    $montoTotal = $ventas->sum('monto');
+
+    return view('reportes.ventas.reporte', compact('ventas', 'totalVentas', 'montoTotal'));
+}
+
+
+   public function generarCarne(Request $request)
+{
+    $request->validate([
+        'desde' => 'required|date',
+        'hasta' => 'required|date'
+    ]);
+
+    $carne = ProduccionCarne::with('animal')
+        ->where('inquilino_id', Auth::user()->inquilino_id)
+        ->whereBetween('fecha', [$request->desde, $request->hasta])
+        ->get();
+
+    // Totales
+    $totalRegistros = $carne->count();
+    $totalGanado = $carne->sum('ganancia_diaria');
+    $promedioGanancia = $totalRegistros > 0 ? $totalGanado / $totalRegistros : 0;
+
+    return view('reportes.carne.reporte', compact('carne', 'totalRegistros', 'totalGanado', 'promedioGanancia'));
+}
+
+    public function generarLeche(Request $request)
+{
+    $request->validate([
+        'desde' => 'required|date',
+        'hasta' => 'required|date'
+    ]);
+
+    $leche = ProduccionLeche::with('animal')
+        ->where('inquilino_id', Auth::user()->inquilino_id)
+        ->whereBetween('fecha', [$request->desde, $request->hasta])
+        ->get();
+
+    // Totales
+    $totalRegistros = $leche->count();
+    $totalLitros = $leche->sum('litros');
+    $promedioLitros = $totalRegistros > 0 ? $totalLitros / $totalRegistros : 0;
+
+    return view('reportes.leche.reporte', compact('leche', 'totalRegistros', 'totalLitros', 'promedioLitros'));
+}
+
+public function dashboard()
+{
+    $inquilino = Auth::user()->inquilino_id;
+
+    // Totales rápidos
+    $totalCompras = Compra::where('inquilino_id', $inquilino)->count();
+    $totalVentas = Venta::where('inquilino_id', $inquilino)->count();
+    $totalCarne = ProduccionCarne::where('inquilino_id', $inquilino)->sum('ganancia_diaria');
+    $totalLeche = ProduccionLeche::where('inquilino_id', $inquilino)->sum('litros');
+    $totalPotreros = Potrero::where('inquilino_id', $inquilino)->count();
+
+    // REPORTE COMBINADO: Producción total por animal
+    $produccionTotal = Animal::where('inquilino_id', $inquilino)
+        ->with([
+            'produccionCarne' => function ($q) {
+                $q->select('animal_id', DB::raw('SUM(ganancia_diaria) as total_carne'))
+                  ->groupBy('animal_id');
+            },
+            'produccionLeche' => function ($q) {
+                $q->select('animal_id', DB::raw('SUM(litros) as total_leche'))
+                  ->groupBy('animal_id');
+            }
+        ])
+        ->get()
+        ->map(function ($animal) {
+            return [
+                'codigo' => $animal->codigo_interno,
+                'total_carne' => $animal->produccionCarne->first()->total_carne ?? 0,
+                'total_leche' => $animal->produccionLeche->first()->total_leche ?? 0,
+                'total_general' => ($animal->produccionCarne->first()->total_carne ?? 0) +
+                                   ($animal->produccionLeche->first()->total_leche ?? 0),
+            ];
+        })
+        ->sortByDesc('total_general')
+        ->take(10); // Top 10 animales
+
+    return view('reportes.dashboard', compact(
+        'totalCompras',
+        'totalVentas',
+        'totalCarne',
+        'totalLeche',
+        'totalPotreros',
+        'produccionTotal'
+    ));
+}
+
+}
+
+
+
