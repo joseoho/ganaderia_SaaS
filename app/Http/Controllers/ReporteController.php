@@ -368,6 +368,7 @@ public function dashboard()
     $totalCarne = ProduccionCarne::where('inquilino_id', $inquilino)->sum('ganancia_diaria');
     $totalLeche = ProduccionLeche::where('inquilino_id', $inquilino)->sum('litros');
     $totalPotreros = Potrero::where('inquilino_id', $inquilino)->count();
+    $totalAnimales = Animal::where('inquilino_id', $inquilino)->count();
 
     // REPORTE COMBINADO: Producción total por animal
     $produccionTotal = Animal::where('inquilino_id', $inquilino)
@@ -400,7 +401,8 @@ public function dashboard()
         'totalCarne',
         'totalLeche',
         'totalPotreros',
-        'produccionTotal'
+        'produccionTotal',
+        'totalAnimales'
     ));
 }
 

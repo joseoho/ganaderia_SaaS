@@ -51,13 +51,39 @@
     <div class="row mb-4">
         <div class="col-md-3">
             <div class="card shadow-sm p-3 text-center">
-                <i class="fas fa-tree fa-2x text-warning"></i>
+                <i class="fas fa-tree fa-2x text-primary"></i>
                 <h4 class="mt-2">{{ $totalPotreros }}</h4>
                 <p class="text-muted">Potreros</p>
-                <a href="{{ route('reportes.potreros') }}" class="btn btn-sm btn-warning">Ver reporte</a>
+                <a href="{{ route('reportes.potreros') }}" class="btn btn-sm btn-primary">Ver reporte</a>
             </div>
         </div>
         
+        <div class="col-md-3">
+            <div class="card shadow-sm p-3 text-center">
+                <i class="fas fa-cash-register fa-2x text-success"></i>
+                <h4 class="mt-2">📄</h4>
+                <p class="text-muted">📄 Reporte General</p>
+                <a href="{{ route('reporte.general') }}" class="btn btn-sm btn-success">Ver reporte</a>
+            </div>
+        </div>
+
+        <div class="col-md-3 mb-3">
+            <div class="card shadow-sm p-3 text-center">
+                <i class="fas fa-drumstick-bite fa-2x text-danger"></i>
+                <h4 class="mt-2">📅</h4>
+                <p class="text-muted"> 📅 Reporte Mensual</p>
+                <a href="{{ route('reporte.porfechas') }}" class="btn btn-sm btn-danger">Ver reporte</a>
+            </div>
+        </div>
+
+        <div class="col-md-3 mb-3">
+            <div class="card shadow-sm p-3 text-center">
+                <i class="fas fa-tint fa-2x text-info"></i>
+                <h4 class="mt-2">Total: {{ number_format($totalAnimales) }} </h4>
+                <p class="text-muted">🐄 Reporte por Animal</p>
+                <a href="{{ route('reporte.general.animal.select') }}" class="btn btn-sm btn-info">Ver reporte</a>
+            </div>
+        </div>
     </div>
 
     
