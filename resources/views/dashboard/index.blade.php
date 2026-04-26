@@ -35,6 +35,17 @@
     </div>
 
     <div class="col-md-3">
+        <div class="card shadow-sm text-center bg-light">
+            <div class="card-body">
+                <h5 class="card-title">Balance Neto</h5>
+                <h2 class="{{ ($totalVentas - ($totalCompras + $totalGastos)) >= 0 ? 'text-success' : 'text-danger' }}">
+                    ${{ number_format($totalVentas - ($totalCompras + $totalGastos), 2) }}
+                </h2>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-3">
         <div class="card shadow-sm text-center">
             <div class="card-body">
                 <h5 class="card-title">Notificaciones Pendientes</h5>

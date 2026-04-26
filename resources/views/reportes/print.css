@@ -1,0 +1,39 @@
+@media print {
+
+    /* Oculta absolutamente todo */
+    body * {
+        visibility: hidden !important;
+    }
+
+    /* Muestra solo el área del reporte */
+    #area-imprimir, #area-imprimir * {
+        visibility: visible !important;
+    }
+
+    /* Posiciona el reporte al inicio */
+    #area-imprimir {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 100%;
+        margin: 0;
+        padding: 0;
+    }
+
+    /* Página tipo carta */
+    @page {
+        size: Letter;
+        margin: 1.5cm;
+    }
+
+    /* Quitar bordes y sombras para una impresión limpia */
+    .card, .table {
+        border: none !important;
+        box-shadow: none !important;
+    }
+
+    /* Ocultar elementos de interfaz que no deben salir en el papel */
+    .btn, button, form, nav, header, footer, .pagination, .alert {
+        display: none !important;
+    }
+}

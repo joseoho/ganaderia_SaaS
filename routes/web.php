@@ -20,6 +20,7 @@ use App\Http\Controllers\ReporteController;
 use App\Http\Controllers\AnimalQrController;
 use App\Http\Controllers\AnimalEtiquetaController;
 use App\Http\Controllers\PotreroController;
+use App\Http\Controllers\GastosController;
 
 Route::get('/', function () {
     return view('welcome');
@@ -91,6 +92,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
         ->name('potreros.salida');
 
 
+    Route::resource('gastos', GastosController::class);
+
     // =============================
     //   REPORTES
     // =============================
@@ -128,6 +131,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
     // Reporte producción leche
     Route::get('reportes/leche', [ReporteController::class, 'reporteLeche'])->name('reportes.leche');
     Route::get('reportes/leche/generar', [ReporteController::class, 'generarLeche'])->name('reportes.leche.generar');
+
+    // Reporte Financiero
+    Route::get('reportes/financiero', [ReporteController::class, 'reporteFinanciero'])
+        ->name('reportes.financiero');
 
     // =============================
     //   QR DE ANIMALES

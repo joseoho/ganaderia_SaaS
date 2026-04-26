@@ -5,7 +5,9 @@ namespace App\Http\Controllers;
 use App\Models\Animal;
 use App\Models\Compra;
 use App\Models\Venta;
-use App\Models\Notificacion;
+use App\Models\Notificacion; 
+use App\Models\Gastos; // Corregido el nombre del modelo
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
 
@@ -32,6 +34,7 @@ class DashboardController extends Controller
         $totalAnimales = Animal::where('inquilino_id', $inquilinoId)->count();
         $totalCompras = Compra::where('inquilino_id', $inquilinoId)->sum('monto_total');
         $totalVentas = Venta::where('inquilino_id', $inquilinoId)->sum('monto_total');
+        $totalGastos = Gastos::where('inquilino_id', $inquilinoId)->sum('monto');
         $notificacionesPendientes = Notificacion::where('usuario_id', Auth::id())
                                                 ->where('estado', 'pendiente')
                                                 ->count();
@@ -67,6 +70,7 @@ $anioActual = now()->year;
             'totalAnimales',
             'totalCompras',
             'totalVentas',
+            'totalGastos',
             'notificacionesPendientes',
             'ultimasCompras',
             'ultimasVentas',

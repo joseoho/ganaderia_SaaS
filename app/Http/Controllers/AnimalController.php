@@ -5,7 +5,8 @@ namespace App\Http\Controllers;
 use App\Models\Animal;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use App\Http\Requests\StoreAnimalRequest;
+
+use App\Http\Requests\StoreAnimalRequest;   
 use App\Http\Requests\UpdateAnimalRequest;
 
 class AnimalController extends Controller
@@ -71,7 +72,7 @@ class AnimalController extends Controller
         ]);
 
         Animal::create([
-            'inquilino_id' => auth()->user()->inquilino_id, // 👈 multi-tenant automático
+            'inquilino_id' => Auth::user()->inquilino_id, // 👈 multi-tenant automático
             'codigo_interno' => $request->codigo_interno,
             'categoria' => $request->categoria,
             'raza' => $request->raza,

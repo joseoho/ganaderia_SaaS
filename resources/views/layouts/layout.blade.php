@@ -83,9 +83,14 @@
                         
                         <!-- Solo Admin -->
                        {{-- @if(Auth::user()->rol === 'Administrador') --}}
-                            <li class="nav-item">
+                            {{-- <li class="nav-item">
                                 <a class="nav-link" href="/compras">
                                     <i class="fas fa-shopping-cart"></i> Compras
+                                </a>
+                            </li> --}}
+                            <li class="nav-item">
+                                <a class="nav-link" href="/gastos">
+                                    <i class="fas fa-shopping-cart"></i> Gastos
                                 </a>
                             </li>
                             <li class="nav-item">

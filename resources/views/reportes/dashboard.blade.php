@@ -60,28 +60,46 @@
         
         <div class="col-md-3">
             <div class="card shadow-sm p-3 text-center">
-                <i class="fas fa-cash-register fa-2x text-success"></i>
-                <h4 class="mt-2">📄</h4>
-                <p class="text-muted">📄 Reporte General</p>
+                {{-- <i class="fas fa-cash-register fa-2x text-success"></i>
+                <h4 class="mt-2">📄</h4> 
+                <p class="text-muted">📄 Reporte General</p> --}}
+                <i class="fas fa-file-alt fa-2x text-success"></i>
+                <h4 class="mt-2">Reporte General</h4>
+                <p class="text-muted">Estado global</p>
                 <a href="{{ route('reporte.general') }}" class="btn btn-sm btn-success">Ver reporte</a>
             </div>
         </div>
 
         <div class="col-md-3 mb-3">
             <div class="card shadow-sm p-3 text-center">
-                <i class="fas fa-drumstick-bite fa-2x text-danger"></i>
+                {{-- <i class="fas fa-drumstick-bite fa-2x text-danger"></i>
                 <h4 class="mt-2">📅</h4>
-                <p class="text-muted"> 📅 Reporte Mensual</p>
+                <p class="text-muted"> 📅 Reporte Mensual</p> --}}
+                <i class="fas fa-calendar-alt fa-2x text-danger"></i>
+                <h4 class="mt-2">Reporte Mensual</h4>
+                <p class="text-muted">Por rango de fechas</p>
                 <a href="{{ route('reporte.porfechas') }}" class="btn btn-sm btn-danger">Ver reporte</a>
             </div>
         </div>
 
         <div class="col-md-3 mb-3">
             <div class="card shadow-sm p-3 text-center">
-                <i class="fas fa-tint fa-2x text-info"></i>
-                <h4 class="mt-2">Total: {{ number_format($totalAnimales) }} </h4>
-                <p class="text-muted">🐄 Reporte por Animal</p>
+                {{-- <i class="fas fa-tint fa-2x text-info"></i> 
+                <h4 class="mt-2">Total: {{ number_format($totalAnimales) }} </h4> 
+                <p class="text-muted">🐄</p> --}}
+                <i class="fas fa-cow fa-2x text-info"></i>
+                <h4 class="mt-2">🐄 Reporte por Animal</h4>
+                <p class="text-muted">Total: {{ number_format($totalAnimales) }}</p>
                 <a href="{{ route('reporte.general.animal.select') }}" class="btn btn-sm btn-info">Ver reporte</a>
+            </div>
+        </div>
+
+        <div class="col-md-3 mb-3">
+            <div class="card shadow-sm p-3 text-center">
+                <i class="fas fa-chart-line fa-2x text-warning"></i>
+                <h4 class="mt-2">Análisis Financiero</h4>
+                <p class="text-muted">Gastos vs Ingresos</p>
+                <a href="{{ route('reportes.financiero') }}" class="btn btn-sm btn-warning">Ver análisis</a>
             </div>
         </div>
     </div>

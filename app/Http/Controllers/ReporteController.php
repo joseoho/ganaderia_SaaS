@@ -14,6 +14,7 @@ use App\Models\Tratamiento;
 use App\Models\RegistroVacuna;
 use App\Models\Genealogia;
 use App\Models\AnimalPotrero;
+use App\Models\Gastos;
 use App\Models\Potrero;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -53,6 +54,11 @@ class ReporteController extends Controller
         // COMPRAS / VENTAS
         $compras = Compra::where('inquilino_id', $inquilino)->count();
         $ventas = Venta::where('inquilino_id', $inquilino)->count();
+
+        $total_gastos_operativos = Gastos::where('inquilino_id', $inquilino)
+            ->when($desde, fn($q) => $q->whereDate('fecha', '>=', $desde))
+            ->when($hasta, fn($q) => $q->whereDate('fecha', '<=', $hasta))
+            ->sum('monto');
 
         // MOVILIZACIONES
         $movilizaciones = Movilizacion::where('inquilino_id', $inquilino)->count();
@@ -95,6 +101,7 @@ class ReporteController extends Controller
             'produccion_carne_total',
             'compras',
             'ventas',
+            'total_gastos_operativos',
             'movilizaciones',
             'reproducciones',
             'inventario_insumos',
@@ -167,6 +174,11 @@ class ReporteController extends Controller
         $compras = Compra::where('inquilino_id', $inquilino)->count();
         $ventas = Venta::where('inquilino_id', $inquilino)->count();
 
+        $total_gastos_operativos = Gastos::where('inquilino_id', $inquilino) // Corregido el nombre del modelo
+            ->when($desde, fn($q) => $q->whereDate('fecha', '>=', $desde))
+            ->when($hasta, fn($q) => $q->whereDate('fecha', '<=', $hasta))
+            ->sum('monto');
+
         // MOVILIZACIONES
         $movilizaciones = Movilizacion::where('inquilino_id', $inquilino)->count();
 
@@ -208,6 +220,7 @@ class ReporteController extends Controller
             'produccion_carne_total',
             'compras',
             'ventas',
+            'total_gastos_operativos',
             'movilizaciones',
             'reproducciones',
             'inventario_insumos',
@@ -312,7 +325,7 @@ class ReporteController extends Controller
 
     // Totales
     $totalVentas = $ventas->count();
-    $montoTotal = $ventas->sum('monto');
+    $montoTotal = $ventas->sum('monto_total');
 
     return view('reportes.ventas.reporte', compact('ventas', 'totalVentas', 'montoTotal'));
 }
@@ -356,6 +369,54 @@ class ReporteController extends Controller
     $promedioLitros = $totalRegistros > 0 ? $totalLitros / $totalRegistros : 0;
 
     return view('reportes.leche.reporte', compact('leche', 'totalRegistros', 'totalLitros', 'promedioLitros'));
+}
+
+public function reporteFinanciero()
+{
+    $inquilino = Auth::user()->inquilino_id;
+    $anioActual = now()->year;
+
+    $totalCompras = Compra::where('inquilino_id', $inquilino)->sum('monto_total');
+    $totalVentas = Venta::where('inquilino_id', $inquilino)->sum('monto_total');
+    $totalGastos = Gastos::where('inquilino_id', $inquilino)->sum('monto');
+    
+    $balance = $totalVentas - ($totalCompras + $totalGastos);
+
+    // Datos para el gráfico mensual
+    $ventasMes = Venta::where('inquilino_id', $inquilino)
+        ->whereYear('fecha', $anioActual)
+        ->select(DB::raw('MONTH(fecha) as mes'), DB::raw('SUM(monto_total) as total'))
+        ->groupBy('mes')->pluck('total', 'mes')->all();
+
+    $comprasMes = Compra::where('inquilino_id', $inquilino)
+        ->whereYear('fecha', $anioActual)
+        ->select(DB::raw('MONTH(fecha) as mes'), DB::raw('SUM(monto_total) as total'))
+        ->groupBy('mes')->pluck('total', 'mes')->all();
+
+    
+    $gastosOpMes = Gastos::where('inquilino_id', $inquilino) // Corregido el nombre del modelo
+        ->whereYear('fecha', $anioActual)
+        ->select(DB::raw('MONTH(fecha) as mes'), DB::raw('SUM(monto) as total'))
+        ->groupBy('mes')->pluck('total', 'mes')->all();
+
+    $labels = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'];
+    $dataVentas = [];
+    $dataGastos = [];
+
+    for ($i = 1; $i <= 12; $i++) {
+        $dataVentas[] = $ventasMes[$i] ?? 0;
+        $dataGastos[] = ($comprasMes[$i] ?? 0) + ($gastosOpMes[$i] ?? 0);
+    }
+
+    return view('reportes.financiero', compact(
+        'totalCompras',
+        'totalVentas',
+        'totalGastos',
+        'balance',
+        'labels',
+        'dataVentas',
+        'dataGastos'
+    ));
 }
 
 public function dashboard()
@@ -407,6 +468,3 @@ public function dashboard()
 }
 
 }
-
-
-

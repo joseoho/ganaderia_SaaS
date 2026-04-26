@@ -33,7 +33,7 @@
                 <td>{{ $v->cliente }}</td>
                 <td>{{ $v->descripcion }}</td>
                 <td>{{ $v->fecha }}</td>
-                <td>${{ number_format($v->monto, 2) }}</td>
+                <td>${{ number_format($v->monto_total, 2) }}</td>
             </tr>
             @endforeach
         </tbody>
