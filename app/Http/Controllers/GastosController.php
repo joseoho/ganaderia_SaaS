@@ -10,7 +10,7 @@ class GastosController extends Controller
 {
     public function index()
     {
-        $gastos = Gastos::where('inquilino_id', Auth::user()->inquilino->id)
+        $gastos = Gastos::where('inquilino_id', Auth::user()->inquilino_id)
             ->orderBy('fecha', 'desc')
             ->paginate(10);
         return view('gastos.index', compact('gastos'));
@@ -30,7 +30,7 @@ class GastosController extends Controller
         ]);
 
         Gastos::create([
-            'inquilino_id' => Auth::user()->inquilino->id,
+            'inquilino_id' => Auth::user()->inquilino_id,
             'categoria' => $request->categoria,
             'monto' => $request->monto,
             'fecha' => $request->fecha,

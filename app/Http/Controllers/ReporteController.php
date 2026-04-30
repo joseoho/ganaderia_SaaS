@@ -16,6 +16,7 @@ use App\Models\Genealogia;
 use App\Models\AnimalPotrero;
 use App\Models\Gastos;
 use App\Models\Potrero;
+use Illuminate\Auth\Access\Gate;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 ;
@@ -52,7 +53,7 @@ class ReporteController extends Controller
             ->sum('ganancia_diaria');
 
         // COMPRAS / VENTAS
-        $compras = Compra::where('inquilino_id', $inquilino)->count();
+        $compras = Gastos::where('inquilino_id', $inquilino)->count();
         $ventas = Venta::where('inquilino_id', $inquilino)->count();
 
         $total_gastos_operativos = Gastos::where('inquilino_id', $inquilino)
@@ -301,7 +302,7 @@ class ReporteController extends Controller
         'hasta' => 'required|date'
     ]);
 
-    $compras = Compra::where('inquilino_id', Auth::user()->inquilino_id)
+    $compras = Gastos::where('inquilino_id', Auth::user()->inquilino_id)
         ->whereBetween('fecha', [$request->desde, $request->hasta])
         ->get();
 
@@ -311,6 +312,8 @@ class ReporteController extends Controller
 
     return view('reportes.compras.reporte', compact('compras', 'totalCompras', 'montoTotal'));
 }
+
+
 
     public function generarVentas(Request $request)
 {

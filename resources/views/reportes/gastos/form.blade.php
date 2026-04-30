@@ -2,7 +2,7 @@
 
 @section('content')
 
-<h2 class="mb-4">Reporte de Gastos por Fecha</h2>
+<h2 class="mb-4">Reporte de Compras por Fecha</h2>
 
 <div class="card shadow-sm p-4">
 

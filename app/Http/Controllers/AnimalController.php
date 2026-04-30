@@ -5,8 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Animal;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-
-use App\Http\Requests\StoreAnimalRequest;   
+use App\Http\Requests\StoreAnimalRequest;       
 use App\Http\Requests\UpdateAnimalRequest;
 
 class AnimalController extends Controller
@@ -57,33 +56,30 @@ class AnimalController extends Controller
         return view('animales.create');
     }
 
-    public function store(Request $request)
+    public function store(StoreAnimalRequest $request)
     {
 
-  
-        $request->validate([
-            'codigo_interno' => 'required|string',
-            'categoria' => 'required|string',
-            'raza' => 'required|string',
-            'fecha_nacimiento' => 'required|date',
-            'sexo' => 'required|string',
-            'peso_entrada' => 'nullable|numeric',
-            'estado' => 'required|string',
-        ]);
+        $data = $request->validated();
+     // Agregar el inquilino_id a los datos
+        $data['inquilino_id'] = Auth::user()->inquilino_id; // 👈 multi-tenant automático
+        // Crear el nuevo registro de Animal con los datos
+        Animal::create($data);
+    
 
-        Animal::create([
-            'inquilino_id' => Auth::user()->inquilino_id, // 👈 multi-tenant automático
-            'codigo_interno' => $request->codigo_interno,
-            'categoria' => $request->categoria,
-            'raza' => $request->raza,
-            'tipo' => $request->tipo,
-            'fecha_nacimiento' => $request->fecha_nacimiento,
-            'sexo' => $request->sexo,
-            'peso_entrada' => $request->peso_actual,
-            'estado' => $request->estado,
-        ]);
+        // Animal::create([
+        //     'inquilino_id' => Auth::user()->inquilino_id, // 👈 multi-tenant automático
+        //     'codigo_interno' => $request->codigo_interno,
+        //     'categoria' => $request->categoria,
+        //     'raza' => $request->raza,
+        //     'tipo' => $request->tipo,
+        //     'fecha_nacimiento' => $request->fecha_nacimiento,
+        //     'sexo' => $request->sexo,
+        //     'peso_entrada' => $request->peso_actual,
+        //     'estado' => $request->estado,
+        // ]);
 
-        return redirect()->route('animales.index')->with('success', 'Animal registrado correctamente');
+        return redirect()->route('animales.index')
+        ->with('success', 'Animal registrado correctamente');
     }
 
     public function show(Animal $animal)
@@ -102,7 +98,7 @@ class AnimalController extends Controller
         return view('animales.edit', compact('animal'));
     }
 
-    public function update(Request $request, Animal $animal)
+    public function update(UpdateAnimalRequest $request, Animal $animal)
     {
         $request->validate([
             'codigo_interno' => 'required|string',

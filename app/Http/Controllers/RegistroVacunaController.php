@@ -14,7 +14,7 @@ class RegistroVacunaController extends Controller
         $query = RegistroVacuna::where('inquilino_id', Auth::user()->inquilino_id);
 
         if ($request->filled('search')) {
-            $query->whereHas('animal', function($q) use ($request) {
+            $query->whereHas('animal', function ($q) use ($request) {
                 $q->where('codigo_interno', 'like', '%' . $request->search . '%');
             });
         }

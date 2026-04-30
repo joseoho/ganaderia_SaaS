@@ -3,12 +3,9 @@
 namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
-use App\Traits\TieneValidacionesInquilino;
 use Illuminate\Support\Facades\Auth;
-
-class StoreGastosRequest extends FormRequest
+class StoreGastoRequest extends FormRequest
 {
-       use TieneValidacionesInquilino;
     public function authorize(): bool { return Auth::check(); }
 
     public function rules(): array

@@ -71,10 +71,10 @@
     </div>
 
     <div class="col-md-6">
-        <label for="peso_actual" class="form-label">Peso Actual (kg)</label>
-        <input type="number" step="0.01" name="peso_actual" id="peso_actual" 
-               class="form-control @error('peso_actual') is-invalid @enderror" 
-               value="{{ old('peso_actual', $animal->peso_entrada ?? '') }}">
+        <label for="peso_entrada" class="form-label">Peso Actual (kg)</label>
+        <input type="number" step="0.01" name="peso_entrada" id="peso_entrada" 
+               class="form-control @error('peso_entrada') is-invalid @enderror" 
+               value="{{ old('peso_entrada', $animal->peso_entrada ?? '') }}">
     </div>
 
     <div class="col-md-12">

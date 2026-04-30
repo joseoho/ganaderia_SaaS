@@ -3,26 +3,26 @@
 namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Support\Facades\Auth;
+use App\Traits\TieneValidacionesInquilino;
 
 class UpdateVentaRequest extends FormRequest
 {
-    /**
-     * Determine if the user is authorized to make this request.
-     */
+     use TieneValidacionesInquilino;
     public function authorize(): bool
     {
-        return false;
+        if (!Auth::check()) return false;
+        $venta = $this->route('venta');
+        return $venta && $venta->inquilino_id === Auth::user()->inquilino->inquilino_id;
     }
 
-    /**
-     * Get the validation rules that apply to the request.
-     *
-     * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array<mixed>|string>
-     */
     public function rules(): array
     {
         return [
-            //
+            'cliente'     => 'required|string|max:255',
+            'descripcion' => 'required|string|max:500',
+            'fecha'       => 'required|date',
+            'monto_total' => 'required|numeric|min:0',
         ];
     }
 }

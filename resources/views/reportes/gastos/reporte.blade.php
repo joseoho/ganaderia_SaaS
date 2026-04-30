@@ -16,13 +16,13 @@
 
 <div id="area-imprimir">
 
-    <h2 class="mb-4">Reporte de Gastos por Fecha</h2>
+    <h2 class="mb-4">Reporte de Compras por Fecha</h2>
 
     <table class="table table-bordered">
         <thead>
             <tr>
-                <th>Categoria</th>
-                <th>Descripcion</th>
+                <th>Proveedor</th>
+                <th>Descripción</th>
                 <th>Fecha</th>
                 <th>Monto</th>
             </tr>
@@ -30,7 +30,7 @@
         <tbody>
             @foreach($compras as $c)
             <tr>
-                <td>{{ $c->categoria }}</td>
+                <td>{{ $c->proveedor }}</td>
                 <td>{{ $c->descripcion }}</td>
                 <td>{{ $c->fecha }}</td>
                 <td>${{ number_format($c->monto, 2) }}</td>

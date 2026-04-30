@@ -3,26 +3,26 @@
 namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
+use App\Traits\TieneValidacionesInquilino;
+use Illuminate\Support\Facades\Auth;
 
 class UpdatePotreroRequest extends FormRequest
 {
-    /**
-     * Determine if the user is authorized to make this request.
-     */
+    use TieneValidacionesInquilino;
     public function authorize(): bool
     {
-        return false;
+        if (!Auth::check()) return false;
+        $potrero = $this->route('potrero');
+        return $potrero && $potrero->inquilino_id === Auth::user()->inquilino->inquilino_id;
     }
 
-    /**
-     * Get the validation rules that apply to the request.
-     *
-     * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array<mixed>|string>
-     */
     public function rules(): array
     {
         return [
-            //
+            'nombre'    => 'required|string|max:255',
+            'tamaño'    => 'required|numeric|min:0',
+            'tipo_pasto'=> 'nullable|string|max:100',
+            'estado'    => 'required|string|max:50',
         ];
     }
 }

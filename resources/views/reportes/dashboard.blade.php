@@ -13,7 +13,7 @@
             <div class="card shadow-sm p-3 text-center">
                 <i class="fas fa-shopping-cart fa-2x text-primary"></i>
                 <h4 class="mt-2">{{ $totalCompras }}</h4>
-                <p class="text-muted">Compras registradas</p>
+                <p class="text-muted">Gastos registradas</p>
                 <a href="{{ route('reportes.compras') }}" class="btn btn-sm btn-primary">Ver reporte</a>
             </div>
         </div>
