@@ -6,7 +6,7 @@ use Illuminate\Foundation\Http\FormRequest;
 use App\Traits\TieneValidacionesInquilino;
 use Illuminate\Support\Facades\Auth;
 
-class StoreGastosRequest extends FormRequest
+class UpdateGastosRequest extends FormRequest
 {
        use TieneValidacionesInquilino;
     public function authorize(): bool { return Auth::check(); }

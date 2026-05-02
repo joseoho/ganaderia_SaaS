@@ -100,18 +100,21 @@ class AnimalController extends Controller
 
     public function update(UpdateAnimalRequest $request, Animal $animal)
     {
-        $request->validate([
-            'codigo_interno' => 'required|string',
-            'categoria' => 'required|string',
-            'raza' => 'required|string',
-            'tipo' => 'required|string',
-            'fecha_nacimiento' => 'required|date',
-            'sexo' => 'required|string',
-            'peso_entrada' => 'nullable|numeric',
-            'estado' => 'required|string',
-        ]);
+        // $request->validate([
+        //     'codigo_interno' => 'required|string',
+        //     'categoria' => 'required|string',
+        //     'raza' => 'required|string',
+        //     'tipo' => 'required|string',
+        //     'fecha_nacimiento' => 'required|date',
+        //     'sexo' => 'required|string',
+        //     'peso_entrada' => 'nullable|numeric',
+        //     'estado' => 'required|string',
+        // ]);
 
-        $animal->update($request->all());
+        // $animal->update($request->all());
+
+        // return redirect()->route('animales.index')->with('success', 'Animal actualizado correctamente');
+         $animal->update($request->validated());
 
         return redirect()->route('animales.index')->with('success', 'Animal actualizado correctamente');
     }

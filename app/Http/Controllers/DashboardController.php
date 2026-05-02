@@ -5,66 +5,57 @@ namespace App\Http\Controllers;
 use App\Models\Animal;
 use App\Models\Compra;
 use App\Models\Venta;
-use App\Models\Notificacion; 
-use App\Models\Gastos; // Corregido el nombre del modelo
+use App\Models\Notificacion;
+use App\Models\Gastos;
+use App\Models\Reproduccion;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
-
 class DashboardController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
     public function index()
     {
-         $inquilinoId = Auth::user()->inquilino_id;
-        // proximos partos
-        $partosProximos = \App\Models\Reproduccion::where('inquilino_id', $inquilinoId)
+        $inquilinoId = Auth::user()->inquilino_id;
+
+        // Próximos partos (filtrado directo en BD)
+        $partosProximos = Reproduccion::where('inquilino_id', $inquilinoId)
             ->whereIn('tipo', ['monta', 'inseminación'])
-            ->get()
-            ->filter(function ($r) {
-                $fpp = \Carbon\Carbon::parse($r->fecha)->addDays(283);
-                $dias = now()->diffInDays($fpp, false);
-                return $dias <= 30 && $dias >= 0;
-            });
+            ->whereRaw('DATE_ADD(fecha, INTERVAL 283 DAY) BETWEEN CURDATE() AND DATE_ADD(CURDATE(), INTERVAL 30 DAY)')
+            ->get();
 
-
-        // Totales filtrados por inquilino
+        // Totales
         $totalAnimales = Animal::where('inquilino_id', $inquilinoId)->count();
-        $totalCompras = Compra::where('inquilino_id', $inquilinoId)->sum('monto_total');
-        $totalVentas = Venta::where('inquilino_id', $inquilinoId)->sum('monto_total');
-        $totalGastos = Gastos::where('inquilino_id', $inquilinoId)->sum('monto');
+        $totalCompras  = Compra::where('inquilino_id', $inquilinoId)->sum('monto_total');
+        $totalVentas   = Venta::where('inquilino_id', $inquilinoId)->sum('monto_total');
+        $totalGastos   = Gastos::where('inquilino_id', $inquilinoId)->sum('monto');
         $notificacionesPendientes = Notificacion::where('usuario_id', Auth::id())
-                                                ->where('estado', 'pendiente')
-                                                ->count();
+            ->where('estado', 'pendiente')
+            ->count();
 
         // Últimas actividades
-        $ultimasCompras = Compra::where('inquilino_id', $inquilinoId)
-                                ->orderBy('fecha', 'desc')
-                                ->take(5)
-                                ->get();
+        $ultimosGastos = Gastos::where('inquilino_id', $inquilinoId)
+            ->orderBy('fecha', 'desc')
+            ->take(5)
+            ->get();
 
         $ultimasVentas = Venta::where('inquilino_id', $inquilinoId)
-                              ->orderBy('fecha', 'desc')
-                              ->take(5)
-                              ->get();
-                              //Totalizar leche y carne al mes
-                              $mesActual = now()->month;
-$anioActual = now()->year;
+            ->orderBy('fecha', 'desc')
+            ->take(5)
+            ->get();
 
-        // Total leche del mes
+        // Totalizar leche y carne del mes
+        $mesActual  = now()->month;
+        $anioActual = now()->year;
+
         $totalLecheMes = \App\Models\ProduccionLeche::where('inquilino_id', $inquilinoId)
             ->whereMonth('fecha', $mesActual)
             ->whereYear('fecha', $anioActual)
             ->sum('litros');
 
-        // Total carne del mes (kg ganados)
         $totalCarneMes = \App\Models\ProduccionCarne::where('inquilino_id', $inquilinoId)
             ->whereMonth('fecha', $mesActual)
             ->whereYear('fecha', $anioActual)
             ->sum('ganancia_diaria');
-
 
         return view('dashboard.index', compact(
             'totalAnimales',
@@ -72,59 +63,18 @@ $anioActual = now()->year;
             'totalVentas',
             'totalGastos',
             'notificacionesPendientes',
-            'ultimasCompras',
+            'ultimosGastos',
             'ultimasVentas',
-            'partosProximos'
-        ,   'totalLecheMes', 'totalCarneMes'
+            'partosProximos',
+            'totalLecheMes',
+            'totalCarneMes'
         ));
-
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
-    {
-        //
-    }
-
-    /**
-     * Store a newly created resource in storage.
-     */
-    public function store(Request $request)
-    {
-        //
-    }
-
-    /**
-     * Display the specified resource.
-     */
-    public function show(string $id)
-    {
-        //
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(string $id)
-    {
-        //
-    }
-
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, string $id)
-    {
-        //
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(string $id)
-    {
-        //
-    }
+    public function create() {}
+    public function store(Request $request) {}
+    public function show(string $id) {}
+    public function edit(string $id) {}
+    public function update(Request $request, string $id) {}
+    public function destroy(string $id) {}
 }

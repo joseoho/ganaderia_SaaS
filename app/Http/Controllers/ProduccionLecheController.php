@@ -6,6 +6,9 @@ use App\Models\ProduccionLeche;
 use App\Models\Animal;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use App\Http\Requests\StoreProduccionLecheRequest;
+use App\Http\Requests\UpdateProduccionLecheRequest;
+use Carbon\Carbon;
 
 class ProduccionLecheController extends Controller
 {
@@ -14,7 +17,7 @@ class ProduccionLecheController extends Controller
         $query = ProduccionLeche::where('inquilino_id', Auth::user()->inquilino_id);
 
         if ($request->filled('search')) {
-            $query->whereHas('animal', function($q) use ($request) {
+            $query->whereHas('animal', function ($q) use ($request) {
                 $q->where('codigo_interno', 'like', '%' . $request->search . '%');
             });
         }
@@ -31,23 +34,17 @@ class ProduccionLecheController extends Controller
     public function create()
     {
         $animales = Animal::where('inquilino_id', Auth::user()->inquilino_id)
-                          ->where('sexo', 'h')
-                          ->get();
+            ->where('sexo', 'h')
+            ->get();
 
         return view('produccion_leche.create', compact('animales'));
     }
 
-    public function store(Request $request)
+    public function store(StoreProduccionLecheRequest $request)
     {
-        $request->validate([
-            'animal_id' => 'required',
-            'fecha' => 'required|date',
-            'litros' => 'required|numeric|min:0',
-        ]);
-
         $ultimo = ProduccionLeche::where('animal_id', $request->animal_id)
-                                 ->orderBy('fecha', 'desc')
-                                 ->first();
+            ->orderBy('fecha', 'desc')
+            ->first();
 
         $litros_anteriores = $ultimo->litros ?? null;
         $variacion = null;
@@ -57,14 +54,14 @@ class ProduccionLecheController extends Controller
         }
 
         ProduccionLeche::create([
-            'inquilino_id' => Auth::user()->inquilino_id,
-            'animal_id' => $request->animal_id,
-            'fecha' => $request->fecha,
-            'turno' => $request->turno,
-            'litros' => $request->litros,
-            'litros_anteriores' => $litros_anteriores,
-            'variacion' => $variacion,
-            'observaciones' => $request->observaciones,
+            'inquilino_id'     => Auth::user()->inquilino_id,
+            'animal_id'        => $request->animal_id,
+            'fecha'            => $request->fecha,
+            'turno'            => $request->turno,
+            'litros'           => $request->litros,
+            'litros_anteriores'=> $litros_anteriores,
+            'variacion'        => $variacion,
+            'observaciones'    => $request->observaciones,
         ]);
 
         return redirect()->route('produccion_leche.index')->with('success', 'Registro de producción guardado');
@@ -74,23 +71,20 @@ class ProduccionLecheController extends Controller
     {
         if ($produccion_leche->inquilino_id !== Auth::user()->inquilino_id) abort(403);
 
-        // Calcular total mensual del animal
-            $mes = \Carbon\Carbon::parse($produccion_leche->fecha)->month;
-            $anio = \Carbon\Carbon::parse($produccion_leche->fecha)->year;
+        $mes  = Carbon::parse($produccion_leche->fecha)->month;
+        $anio = Carbon::parse($produccion_leche->fecha)->year;
 
-            $total_mes = \App\Models\ProduccionLeche::where('animal_id', $produccion_leche->animal_id)
-                ->whereMonth('fecha', $mes)
-                ->whereYear('fecha', $anio)
-                ->sum('litros');
-            // ALERTA: bajó la producción
-                $alerta_baja = null;
+        $total_mes = ProduccionLeche::where('animal_id', $produccion_leche->animal_id)
+            ->whereMonth('fecha', $mes)
+            ->whereYear('fecha', $anio)
+            ->sum('litros');
 
-                if (!is_null($produccion_leche->variacion) && $produccion_leche->variacion < 0) {
-                    $alerta_baja = "Atención: este animal bajó su producción en " . abs($produccion_leche->variacion) . " litros.";
-                }
+        $alerta_baja = null;
+        if (!is_null($produccion_leche->variacion) && $produccion_leche->variacion < 0) {
+            $alerta_baja = "Atención: este animal bajó su producción en " . abs($produccion_leche->variacion) . " litros.";
+        }
 
-            return view('produccion_leche.show', compact('produccion_leche', 'total_mes', 'alerta_baja'));
-
+        return view('produccion_leche.show', compact('produccion_leche', 'total_mes', 'alerta_baja'));
     }
 
     public function edit(ProduccionLeche $produccion_leche)
@@ -98,23 +92,43 @@ class ProduccionLecheController extends Controller
         if ($produccion_leche->inquilino_id !== Auth::user()->inquilino_id) abort(403);
 
         $animales = Animal::where('inquilino_id', Auth::user()->inquilino_id)
-                          ->where('sexo', 'h')
-                          ->get();
+            ->where('sexo', 'h')
+            ->get();
 
         return view('produccion_leche.edit', compact('produccion_leche', 'animales'));
     }
 
-    public function update(Request $request, ProduccionLeche $produccion_leche)
+    public function update(UpdateProduccionLecheRequest $request, ProduccionLeche $produccion_leche)
     {
-        if ($produccion_leche->inquilino_id !== Auth::user()->inquilino_id) abort(403);
+        $produccion_leche->update($request->validated());
 
-        $request->validate([
-            'animal_id' => 'required',
-            'fecha' => 'required|date',
-            'litros' => 'required|numeric|min:0',
-        ]);
+        // Recalcular campos derivados
+        $ultimoAnterior = ProduccionLeche::where('animal_id', $produccion_leche->animal_id)
+            ->where('id', '<', $produccion_leche->id)
+            ->orderBy('fecha', 'desc')
+            ->first();
 
-        $produccion_leche->update($request->all());
+        if ($ultimoAnterior) {
+            $produccion_leche->litros_anteriores = $ultimoAnterior->litros;
+            $produccion_leche->variacion = $produccion_leche->litros - $ultimoAnterior->litros;
+        } else {
+            $produccion_leche->litros_anteriores = null;
+            $produccion_leche->variacion = null;
+        }
+
+        // Recalcular el siguiente registro si existe
+        $siguiente = ProduccionLeche::where('animal_id', $produccion_leche->animal_id)
+            ->where('id', '>', $produccion_leche->id)
+            ->orderBy('fecha', 'asc')
+            ->first();
+
+        if ($siguiente) {
+            $siguiente->litros_anteriores = $produccion_leche->litros;
+            $siguiente->variacion = $siguiente->litros - $produccion_leche->litros;
+            $siguiente->save();
+        }
+
+        $produccion_leche->save();
 
         return redirect()->route('produccion_leche.index')->with('success', 'Registro actualizado');
     }

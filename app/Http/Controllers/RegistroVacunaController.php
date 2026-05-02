@@ -6,6 +6,8 @@ use App\Models\RegistroVacuna;
 use App\Models\Animal;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use App\Http\Requests\StoreRegistroVacunaRequest;
+use App\Http\Requests\UpdateRegistroVacunaRequest;
 
 class RegistroVacunaController extends Controller
 {
@@ -34,25 +36,19 @@ class RegistroVacunaController extends Controller
         return view('registro_vacunas.create', compact('animales'));
     }
 
-    public function store(Request $request)
+    public function store(StoreRegistroVacunaRequest $request)
     {
-        // $request->validate([
-        //     'animal_id' => 'required',
-        //     'nombre' => 'required|string|max:255',
-        //     'fecha_aplicacion' => 'required|date',
-        // ]);
-
         RegistroVacuna::create([
-            'inquilino_id' => Auth::user()->inquilino_id,
-            'animal_id' => $request->animal_id,
-            'nombre' => $request->nombre,
-            'lote' => $request->lote,
-            'proveedor' => $request->proveedor,
-            'via' => $request->via,
-            'fecha_aplicacion' => $request->fecha,
-            'dosis' => $request->dosis,
-            'proxima_dosis' => $request->proxima_dosis,
-            'observaciones' => $request->observaciones,
+            'inquilino_id'    => Auth::user()->inquilino_id,
+            'animal_id'       => $request->animal_id,
+            'nombre'          => $request->nombre,
+            'lote'            => $request->lote,
+            'proveedor'       => $request->proveedor,
+            'via'             => $request->via,
+            'fecha_aplicacion'=> $request->fecha_aplicacion,
+            'dosis'           => $request->dosis,
+            'proxima_dosis'   => $request->proxima_dosis,
+            'observaciones'   => $request->observaciones,
         ]);
 
         return redirect()->route('registro_vacunas.index')->with('success', 'Vacuna registrada');
@@ -70,21 +66,12 @@ class RegistroVacunaController extends Controller
         if ($registro_vacuna->inquilino_id !== Auth::user()->inquilino_id) abort(403);
 
         $animales = Animal::where('inquilino_id', Auth::user()->inquilino_id)->get();
-
         return view('registro_vacunas.edit', compact('registro_vacuna', 'animales'));
     }
 
-    public function update(Request $request, RegistroVacuna $registro_vacuna)
+    public function update(UpdateRegistroVacunaRequest $request, RegistroVacuna $registro_vacuna)
     {
-        if ($registro_vacuna->inquilino_id !== Auth::user()->inquilino_id) abort(403);
-
-        // $request->validate([
-        //     'animal_id' => 'required',
-        //     'nombre' => 'required|string|max:255',
-        //     'fecha_aplicacion' => 'required|date',
-        // ]);
-
-        $registro_vacuna->update($request->all());
+        $registro_vacuna->update($request->validated());
 
         return redirect()->route('registro_vacunas.index')->with('success', 'Vacuna actualizada');
     }

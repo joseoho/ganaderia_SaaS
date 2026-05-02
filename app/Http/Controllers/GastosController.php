@@ -5,15 +5,32 @@ namespace App\Http\Controllers;
 use App\Models\Gastos;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use App\Http\Requests\StoreGastosRequest;
+use App\Http\Requests\UpdateGastosRequest;
+
 
 class GastosController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $gastos = Gastos::where('inquilino_id', Auth::user()->inquilino_id)
-            ->orderBy('fecha', 'desc')
-            ->paginate(10);
+         $query = Gastos::where('inquilino_id', Auth::user()->inquilino_id);
+
+        if ($request->filled('search')) {
+            $query->where('categoria', 'like', '%' . $request->search . '%')
+                  ->orWhere('descripcion', 'like', '%' . $request->search . '%');
+        }
+
+        if ($request->filled('fecha_desde')) {
+            $query->whereDate('fecha', '>=', $request->fecha_desde);
+        }
+        if ($request->filled('fecha_hasta')) {
+            $query->whereDate('fecha', '<=', $request->fecha_hasta);
+        }
+
+        $gastos = $query->orderBy('fecha', 'desc')->paginate(10);
+
         return view('gastos.index', compact('gastos'));
+
     }
 
     public function create()
@@ -21,7 +38,7 @@ class GastosController extends Controller
         return view('gastos.create');
     }
 
-    public function store(Request $request)
+    public function store(StoreGastosRequest $request)
     {
         $request->validate([
             'categoria' => 'required|string',
@@ -60,7 +77,7 @@ class GastosController extends Controller
         return view('gastos.edit', compact('gasto'));
     }
 
-    public function update(Request $request, Gastos $gasto)
+    public function update(UpdateGastosRequest $request, Gastos $gasto)
     {
         if ($gasto->inquilino_id !== Auth::user()->inquilino_id) {
             abort(403, 'No autorizado');

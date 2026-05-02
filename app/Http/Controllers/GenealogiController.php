@@ -16,7 +16,7 @@ class GenealogiController extends Controller
         $query = Genealogia::where('inquilino_id', Auth::user()->inquilino_id);
 
         if ($request->filled('search')) {
-            $query->whereHas('animal', function($q) use ($request) {
+            $query->whereHas('animal', function ($q) use ($request) {
                 $q->where('codigo_interno', 'like', '%' . $request->search . '%');
             });
         }
@@ -29,23 +29,18 @@ class GenealogiController extends Controller
     public function create()
     {
         $inquilino = Auth::user()->inquilino_id;
-
-        $animales = Animal::where('inquilino_id', $inquilino)->get();
+        $animales  = Animal::where('inquilino_id', $inquilino)->get();
 
         return view('genealogia.create', compact('animales'));
     }
 
-    public function store(Request $request)
+    public function store(StoreGenealogiaRequest $request)
     {
-        $request->validate([
-            'animal_id' => 'required',
-        ]);
-
         Genealogia::create([
-            'inquilino_id' => Auth::user()->inquilino_id,
-            'animal_id' => $request->animal_id,
-            'padre_id' => $request->padre_id,
-            'madre_id' => $request->madre_id,
+            'inquilino_id'  => Auth::user()->inquilino_id,
+            'animal_id'     => $request->animal_id,
+            'padre_id'      => $request->padre_id,
+            'madre_id'      => $request->madre_id,
             'observaciones' => $request->observaciones,
         ]);
 
@@ -72,13 +67,9 @@ class GenealogiController extends Controller
         return view('genealogia.edit', compact('genealogium', 'animales'));
     }
 
-    public function update(Request $request, Genealogia $genealogium)
+    public function update(UpdateGenealogiaRequest $request, Genealogia $genealogium)
     {
-        if ($genealogium->inquilino_id !== Auth::user()->inquilino_id) {
-            abort(403);
-        }
-
-        $genealogium->update($request->all());
+        $genealogium->update($request->validated());
 
         return redirect()->route('genealogia.index')->with('success', 'Genealogía actualizada');
     }

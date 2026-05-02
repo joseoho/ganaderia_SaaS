@@ -11,6 +11,6 @@
         <input type="date" name="fecha" class="form-control" required>
     </div>
     <div class="mb-3">
-        <label for="monto" class="form-label">Monto</label>
-        <input type="number" step="0.01" name="monto" class="form-control" required>
+        <label for="monto_total" class="form-label">Monto Total</label>
+        <input type="number" step="0.01" name="monto_total" class="form-control" required>
     </div>

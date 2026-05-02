@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use App\Models\Venta;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use App\Http\Requests\StoreVentaRequest;
+use App\Http\Requests\UpdateVentaRequest;
 
 class VentaController extends Controller
 {
@@ -13,8 +15,10 @@ class VentaController extends Controller
         $query = Venta::where('inquilino_id', Auth::user()->inquilino_id);
 
         if ($request->filled('search')) {
-            $query->where('cliente', 'like', '%' . $request->search . '%')
+            $query->where(function ($q) use ($request) {
+                $q->where('cliente', 'like', '%' . $request->search . '%')
                   ->orWhere('descripcion', 'like', '%' . $request->search . '%');
+            });
         }
 
         if ($request->filled('fecha_desde')) {
@@ -34,21 +38,14 @@ class VentaController extends Controller
         return view('ventas.create');
     }
 
-    public function store(Request $request)
+    public function store(StoreVentaRequest $request)
     {
-        // $request->validate([
-        //     'cliente' => 'required|string|max:255',
-        //     'descripcion' => 'required|string',
-        //     'fecha' => 'required|date',
-        //     'monto_total' => 'required|numeric',
-        // ]);
-
         Venta::create([
             'inquilino_id' => Auth::user()->inquilino_id,
-            'cliente' => $request->cliente,
-            'descripcion' => $request->descripcion,
-            'fecha' => $request->fecha,
-            'monto_total' => $request->monto,
+            'cliente'      => $request->cliente,
+            'descripcion'  => $request->descripcion,
+            'fecha'        => $request->fecha,
+            'monto_total'  => $request->monto_total,
         ]);
 
         return redirect()->route('ventas.index')->with('success', 'Venta registrada correctamente');
@@ -59,6 +56,7 @@ class VentaController extends Controller
         if ($venta->inquilino_id !== Auth::user()->inquilino_id) {
             abort(403, 'No autorizado');
         }
+
         return view('ventas.show', compact('venta'));
     }
 
@@ -67,23 +65,13 @@ class VentaController extends Controller
         if ($venta->inquilino_id !== Auth::user()->inquilino_id) {
             abort(403, 'No autorizado');
         }
+
         return view('ventas.edit', compact('venta'));
     }
 
-    public function update(Request $request, Venta $venta)
+    public function update(UpdateVentaRequest $request, Venta $venta)
     {
-        if ($venta->inquilino_id !== Auth::user()->inquilino_id) {
-            abort(403, 'No autorizado');
-        }
-
-        $request->validate([
-            'cliente' => 'required|string|max:255',
-            'descripcion' => 'required|string',
-            'fecha' => 'required|date',
-            'monto' => 'required|numeric',
-        ]);
-
-        $venta->update($request->all());
+        $venta->update($request->validated());
 
         return redirect()->route('ventas.index')->with('success', 'Venta actualizada correctamente');
     }
@@ -95,6 +83,7 @@ class VentaController extends Controller
         }
 
         $venta->delete();
+
         return redirect()->route('ventas.index')->with('success', 'Venta eliminada');
     }
 }

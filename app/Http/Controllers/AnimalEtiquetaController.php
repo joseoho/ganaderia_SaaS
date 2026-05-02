@@ -6,94 +6,40 @@ use Illuminate\Http\Request;
 use App\Models\Animal;
 use Illuminate\Support\Facades\Auth;
 
-
 class AnimalEtiquetaController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
     public function index()
     {
-        try {
-            // Verificar si el usuario está autenticado
-            if (!Auth::check()) {
-                dd('Usuario no autenticado');
-            }
+        $inquilino_id = Auth::user()->inquilino_id;
 
-            // Verificar el inquilino_id
-            $inquilino_id = Auth::user()->inquilino_id;
-            if (!$inquilino_id) {
-                dd('Usuario no tiene inquilino_id');
-            }
-
-            // Obtener animales
-            $animales = Animal::where('inquilino_id', $inquilino_id)->get();
-            
-            // Verificar si hay animales
-            if ($animales->isEmpty()) {
-                return view('etiquetas.index', ['animales' => collect([])])->with('mensaje', 'No hay animales registrados');
-            }
-
-            return view('etiquetas.index', compact('animales'));
-
-        } catch (\Exception $e) {
-            dd('Error: ' . $e->getMessage());
+        if (!$inquilino_id) {
+            return redirect()->route('home')->with('error', 'No tiene un inquilino asignado.');
         }
 
+        $animales = Animal::where('inquilino_id', $inquilino_id)->get();
+
+        if ($animales->isEmpty()) {
+            return view('etiquetas.index', ['animales' => collect([])])->with('mensaje', 'No hay animales registrados');
+        }
+
+        return view('etiquetas.index', compact('animales'));
     }
 
+    public function create() {}
 
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
-    {
-        //
-    }
+    public function store(Request $request) {}
 
-    /**
-     * Store a newly created resource in storage.
-     */
-    public function store(Request $request)
-    {
-        //
-    }
+    public function show(string $id) {}
 
-    /**
-     * Display the specified resource.
-     */
-    public function show(string $id)
-    {
-        //
-    }
+    public function edit(string $id) {}
 
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(string $id)
-    {
-        //
-    }
+    public function update(Request $request, string $id) {}
 
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, string $id)
-    {
-        //
-    }
+    public function destroy(string $id) {}
 
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(string $id)
+    public function generar(Request $request)
     {
-        //
-    }
-
-     public function generar(Request $request)
-    {
-       $request->validate([
+        $request->validate([
             'animales' => 'required|array'
         ]);
 
@@ -103,6 +49,4 @@ class AnimalEtiquetaController extends Controller
 
         return view('etiquetas.generar', compact('animales'));
     }
-    
-
 }

@@ -48,7 +48,7 @@
 
                 <div class="col-md-4 mb-3">
                     <label class="form-label font-weight-bold-label">Fecha de Inicio</label>
-                    <input type="date" name="fecha_inicio" class="form-control" 
+                    <input type="date" name="fecha" class="form-control" 
                            value="{{ date('Y-m-d') }}" required>
                 </div>
             </div>

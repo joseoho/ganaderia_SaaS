@@ -2,6 +2,29 @@
 @section('title', 'Listado de Gastos')
 
 @section('content')
+<!-- 🔍 Barra de búsqueda y filtros -->
+<form method="GET" action="{{ route('gastos.index') }}" class="row g-3 mb-4">
+    <div class="col-md-4">
+        <input type="text" name="search" class="form-control" placeholder="Buscar por categoría o descripción..."
+               value="{{ request('search') }}">
+    </div>
+
+    <div class="col-md-3">
+        <input type="date" name="fecha_desde" class="form-control" value="{{ request('fecha_desde') }}">
+    </div>
+
+    <div class="col-md-3">
+        <input type="date" name="fecha_hasta" class="form-control" value="{{ request('fecha_hasta') }}">
+    </div>
+
+    <div class="col-md-2 d-grid">
+        <button type="submit" class="btn btn-primary">Filtrar</button>
+    </div>
+    <div class="col-md-2">
+        <a href="{{ route('gastos.index') }}" class="btn btn-secondary">
+        <i class="fas fa-broom"></i> Limpiar</a> 
+    </div> 
+</form>
 <div class="container">
     <div class="d-flex justify-content-between align-items-center mb-4">
         <h2><i class="fas fa-wallet text-primary"></i> Control de Gastos Operativos</h2>

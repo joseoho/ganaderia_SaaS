@@ -19,8 +19,8 @@
     <div class="col-md-3">
         <div class="card shadow-sm text-center">
             <div class="card-body">
-                <h5 class="card-title">Compras</h5>
-                <h2>${{ number_format($totalCompras, 2) }}</h2>
+                <h5 class="card-title">Gastos</h5>
+                <h2>${{ number_format($totalGastos, 2) }}</h2>
             </div>
         </div>
     </div>
@@ -62,17 +62,17 @@
     <div class="col-md-6">
         <div class="card shadow-sm mb-4">
             <div class="card-header bg-primary text-white">
-                Últimas Compras
+                Últimos Gastos
             </div>
             <ul class="list-group list-group-flush">
-                @forelse($ultimasCompras as $compra)
+                @forelse($ultimosGastos as $gasto)
                     <li class="list-group-item">
-                        <strong>{{ $compra->proveedor }}</strong> — 
-                        ${{ number_format($compra->monto_total, 2) }}
-                        <span class="text-muted float-end">{{ $compra->fecha }}</span>
+                        <strong>{{ $gasto->proveedor }}</strong> — 
+                        ${{ number_format($gasto->monto, 2) }}
+                        <span class="text-muted float-end">{{ $gasto->fecha }}</span>
                     </li>
                 @empty
-                    <li class="list-group-item text-center text-muted">Sin compras recientes</li>
+                    <li class="list-group-item text-center text-muted">Sin gastos recientes</li>
                 @endforelse
             </ul>
         </div>

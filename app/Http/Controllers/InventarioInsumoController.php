@@ -5,8 +5,8 @@ namespace App\Http\Controllers;
 use App\Models\InventarioInsumo;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use App\Http\Requests\UpdateInventarioInsumoRequest;
 use App\Http\Requests\StoreInventarioInsumoRequest;
+use App\Http\Requests\UpdateInventarioInsumoRequest;
 
 class InventarioInsumoController extends Controller
 {
@@ -15,8 +15,10 @@ class InventarioInsumoController extends Controller
         $query = InventarioInsumo::where('inquilino_id', Auth::user()->inquilino_id);
 
         if ($request->filled('search')) {
-            $query->where('nombre', 'like', '%' . $request->search . '%')
+            $query->where(function ($q) use ($request) {
+                $q->where('nombre', 'like', '%' . $request->search . '%')
                   ->orWhere('categoria', 'like', '%' . $request->search . '%');
+            });
         }
 
         if ($request->filled('categoria')) {
@@ -35,22 +37,15 @@ class InventarioInsumoController extends Controller
 
     public function store(StoreInventarioInsumoRequest $request)
     {
-
-        $request->validate([
-            'nombre' => 'required|string|max:255',
-            'cantidad' => 'required|integer|min:0',
-            'unidad' => 'required|string|max:50',
-        ]);
-
         InventarioInsumo::create([
             'inquilino_id' => Auth::user()->inquilino_id,
-            'nombre' => $request->nombre,
-            'categoria' => $request->categoria,
-            'cantidad' => $request->cantidad,
-            'unidad' => $request->unidad,
-            'minimo' => $request->minimo,
-            'fecha_ingreso' => $request->fecha_ingreso,
-            'descripcion' => $request->descripcion,
+            'nombre'       => $request->nombre,
+            'categoria'    => $request->categoria,
+            'cantidad'     => $request->cantidad,
+            'unidad'       => $request->unidad,
+            'minimo'       => $request->minimo,
+            'fecha_ingreso'=> $request->fecha_ingreso,
+            'descripcion'  => $request->descripcion,
         ]);
 
         return redirect()->route('inventario.index')->with('success', 'Insumo registrado');
@@ -70,18 +65,9 @@ class InventarioInsumoController extends Controller
         return view('inventario_insumos.edit', compact('inventario'));
     }
 
-    public function update(Request $request, InventarioInsumo $inventario)
+    public function update(UpdateInventarioInsumoRequest $request, InventarioInsumo $inventario)
     {
-
-        if ($inventario->inquilino_id !== Auth::user()->inquilino_id) abort(403);
-
-        $request->validate([
-            'nombre' => 'required|string|max:255',
-            'cantidad' => 'required|integer|min:0',
-            'unidad' => 'required|string|max:50',
-        ]);
-
-        $inventario->update($request->all());
+        $inventario->update($request->validated());
 
         return redirect()->route('inventario.index')->with('success', 'Insumo actualizado');
     }

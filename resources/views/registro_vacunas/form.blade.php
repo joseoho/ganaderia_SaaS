@@ -45,8 +45,8 @@
             </div>
 
              <div class="mb-3">
-                <label class="form-label">Fecha</label>
-                <input type="date" name="fecha" class="form-control" required>
+                <label class="form-label">Fecha de aplicación</label>
+                <input type="date" name="fecha_aplicacion" class="form-control" required>
             </div>
 
             <div class="mb-3">
