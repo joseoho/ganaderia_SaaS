@@ -69,7 +69,13 @@ class GenealogiController extends Controller
 
     public function update(UpdateGenealogiaRequest $request, Genealogia $genealogium)
     {
-        $genealogium->update($request->validated());
+        // $genealogium->update($request->validated());
+        $genealogium->update([
+            'animal_id'     => $request->animal_id,
+            'padre_id'      => $request->padre_id,
+            'madre_id'      => $request->madre_id,
+            'observaciones' => $request->observaciones,
+        ]);
 
         return redirect()->route('genealogia.index')->with('success', 'Genealogía actualizada');
     }

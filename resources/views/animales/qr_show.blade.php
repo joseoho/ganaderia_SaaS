@@ -44,6 +44,12 @@
     @foreach($reproduccion as $r)
         <p>{{ $r->tipo }} — {{ $r->fecha }}</p>
     @endforeach
+        @if($r = $reproduccion->last())
+            <p><strong>Último evento:</strong> {{ $r->tipo }} el {{ $r->fecha }}</p>
+    @else
+        <p>No hay datos de genealogía.</p>
+    @endif
+    
 </div>
 
 <div class="card">

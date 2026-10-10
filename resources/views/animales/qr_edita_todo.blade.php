@@ -25,7 +25,7 @@
         <h3>Datos Generales</h3>
 
         <label>Código interno</label>
-        <input type="text" name="codigo_interno" value="{{ $animal->codigo_interno }}">
+        <input type="text" name="codigo_interno" value="{{ $animal->codigo_interno }}" readonly>
 
         <label>Raza</label>
         <input type="text" name="raza" value="{{ $animal->raza }}">
@@ -68,10 +68,10 @@
         <h3>Datos Reproductivos</h3>
 
         <label>Padre</label>
-        <input type="text" name="padre" value="{{ optional($animal->genealogia)->padre }}">
+        <input type="text" name="padre" value="{{ optional($animal->genealogia)->padre }}" readonly>
 
         <label>Madre</label>
-        <input type="text" name="madre" value="{{ optional($animal->genealogia)->madre }}">
+        <input type="text" name="madre" value="{{ optional($animal->genealogia)->madre }}" readonly>
 
         <button type="submit">Guardar Cambios</button>
 

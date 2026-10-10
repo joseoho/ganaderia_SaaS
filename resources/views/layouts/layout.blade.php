@@ -198,6 +198,44 @@
                                 <i class="fas fa-tachometer-alt"></i> Dashboard Reportes
                             </a>
                         </li>
+                      {{--  <li class="nav-item">
+                            <a class="nav-link" href="{{ route('import.animales.upload') }}">
+                                <i class="fas fa-file-import"></i> Importar datos
+                            </a>
+                        </li> --}}
+                        <li class="nav-item dropdown">
+    <a class="nav-link dropdown-toggle" href="#" id="importMenu" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+        <i class="fas fa-file-import"></i> Importar datos
+    </a>
+    <ul class="dropdown-menu" aria-labelledby="importMenu">
+
+        <li>
+            <a class="dropdown-item" href="{{ route('import.animales.form') }}">
+                Importar Animales
+            </a>
+        </li>
+
+        <li>
+            <a class="dropdown-item" href="{{ route('import.produccion.form') }}">
+                Importar Producción
+            </a>
+        </li>
+
+        <li>
+            <a class="dropdown-item" href="{{ route('import.compras.form') }}">
+                Importar Compras
+            </a>
+        </li>
+
+        <li>
+            <a class="dropdown-item" href="{{ route('import.ventas.form') }}">
+                Importar Ventas
+            </a>
+        </li>
+
+    </ul>
+</li>
+
                     </ul>
                 </div>
             </nav>
