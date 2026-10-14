@@ -57,7 +57,7 @@
     <h4>Producción de Leche</h4>
     <ul>
         @foreach($produccion_leche as $p)
-            <li>{{ $p->fecha }} — {{ $p->litros }} litros</li>
+            <li>{{ \App\Support\Formato::fecha($p->fecha) }} — {{ $p->litros }} litros</li>
         @endforeach
     </ul>
 
@@ -66,7 +66,7 @@
     <h4>Producción de Carne</h4>
     <ul>
         @foreach($produccion_carne as $p)
-            <li>{{ $p->fecha }} — {{ $p->peso }} kg</li>
+            <li>{{ \App\Support\Formato::fecha($p->fecha) }} — {{ $p->peso }} kg</li>
         @endforeach
     </ul>
 
@@ -75,7 +75,7 @@
     <h4>Tratamientos</h4>
     <ul>
         @foreach($tratamientos as $t)
-            <li>{{ $t->motivo }} — {{ $t->medicamento }} ({{ $t->fecha_inicio }})</li>
+            <li>{{ $t->motivo }} — {{ $t->medicamento }} ({{ \App\Support\Formato::fecha($t->fecha_inicio) }})</li>
         @endforeach
     </ul>
 
@@ -84,7 +84,7 @@
     <h4>Vacunas</h4>
     <ul>
         @foreach($vacunas as $v)
-            <li>{{ $v->nombre }} — {{ $v->fecha }}</li>
+            <li>{{ $v->nombre }} — {{ \App\Support\Formato::fecha($v->fecha) }}</li>
         @endforeach
     </ul>
 
@@ -93,7 +93,7 @@
     <h4>Reproducción</h4>
     <ul>
         @foreach($reproduccion as $r)
-            <li>{{ $r->tipo }} — {{ $r->fecha }}</li>
+            <li>{{ $r->tipo }} — {{ \App\Support\Formato::fecha($r->fecha) }}</li>
         @endforeach
     </ul>
 

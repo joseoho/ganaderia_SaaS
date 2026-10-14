@@ -118,7 +118,7 @@
         @forelse($tratamientos_activos as $t)
             <li>
                 <strong>{{ $t->animal->codigo_interno }}</strong> — {{ $t->motivo }}  
-                ({{ $t->medicamento }}, desde {{ $t->fecha }})
+                ({{ $t->medicamento }}, desde {{ \App\Support\Formato::fecha($t->fecha) }})
             </li>
         @empty
             <p>No hay tratamientos activos.</p>
@@ -132,7 +132,7 @@
         @foreach($tratamientos_historico as $t)
             <li>
                 <strong>{{ $t->animal->codigo_interno }}</strong> — {{ $t->motivo }}  
-                ({{ $t->fecha_inicio }} a {{ $t->fecha_fin ?? 'En curso' }})
+                ({{ \App\Support\Formato::fecha($t->fecha_inicio) }} a {{ \App\Support\Formato::fecha($t->fecha_fin) ?: 'En curso' }})
             </li>
         @endforeach
     </ul>
@@ -144,7 +144,7 @@
         @foreach($vacunas as $v)
             <li>
                 <strong>{{ $v->animal->codigo_interno }}</strong> — {{ $v->nombre }}  
-                ({{ $v->fecha }})
+                ({{ \App\Support\Formato::fecha($v->fecha) }})
             </li>
         @endforeach
     </ul>

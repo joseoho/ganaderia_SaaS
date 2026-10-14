@@ -69,7 +69,7 @@
                     <li class="list-group-item">
                         <strong>{{ $gasto->proveedor }}</strong> — 
                         ${{ number_format($gasto->monto, 2) }}
-                        <span class="text-muted float-end">{{ $gasto->fecha }}</span>
+                        <span class="text-muted float-end">{{ \App\Support\Formato::fecha($gasto->fecha) }}</span>
                     </li>
                 @empty
                     <li class="list-group-item text-center text-muted">Sin gastos recientes</li>
@@ -88,7 +88,7 @@
                     <li class="list-group-item">
                         <strong>{{ $venta->cliente }}</strong> — 
                         ${{ number_format($venta->monto_total, 2) }}
-                        <span class="text-muted float-end">{{ $venta->fecha }}</span>
+                        <span class="text-muted float-end">{{ \App\Support\Formato::fecha($venta->fecha) }}</span>
                     </li>
                 @empty
                     <li class="list-group-item text-center text-muted">Sin ventas recientes</li>

@@ -48,7 +48,7 @@
                     <ul class="list-group list-group-flush mb-3">
                         <li class="list-group-item"><strong>Origen:</strong> {{ $m->origen ?? 'N/A' }}</li>
                         <li class="list-group-item"><strong>Destino:</strong> {{ $m->destino ?? 'N/A' }}</li>
-                        <li class="list-group-item"><strong>Fecha:</strong> {{ $m->fecha }}</li>
+                        <li class="list-group-item"><strong>Fecha:</strong> {{ \App\Support\Formato::fecha($m->fecha) }}</li>
                     </ul>
 
                     <div class="d-flex justify-content-between">

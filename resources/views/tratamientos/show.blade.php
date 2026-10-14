@@ -16,8 +16,8 @@
             <li class="list-group-item"><strong>Medicamento:</strong> {{ $tratamiento->medicamento }}</li>
             <li class="list-group-item"><strong>Vía:</strong> {{ $tratamiento->via ?? 'N/A' }}</li>
             <li class="list-group-item"><strong>Dosis:</strong> {{ $tratamiento->dosis ?? 'N/A' }} ml</li>
-            <li class="list-group-item"><strong>Inicio:</strong> {{ $tratamiento->fecha }}</li>
-            <li class="list-group-item"><strong>Fin:</strong> {{ $tratamiento->fecha_fin ?? 'En curso' }}</li>
+            <li class="list-group-item"><strong>Inicio:</strong> {{ \App\Support\Formato::fecha($tratamiento->fecha) }}</li>
+            <li class="list-group-item"><strong>Fin:</strong> {{ \App\Support\Formato::fecha($tratamiento->fecha_fin) ?: 'En curso' }}</li>
 
             @if($alerta_activo)
                 <li class="list-group-item">

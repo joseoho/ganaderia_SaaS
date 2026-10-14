@@ -66,7 +66,7 @@
                         </li>
 
                         <li class="list-group-item">
-                            <strong>Fecha:</strong> {{ $p->fecha }}
+                            <strong>Fecha:</strong> {{ \App\Support\Formato::fecha($p->fecha) }}
                         </li>
                     </ul>
 

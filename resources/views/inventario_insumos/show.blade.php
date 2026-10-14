@@ -12,7 +12,7 @@
 
         <ul class="list-group list-group-flush mb-3">
             <li class="list-group-item"><strong>Cantidad:</strong> {{ $inventario->cantidad }} {{ $inventario->unidad }}</li>
-            <li class="list-group-item"><strong>Fecha ingreso:</strong> {{ $inventario->fecha_ingreso ?? 'No registrada' }}</li>
+            <li class="list-group-item"><strong>Fecha ingreso:</strong> {{ \App\Support\Formato::fecha($inventario->fecha_ingreso) ?: 'No registrada' }}</li>
             <li class="list-group-item"><strong>Descripción:</strong> {{ $inventario->descripcion ?? 'Sin descripción' }}</li>
         </ul>
 

@@ -15,7 +15,7 @@
             {{-- <li class="list-group-item"><strong>Tipo:</strong> {{ ucfirst($movilizacione->tipo) }}</li> --}}
             <li class="list-group-item"><strong>Origen:</strong> {{ $movilizacione->origen ?? 'N/A' }}</li>
             <li class="list-group-item"><strong>Destino:</strong> {{ $movilizacione->destino ?? 'N/A' }}</li>
-            <li class="list-group-item"><strong>Fecha:</strong> {{ $movilizacione->fecha }}</li>
+            <li class="list-group-item"><strong>Fecha:</strong> {{ \App\Support\Formato::fecha($movilizacione->fecha) }}</li>
             <li class="list-group-item"><strong>Descripción:</strong> {{ $movilizacione->motivo ?? 'Sin descripción' }}</li>
         </ul>
 

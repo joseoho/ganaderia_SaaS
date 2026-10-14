@@ -32,7 +32,7 @@
             <tr>
                 <td>{{ $c->proveedor }}</td>
                 <td>{{ $c->descripcion }}</td>
-                <td>{{ $c->fecha }}</td>
+                <td>{{ \App\Support\Formato::fecha($c->fecha) }}</td>
                 <td>${{ number_format($c->monto, 2) }}</td>
             </tr>
             @endforeach

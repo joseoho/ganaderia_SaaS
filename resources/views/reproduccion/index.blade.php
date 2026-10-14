@@ -50,7 +50,7 @@
                     <p class="text-muted">{{ ucfirst($r->tipo) }}</p>
 
                     <ul class="list-group list-group-flush mb-3">
-                        <li class="list-group-item"><strong>Fecha:</strong> {{ $r->fecha }}</li>
+                        <li class="list-group-item"><strong>Fecha:</strong> {{ \App\Support\Formato::fecha($r->fecha) }}</li>
                         <li class="list-group-item"><strong>Toro:</strong> {{ $r->toro ?? 'N/A' }}</li>
                         <li class="list-group-item"><strong>Resultado:</strong> {{ $r->resultado ?? 'N/A' }}</li>
                     </ul>

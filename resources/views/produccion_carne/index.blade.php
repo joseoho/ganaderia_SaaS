@@ -33,7 +33,7 @@
                     <ul class="list-group list-group-flush mb-3">
                         <li class="list-group-item"><strong>Peso:</strong> {{ $p->peso }} kg</li>
                         <li class="list-group-item"><strong>GDP:</strong> {{ $p->ganancia_diaria ? number_format($p->ganancia_diaria, 2) : 'N/A' }} kg/día</li>
-                        <li class="list-group-item"><strong>Fecha:</strong> {{ $p->fecha }}</li>
+                        <li class="list-group-item"><strong>Fecha:</strong> {{ \App\Support\Formato::fecha($p->fecha) }}</li>
                     </ul>
 
                     <div class="d-flex justify-content-between">

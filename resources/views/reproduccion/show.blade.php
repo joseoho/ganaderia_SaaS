@@ -13,7 +13,7 @@
 
         <ul class="list-group list-group-flush mb-3">
             <li class="list-group-item"><strong>Tipo:</strong> {{ ucfirst($reproduccion->tipo) }}</li>
-            <li class="list-group-item"><strong>Fecha:</strong> {{ $reproduccion->fecha }}</li>
+            <li class="list-group-item"><strong>Fecha:</strong> {{ \App\Support\Formato::fecha($reproduccion->fecha) }}</li>
             <li class="list-group-item"><strong>Toro:</strong> {{ $reproduccion->toro ?? 'N/A' }}</li>
             <li class="list-group-item"><strong>Resultado:</strong> {{ $reproduccion->resultado ?? 'N/A' }}</li>
             <li class="list-group-item"><strong>Observaciones:</strong> {{ $reproduccion->observaciones ?? 'Sin observaciones' }}</li>

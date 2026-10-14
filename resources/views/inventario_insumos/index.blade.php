@@ -58,7 +58,7 @@
                             <strong>Cantidad:</strong> {{ $i->cantidad }} {{ $i->unidad }}
                         </li>
                         <li class="list-group-item">
-                            <strong>Ingreso:</strong> {{ $i->fecha_ingreso ?? 'No registrado' }}
+                            <strong>Ingreso:</strong> {{ \App\Support\Formato::fecha($i->fecha_ingreso) ?: 'No registrado' }}
                         </li>
                     </ul>
 

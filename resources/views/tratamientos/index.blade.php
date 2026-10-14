@@ -44,8 +44,8 @@
 
                     <ul class="list-group list-group-flush mb-3">
                         <li class="list-group-item"><strong>Medicamento:</strong> {{ $t->medicamento }}</li>
-                        <li class="list-group-item"><strong>Inicio:</strong> {{ $t->fecha}}</li>
-                        <li class="list-group-item"><strong>Fin:</strong> {{ $t->fecha_fin ?? 'En curso' }}</li>
+                        <li class="list-group-item"><strong>Inicio:</strong> {{ \App\Support\Formato::fecha($t->fecha) }}</li>
+                        <li class="list-group-item"><strong>Fin:</strong> {{ \App\Support\Formato::fecha($t->fecha_fin) ?: 'En curso' }}</li>
                     </ul>
 
                     <div class="d-flex justify-content-between">

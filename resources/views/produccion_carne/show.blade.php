@@ -16,7 +16,7 @@
             <li class="list-group-item"><strong>Peso:</strong> {{ $produccion->peso }} kg</li>
             <li class="list-group-item"><strong>Peso anterior:</strong> {{ $produccion->peso_anterior ?? 'N/A' }} kg</li>
             <li class="list-group-item"><strong>GDP:</strong> {{ $produccion->ganancia_diaria ? number_format($produccion->ganancia_diaria, 2) : 'N/A' }} kg/día</li>
-            <li class="list-group-item"><strong>Fecha:</strong> {{ $produccion->fecha }}</li>
+            <li class="list-group-item"><strong>Fecha:</strong> {{ \App\Support\Formato::fecha($produccion->fecha) }}</li>
             <li class="list-group-item"><strong>Observaciones:</strong> {{ $produccion->observaciones ?? 'Sin observaciones' }}</li>
             <li class="list-group-item">
                     <strong>Ganancia total del mes:</strong>

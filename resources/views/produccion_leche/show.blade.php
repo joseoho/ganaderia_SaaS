@@ -16,7 +16,7 @@
             <li class="list-group-item"><strong>Litros anteriores:</strong> {{ $produccion_leche->litros_anteriores ?? 'N/A' }}</li>
             <li class="list-group-item"><strong>Variación:</strong> {{ $produccion_leche->variacion ?? 'N/A' }}</li>
             <li class="list-group-item"><strong>Turno:</strong> {{ ucfirst($produccion_leche->turno) }}</li>
-            <li class="list-group-item"><strong>Fecha:</strong> {{ $produccion_leche->fecha }}</li>
+            <li class="list-group-item"><strong>Fecha:</strong> {{ \App\Support\Formato::fecha($produccion_leche->fecha) }}</li>
             <li class="list-group-item"><strong>Observaciones:</strong> {{ $produccion_leche->observaciones ?? 'Sin observaciones' }}</li>
             <li class="list-group-item">
             <strong>Total producido en el mes:</strong>

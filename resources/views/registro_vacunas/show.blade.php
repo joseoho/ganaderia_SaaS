@@ -16,9 +16,9 @@
             <li class="list-group-item"><strong>Lote:</strong> {{ $registro_vacuna->lote ?? 'N/A' }}</li>
             <li class="list-group-item"><strong>Proveedor:</strong> {{ $registro_vacuna->proveedor ?? 'N/A' }}</li>
             <li class="list-group-item"><strong>Vía:</strong> {{ $registro_vacuna->via ?? 'N/A' }}</li>
-            <li class="list-group-item"><strong>Fecha:</strong> {{ $registro_vacuna->fecha_aplicacion }}</li>
+            <li class="list-group-item"><strong>Fecha:</strong> {{ \App\Support\Formato::fecha($registro_vacuna->fecha_aplicacion) }}</li>
             <li class="list-group-item"><strong>Dosis:</strong> {{ $registro_vacuna->dosis ?? 'N/A' }} ml</li>
-            <li class="list-group-item"><strong>Próxima dosis:</strong> {{ $registro_vacuna->proxima_dosis }}</li>
+            <li class="list-group-item"><strong>Próxima dosis:</strong> {{ \App\Support\Formato::fecha($registro_vacuna->proxima_dosis) }}</li>
             <li class="list-group-item"><strong>Observaciones:</strong> {{ $registro_vacuna->observaciones ?? 'Sin observaciones' }}</li>
         </ul>
 

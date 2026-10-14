@@ -42,7 +42,7 @@
                     <p class="card-text text-muted">{{ $compra->descripcion }}</p>
 
                     <ul class="list-group list-group-flush mb-3">
-                        <li class="list-group-item"><strong>Fecha:</strong> {{ $compra->fecha }}</li>
+                        <li class="list-group-item"><strong>Fecha:</strong> {{ \App\Support\Formato::fecha($compra->fecha) }}</li>
                         <li class="list-group-item"><strong>Monto:</strong> ${{ number_format($compra->monto_total, 2) }}</li>
                     </ul>
 

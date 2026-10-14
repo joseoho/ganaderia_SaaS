@@ -73,7 +73,7 @@
             <td>{{ $animal->raza }}</td>
             <td>{{ $animal->tipo }}</td>
             <td>{{ $animal->sexo }}</td>
-            <td>{{ $animal->fecha_nacimiento }}</td>
+            <td>{{ \App\Support\Formato::fecha($animal->fecha_nacimiento) }}</td>
             <td>{{ $animal->peso_entrada }}</td>
             <td>{{ $animal->estado }}</td>
             <!-- QR DEL ANIMAL -->

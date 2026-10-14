@@ -59,7 +59,7 @@
             <td>{{ $n->id }}</td>
             <td>{{ $n->mensaje }}</td>
             <td>{{ $n->tipo }}</td>
-            <td>{{ $n->fecha_envio }}</td>
+            <td>{{ \App\Support\Formato::fecha($n->fecha_envio) }}</td>
             <td>{{ $n->estado }}</td>
             <td>
                 <a href="{{ route('notificaciones.show', $n->id) }}" class="btn btn-info btn-sm">Ver</a>
