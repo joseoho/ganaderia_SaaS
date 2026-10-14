@@ -4,8 +4,12 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
+use App\Models\Concerns\BelongsToTenant;
+
 class Reproduccion extends Model
 {
+    use BelongsToTenant;
+
     protected $table ='reproduccion';
     protected $fillable = 
     ['inquilino_id',

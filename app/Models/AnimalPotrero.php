@@ -4,8 +4,12 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
+use App\Models\Concerns\BelongsToTenant;
+
 class AnimalPotrero extends Model
 {
+    use BelongsToTenant;
+
     protected $table = 'animal_potrero';
 
     protected $fillable = [

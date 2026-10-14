@@ -4,8 +4,12 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
+use App\Models\Concerns\BelongsToTenant;
+
 class Genealogia extends Model
 {
+    use BelongsToTenant;
+
     protected $table ='genealogia';
     protected $fillable = ['animal_id','inquilino_id','padre_id','madre_id','observaciones']; 
     

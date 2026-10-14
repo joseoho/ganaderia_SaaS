@@ -5,8 +5,12 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
+use App\Models\Concerns\BelongsToTenant;
+
 class Animal extends Model
 {
+    use BelongsToTenant;
+
     use HasFactory;
     protected $table ='animales';
     protected $fillable = ['inquilino_id','codigo_interno','categoria','raza','tipo','fecha_nacimiento','sexo','peso_entrada','estado'];

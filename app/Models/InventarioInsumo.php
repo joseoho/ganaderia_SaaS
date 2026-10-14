@@ -4,8 +4,12 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
+use App\Models\Concerns\BelongsToTenant;
+
 class InventarioInsumo extends Model
 {
+    use BelongsToTenant;
+
     protected $table ='inventario_insumos';
     protected $fillable = ['inquilino_id','nombre','categoria','cantidad','unidad','minimo','ubicacion','fecha_ingreso','descripcion'];   
   

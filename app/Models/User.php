@@ -2,14 +2,17 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\BelongsToTenant;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 
 class User extends Authenticatable
 {
-    use HasFactory, Notifiable;
+    use BelongsToTenant, HasFactory, Notifiable;
+
     protected $table = 'users';
+
     protected $fillable = [
         'name',
         'email',
@@ -17,31 +20,26 @@ class User extends Authenticatable
         'inquilino_id',
     ];
 
-    protected static function booted()
-    {
-        static::addGlobalScope('inquilino', function ($query) {
-            if (app()->has('inquilino_id')) {
-                $query->where('inquilino_id', app('inquilino_id'));
-            }
-        });
-    }
-
-    // Relación con Inquilino
-    public function inquilino()
-    {
-        return $this->belongsTo(Inquilino::class, 'inquilino_id'); // 👈 clave foránea explícita
-    }
-
-    // Relación con Notificaciones
-    public function notificaciones()
-    {
-         return $this->hasMany(Notificacion::class, 'usuario_id');
-    }
-
     protected $hidden = [
         'password',
         'remember_token',
     ];
+
+    /**
+     * Aislamiento por ganaderia y asignacion automatica de inquilino_id:
+     * los aporta el trait BelongsToTenant (Fase 2).
+     *
+     * Se elimino el global scope manual "fail-open" que habia aqui.
+     */
+    public function inquilino()
+    {
+        return $this->belongsTo(Inquilino::class, 'inquilino_id');
+    }
+
+    public function notificaciones()
+    {
+        return $this->hasMany(Notificacion::class, 'usuario_id');
+    }
 
     protected function casts(): array
     {

@@ -11,7 +11,12 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
-        //
+        // Alias de middleware. NO se anade al grupo 'web': ese grupo corre
+        // antes de 'auth', asi que todavia no habria usuario del que sacar
+        // la ganaderia activa. Se aplica en routes/web.php tras 'auth'.
+        $middleware->alias([
+            'tenant' => \App\Http\Middleware\ResolveTenant::class,
+        ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         //
