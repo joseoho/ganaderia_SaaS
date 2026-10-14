@@ -90,8 +90,24 @@ class PotreroController extends Controller
         $potrero = Potrero::where('id', $id)
             ->where('inquilino_id', Auth::user()->inquilino_id)
             ->firstOrFail();
+        $datos = $request->validate([
+            'animales' => 'required|array',
+            'animales.*' => 'integer',
+        ]);
 
-        foreach ($request->animales as $animal_id) {
+        // Solo se admiten animales de la ganaderia activa. Antes se creaba la
+        // asignacion con el animal_id que viniera en la peticion sin comprobar
+        // de quien era, asi que cualquiera podia meter el ganado de otra
+        // ganaderia en su potrero enviando su id.
+        $animales = Animal::where('inquilino_id', Auth::user()->inquilino_id)
+            ->whereIn('id', $datos['animales'])
+            ->pluck('id');
+
+        if ($animales->count() !== count($datos['animales'])) {
+            abort(403, 'Alguno de los animales no pertenece a tu ganaderia.');
+        }
+
+        foreach ($animales as $animal_id) {
             AnimalPotrero::create([
                 'animal_id' => $animal_id,
                 'potrero_id' => $id,
@@ -122,7 +138,7 @@ class PotreroController extends Controller
             $a->update(['fecha_salida' => now()->toDateString()]);
         }
 
-        $dias = now()->diffInDays($potrero->fecha_ultimo_ingreso);
+        $dias = (int) abs(now()->diffInDays($potrero->fecha_ultimo_ingreso ?? now()));
         $carga = $animales->count() / $potrero->tamano;
 
         Rotacion::create([
@@ -140,5 +156,27 @@ class PotreroController extends Controller
         ]);
 
         return back()->with('success', 'Salida registrada y rotación creada');
+    }
+
+    /**
+     * Elimina un potrero.
+     *
+     * No existia: la ruta DELETE del resource apuntaba a un metodo inexistente,
+     * asi que borrar un potrero devolvia un error 500. El binding ya aplica el
+     * filtro de ganaderia, de modo que un potrero ajeno da 404.
+     */
+    public function destroy(Potrero $potrero)
+    {
+        // Un potrero con historial no se borra arrastrando sus datos: se avisa.
+        $tieneHistorial = AnimalPotrero::where('potrero_id', $potrero->id)->exists()
+            || Rotacion::where('potrero_id', $potrero->id)->exists();
+
+        if ($tieneHistorial) {
+            return back()->with('error', 'No se puede eliminar: el potrero tiene animales o rotaciones registradas.');
+        }
+
+        $potrero->delete();
+
+        return redirect()->route('potreros.index')->with('success', 'Potrero eliminado');
     }
 }
