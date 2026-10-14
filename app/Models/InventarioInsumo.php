@@ -37,6 +37,7 @@ class InventarioInsumo extends Model
     {
         return [
             'cantidad' => 'decimal:2',
+            'fecha_ingreso' => 'datetime',
         ];
     }
 }

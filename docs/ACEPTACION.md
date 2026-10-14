@@ -61,14 +61,20 @@ y 0 registros de otra ganadería visibles.
 ## 3. Suite de pruebas
 
 ```
-php artisan test → Tests: 86 passed (258 assertions) · Duration: 21.78s
+php artisan test → Tests: 188 passed (607 assertions) · Duration: 37.15s
 ```
 
 | Bloque | Pruebas | Qué cubre |
 |---|---|---|
 | Aislamiento multi-tenant | 8 | 19/19 modelos con filtro, conteos disjuntos por ganadería, registro ajeno → 404, sin salto de tenant, falla cerrado |
 | Edición por módulo | 21 | 9 módulos: el dueño edita, el ajeno recibe 404, no hay IDOR |
-| Formularios de edición | 42 | 14 módulos × 3: la página carga, las fechas salen en ISO y el formulario se reenvía tal cual |
+| Formularios de edición | 46 | 14 módulos × 3: la página carga, las fechas salen en ISO y el formulario se reenvía tal cual |
+| Persistencia al editar | 8 | Lo que se escribe en el formulario se guarda de verdad (no basta con que se acepte) |
+| Formularios de creación | 28 | 14 módulos × 2: se rellenan con datos válidos del esquema, se envían y se comprueba que el registro se crea y se guarda |
+| Fábricas de modelo | 38 | Cada fábrica crea un registro válido y de la ganadería activa |
+| Formato de fechas | 21 | Las fechas visibles se muestran sin hora en 19 páginas y la ficha QR |
+| Consultas por página | 3 | La ficha del potrero no hace N+1 ni consulta desde la vista |
+| FormRequests | 1 | Ningún FormRequest con ules() vacío se usa con alidated() |
 | Invariancia de valores | 4 | Reenviar un formulario no cambia el valor guardado |
 | Importación Excel/CSV | 5 | Formato, tamaño, tope de filas y alta real |
 | Páginas de error | 2 | 404 propia y las 5 vistas compilan sin Vite |

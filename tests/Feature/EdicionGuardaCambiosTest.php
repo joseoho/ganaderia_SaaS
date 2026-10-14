@@ -6,6 +6,7 @@ use App\Models\Animal;
 use App\Models\Compra;
 use App\Models\InventarioInsumo;
 use App\Models\Movilizacion;
+use App\Models\Notificacion;
 use App\Models\Potrero;
 use App\Models\Tratamiento;
 use App\Models\User;
@@ -80,6 +81,12 @@ class EdicionGuardaCambiosTest extends TestCase
             'tratamientos' => [Tratamiento::class, '/tratamientos/%d/edit', [
                 'motivo' => 'motivo',
                 'medicamento' => 'medicamento',
+            ]],
+            // notificaciones esta aqui por un fallo concreto: su FormRequest
+            // tenia rules() vacio, asi que update($request->validated())
+            // actualizaba [] y la interfaz decia "actualizada correctamente".
+            'notificaciones' => [Notificacion::class, '/notificaciones/%d/edit', [
+                'mensaje' => 'mensaje',
             ]],
         ];
     }

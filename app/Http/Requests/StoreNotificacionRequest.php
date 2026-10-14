@@ -22,7 +22,11 @@ class StoreNotificacionRequest extends FormRequest
     public function rules(): array
     {
         return [
-            //
+            'usuario_id' => 'required|integer',
+            'mensaje' => 'required|string',
+            'tipo' => 'required|string',
+            'fecha_envio' => 'required|date',
+            'estado' => 'required|string',
         ];
     }
 }

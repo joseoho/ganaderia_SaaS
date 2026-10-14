@@ -22,7 +22,10 @@ class UpdateNotificacionRequest extends FormRequest
     public function rules(): array
     {
         return [
-            //
+            'mensaje' => 'required|string',
+            'tipo' => 'required|string',
+            'fecha_envio' => 'required|date',
+            'estado' => 'required|string',
         ];
     }
 }

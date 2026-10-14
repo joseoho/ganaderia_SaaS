@@ -50,12 +50,6 @@ class NotificacionController extends Controller
      */
     public function store(StoreNotificacionRequest $request)
     {
-        $request->validate(['usuario_id' => 'required|integer',
-            'mensaje' => 'required|string',
-            'tipo' => 'required|string',
-            'fecha_envio' => 'required|date',
-            'estado' => 'required|string', ]);
-
         Notificacion::create($request->validated());
 
         return redirect()->route('notificaciones.index')->with('success', 'Notificación creada correctamente');
@@ -100,10 +94,6 @@ class NotificacionController extends Controller
             abort(403, 'No autorizado');
         }
 
-        $request->validate(['mensaje' => 'required|string',
-            'tipo' => 'required|string',
-            'fecha_envio' => 'required|date',
-            'estado' => 'required|string', ]);
         $notificacion->update($request->validated());
 
         return redirect()->route('notificaciones.index')->with('success', 'Notificación actualizada correctamente');
