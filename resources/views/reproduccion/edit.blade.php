@@ -36,7 +36,7 @@
 
             <div class="mb-3">
                 <label class="form-label">Fecha</label>
-                <input type="date" name="fecha" class="form-control" value="{{ $reproduccion->fecha }}" required>
+                <input type="date" name="fecha" class="form-control" value="{{ \App\Support\Formato::fecha($reproduccion->fecha) }}" required>
             </div>
 
             <div class="mb-3">

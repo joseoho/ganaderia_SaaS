@@ -115,11 +115,11 @@
                     <div class="col-md-6">
                         <div class="mb-3">
                             <label for="fecha" class="form-label">Fecha *</label>
-                            <input type="date" name="fecha" id="fecha" 
-                                   class="form-control @error('fecha') is-invalid @enderror" 
-                                   value="{{ old('fecha', $registro_vacuna->fecha ? \Carbon\Carbon::parse($registro_vacuna->fecha)->format('Y-m-d') : '') }}" 
+                            <input type="date" name="fecha_aplicacion" id="fecha_aplicacion" 
+                                   class="form-control @error('fecha_aplicacion') is-invalid @enderror" 
+                                   value="{{ old('fecha_aplicacion', \App\Support\Formato::fecha($registro_vacuna->fecha_aplicacion)) }}" 
                                    required>
-                            @error('fecha')
+                            @error('fecha_aplicacion')
                                 <div class="invalid-feedback">{{ $message }}</div>
                             @enderror
                         </div>
@@ -144,7 +144,7 @@
                             <label for="proxima_dosis" class="form-label">Próxima dosis *</label>
                             <input type="date" name="proxima_dosis" id="proxima_dosis" 
                                    class="form-control @error('proxima_dosis') is-invalid @enderror" 
-                                   value="{{ old('proxima_dosis', $registro_vacuna->proxima_dosis ? \Carbon\Carbon::parse($registro_vacuna->proxima_dosis)->format('Y-m-d') : '') }}" 
+                                   value="{{ old('proxima_dosis', \App\Support\Formato::fecha($registro_vacuna->proxima_dosis)) }}" 
                                    required>
                             @error('proxima_dosis')
                                 <div class="invalid-feedback">{{ $message }}</div>

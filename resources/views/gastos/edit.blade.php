@@ -40,7 +40,7 @@
 
                         <div class="mb-3">
                             <label class="form-label">Fecha del Gasto</label>
-                            <input type="date" name="fecha" class="form-control @error('fecha') is-invalid @enderror" value="{{ old('fecha', $gasto->fecha) }}" required>
+                            <input type="date" name="fecha" class="form-control @error('fecha') is-invalid @enderror" value="{{ old('fecha', \App\Support\Formato::fecha($gasto->fecha)) }}" required>
                             @error('fecha') <div class="invalid-feedback">{{ $message }}</div> @enderror
                         </div>
 

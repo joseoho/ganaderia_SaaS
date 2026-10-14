@@ -60,8 +60,8 @@
 
                 <div class="col-md-4 mb-3">
                     <label class="form-label">Fecha de Inicio</label>
-                    <input type="date" name="fecha_inicio" class="form-control" 
-                           value="{{ $tratamiento->fecha instanceof \Carbon\Carbon ? $tratamiento->fecha->format('Y-m-d') : $tratamiento->fecha }}" required>
+                    <input type="date" name="fecha" class="form-control" 
+                           value="{{ \App\Support\Formato::fecha($tratamiento->fecha) }}" required>
                 </div>
             </div>
 
@@ -69,7 +69,7 @@
                 <div class="col-md-6 mb-3">
                     <label class="form-label">Fecha de Fin</label>
                     <input type="date" name="fecha_fin" class="form-control" 
-                           value="{{ $tratamiento->fecha_fin instanceof \Carbon\Carbon ? $tratamiento->fecha_fin->format('Y-m-d') : $tratamiento->fecha_fin }}">
+                           value="{{ \App\Support\Formato::fecha($tratamiento->fecha_fin) }}">
                     <small class="text-muted">Dejar en blanco si es una dosis única o aún no finaliza</small>
                 </div>
 

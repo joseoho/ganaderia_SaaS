@@ -40,7 +40,7 @@
         <input type="number" name="peso_actual" value="{{ $animal->peso_entrada }}">
 
         <label>Fecha de nacimiento</label>
-        <input type="date" name="fecha_nacimiento" value="{{ $animal->fecha_nacimiento }}">
+        <input type="date" name="fecha_nacimiento" value="{{ \App\Support\Formato::fecha($animal->fecha_nacimiento) }}">
 
         <label>Estado</label>
         <select name="estado">

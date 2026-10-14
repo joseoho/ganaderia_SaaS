@@ -17,7 +17,7 @@
     </div>
     <div class="mb-3">
         <label for="fecha" class="form-label">Fecha</label>
-        <input type="date" name="fecha" class="form-control" value="{{ $compra->fecha }}" required>
+        <input type="date" name="fecha" class="form-control" value="{{ \App\Support\Formato::fecha($compra->fecha) }}" required>
     </div>
     <div class="mb-3">
         <label for="monto" class="form-label">Monto</label>

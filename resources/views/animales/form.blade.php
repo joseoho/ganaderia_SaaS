@@ -58,7 +58,7 @@
         <label for="fecha_nacimiento" class="form-label">Fecha de Nacimiento</label>
         <input type="date" name="fecha_nacimiento" id="fecha_nacimiento" 
                class="form-control @error('fecha_nacimiento') is-invalid @enderror" 
-               value="{{ old('fecha_nacimiento', $animal->fecha_nacimiento ?? '') }}" required>
+               value="{{ old('fecha_nacimiento', \App\Support\Formato::fecha($animal->fecha_nacimiento ?? null)) }}" required>
     </div>
 
     <div class="col-md-6">

@@ -43,7 +43,7 @@
 
             <div class="mb-3">
                 <label class="form-label">Fecha de ingreso</label>
-                <input type="date" name="fecha_ingreso" class="form-control" value="{{ $inventario->fecha_ingreso }}">
+                <input type="date" name="fecha_ingreso" class="form-control" value="{{ \App\Support\Formato::fecha($inventario->fecha_ingreso) }}">
             </div>
 
             <div class="mb-3">

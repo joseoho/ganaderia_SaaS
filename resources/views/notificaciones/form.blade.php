@@ -24,7 +24,7 @@
 
     <div class="mb-3">
         <label for="fecha_envio" class="form-label">Fecha de envío</label>
-        <input type="date" name="fecha_envio" class="form-control" value="{{ old('fecha_envio', $notificacion->fecha_envio ?? '') }}">
+        <input type="date" name="fecha_envio" class="form-control" value="{{ old('fecha_envio', \App\Support\Formato::fecha($notificacion->fecha_envio ?? null)) }}">
     </div>
 
     <div class="mb-3">
