@@ -7,7 +7,7 @@ use Illuminate\Support\Facades\Schema;
 /**
  * Compras.
  *
- * StoreCompraRequest no define reglas, pero CompraController valida
+ * La validacion se hace en el controlador
  * inline: fecha, proveedor, descripcion y monto_total son obligatorios.
  * El esquema original los permitia NULL, asi que la base aceptaba compras
  * sin fecha ni importe (y los reportes sumaban filas invalidas).

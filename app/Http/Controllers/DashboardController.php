@@ -8,7 +8,6 @@ use App\Models\Gastos;
 use App\Models\Notificacion;
 use App\Models\Reproduccion;
 use App\Models\Venta;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
 class DashboardController extends Controller
@@ -70,16 +69,4 @@ class DashboardController extends Controller
             'totalCarneMes'
         ));
     }
-
-    public function create() {}
-
-    public function store(Request $request) {}
-
-    public function show(string $id) {}
-
-    public function edit(string $id) {}
-
-    public function update(Request $request, string $id) {}
-
-    public function destroy(string $id) {}
 }
