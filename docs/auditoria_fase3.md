@@ -186,3 +186,25 @@ manual de flujos es imprescindible; las reglas acotan, no sustituyen.
 
 Cinco usos de `$request->all()` permitian enviar `inquilino_id` en un POST y
 mover un registro a otra ganaderia. Sustituidos por datos validados.
+## Correccion de un hallazgo propio (Fase 6)
+
+El hallazgo P2 "Importacion Excel sin limites ni pruebas" era **parcialmente
+erroneo**: el controlador ya validaba `required|file|max:10240`, es decir, si
+habia limite de 10 MB. Lo que faltaba de verdad era otra cosa:
+
+- **Sin lista blanca de formato**: cualquier archivo de hasta 10 MB se aceptaba
+  (un PDF, por ejemplo) y acababa en un mensaje generico.
+- **Sin tope de filas**: un CSV de 9 MB podia tener decenas de miles de filas y
+  disparar miles de escrituras.
+- **Errores silenciados**: `ImportService::leerArchivo()` capturaba cualquier
+  excepcion y devolvia una coleccion vacia, de modo que la causa real solo
+  quedaba en el log y el usuario veia "el archivo esta vacio o no se pudo leer".
+
+Corregido: lista blanca `csv,txt,xlsx,xls`, tope de `MAX_FILAS = 5000` con
+mensaje explicito, y los errores de validacion se propagan en lugar de
+silenciarse. Cubierto con 5 tests en `tests/Feature/ImportacionTest.php`.
+
+Queda anotado como deuda (no corregido): las filas se guardan **en la sesion**
+entre el paso de mapeo y el de confirmacion, lo que con archivos grandes infla
+la sesion y penaliza cada peticion. Lo correcto seria un almacenamiento temporal
+en disco o en base de datos.

@@ -11,6 +11,7 @@ use App\Services\ImportService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Validation\ValidationException;
 
 class ImportController extends Controller
 {
@@ -39,7 +40,7 @@ class ImportController extends Controller
     public function animalesUpload(Request $request)
     {
         $request->validate([
-            'archivo' => 'required|file|max:10240',
+            'archivo' => 'required|file|max:10240|mimes:csv,txt,xlsx,xls',
         ]);
 
         if (! $request->hasFile('archivo') || ! $request->file('archivo')->isValid()) {
@@ -87,6 +88,8 @@ class ImportController extends Controller
 
             return view('import.animales.map', compact('headers', 'camposSistema', 'sugerencias'));
 
+        } catch (ValidationException $e) {
+            throw $e;
         } catch (\Exception $e) {
             Log::error('Error en animalesUpload: '.$e->getMessage());
 
@@ -158,7 +161,7 @@ class ImportController extends Controller
     public function produccionUpload(Request $request)
     {
         $request->validate([
-            'archivo' => 'required|file|max:10240',
+            'archivo' => 'required|file|max:10240|mimes:csv,txt,xlsx,xls',
         ]);
 
         if (! $request->hasFile('archivo') || ! $request->file('archivo')->isValid()) {
@@ -204,6 +207,8 @@ class ImportController extends Controller
 
             return view('import.produccion.map', compact('headers', 'camposSistema', 'sugerencias'));
 
+        } catch (ValidationException $e) {
+            throw $e;
         } catch (\Exception $e) {
             Log::error('Error en produccionUpload: '.$e->getMessage());
 
@@ -275,7 +280,7 @@ class ImportController extends Controller
     public function comprasUpload(Request $request)
     {
         $request->validate([
-            'archivo' => 'required|file|max:10240',
+            'archivo' => 'required|file|max:10240|mimes:csv,txt,xlsx,xls',
         ]);
 
         if (! $request->hasFile('archivo') || ! $request->file('archivo')->isValid()) {
@@ -318,6 +323,8 @@ class ImportController extends Controller
 
             return view('import.compras.map', compact('headers', 'camposSistema', 'sugerencias'));
 
+        } catch (ValidationException $e) {
+            throw $e;
         } catch (\Exception $e) {
             Log::error('Error en comprasUpload: '.$e->getMessage());
 
@@ -378,7 +385,7 @@ class ImportController extends Controller
     public function ventasUpload(Request $request)
     {
         $request->validate([
-            'archivo' => 'required|file|max:10240',
+            'archivo' => 'required|file|max:10240|mimes:csv,txt,xlsx,xls',
         ]);
 
         if (! $request->hasFile('archivo') || ! $request->file('archivo')->isValid()) {
@@ -421,6 +428,8 @@ class ImportController extends Controller
 
             return view('import.ventas.map', compact('headers', 'camposSistema', 'sugerencias'));
 
+        } catch (ValidationException $e) {
+            throw $e;
         } catch (\Exception $e) {
             Log::error('Error en ventasUpload: '.$e->getMessage());
 

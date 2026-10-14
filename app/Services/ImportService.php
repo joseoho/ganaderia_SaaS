@@ -4,10 +4,20 @@ namespace App\Services;
 
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Validation\ValidationException;
 use Maatwebsite\Excel\Facades\Excel;
 
 class ImportService
 {
+    /**
+     * Tope de filas por importacion.
+     *
+     * Protege las escrituras a base de datos y el guardado en sesion. No
+     * protege la memoria durante el parseo: eso lo acota el limite de 10 MB
+     * del archivo, validado en el controlador.
+     */
+    public const MAX_FILAS = 5000;
+
     /**
      * Lee un archivo (CSV, XLSX, XLS) y devuelve un Collection de filas.
      */
@@ -20,19 +30,37 @@ class ImportService
 
         try {
             $coleccion = Excel::toCollection(null, $file);
-
-            // La hoja 0 es la primera pestaña
-            if ($coleccion->isEmpty() || ! isset($coleccion[0])) {
-                return collect([]);
-            }
-
-            return $coleccion[0];
-
-        } catch (\Exception $e) {
+        } catch (ValidationException $e) {
+            // Un error de validacion nunca debe silenciarse.
+            throw $e;
+        } catch (\Throwable $e) {
             Log::error('Error ImportService@leerArchivo: '.$e->getMessage());
 
+            // Antes se devolvia una coleccion vacia y el usuario solo veia
+            // "el archivo esta vacio o no se pudo leer", sin saber por que.
+            throw ValidationException::withMessages([
+                'archivo' => 'No se pudo leer el archivo. Comprueba que es un CSV o Excel válido y que no está dañado.',
+            ]);
+        }
+
+        // La hoja 0 es la primera pestaña
+        if ($coleccion->isEmpty() || ! isset($coleccion[0])) {
             return collect([]);
         }
+
+        $filas = $coleccion[0];
+
+        if ($filas->count() > self::MAX_FILAS) {
+            throw ValidationException::withMessages([
+                'archivo' => sprintf(
+                    'El archivo tiene %d filas y el máximo por importación es %d. Divídelo en varios archivos.',
+                    $filas->count(),
+                    self::MAX_FILAS
+                ),
+            ]);
+        }
+
+        return $filas;
     }
 
     /**
