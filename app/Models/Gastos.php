@@ -3,11 +3,13 @@
 namespace App\Models;
 
 use App\Models\Concerns\BelongsToTenant;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class Gastos extends Model
 {
     use BelongsToTenant;
+    use HasFactory;
 
     protected $fillable = ['inquilino_id', 'categoria', 'monto', 'fecha', 'descripcion'];
 

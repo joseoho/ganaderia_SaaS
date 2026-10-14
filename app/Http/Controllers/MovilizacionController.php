@@ -86,7 +86,15 @@ class MovilizacionController extends Controller
             'animal_id' => 'required',
             'tipo' => 'required|string',
             'fecha' => 'required|date',
+            'origen' => 'nullable|string|max:255',
+            'destino' => 'nullable|string|max:255',
+            'descripcion' => 'nullable|string|max:500',
         ]);
+
+        // El formulario llama `descripcion` a lo que en la tabla es `motivo`.
+        // Antes solo se actualizaban animal, tipo y fecha, asi que editar el
+        // origen, el destino o el texto se descartaba sin avisar al usuario.
+        $datos['motivo'] = $request->descripcion;
 
         $movilizacione->update($datos);
 
