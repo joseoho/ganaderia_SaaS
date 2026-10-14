@@ -2,12 +2,20 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class Vacuna extends Model
 {
+    use HasFactory;
+
     protected $table = 'vacunas';
-    protected $fillable = ['nombre','descripcion']; 
+
+    /**
+     * `inquilino_id` es obligatorio desde la Fase 1: el catalogo de vacunas
+     * era global y permitia que una ganaderia viera las vacunas de otra.
+     */
+    protected $fillable = ['inquilino_id','nombre','descripcion']; 
     public function registros() 
     { 
         return $this->hasMany(RegistroVacuna::class, 'vacuna_id'); 
