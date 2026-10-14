@@ -16,9 +16,16 @@
     <div class="md-3">
         <select name="tipo" class="form-select">
             <option value="">-- Seleccione --</option>
-            <option value="alerta" {{ request('tipo')=='alerta' ? 'selected' : '' }}>Alerta</option>
-            <option value="info" {{ request('tipo')=='info' ? 'selected' : '' }}>Info</option>
-            <option value="recordatorio" {{ request('tipo')=='recordatorio' ? 'selected' : '' }}>Recordatorio</option>
+            @php
+                                    $tipoActual = old('tipo', $notificacion->tipo ?? '');
+                                    $tiposNotificacion = ['alerta' => 'Alerta', 'info' => 'Info', 'recordatorio' => 'Recordatorio'];
+                                    if ($tipoActual && ! array_key_exists($tipoActual, $tiposNotificacion)) {
+                                        $tiposNotificacion[$tipoActual] = ucfirst($tipoActual);
+                                    }
+                                @endphp
+                                @foreach ($tiposNotificacion as $valor => $texto)
+                                    <option value="{{ $valor }}" {{ $tipoActual == $valor ? 'selected' : '' }}>{{ $texto }}</option>
+                                @endforeach
         </select>
     </div>
 

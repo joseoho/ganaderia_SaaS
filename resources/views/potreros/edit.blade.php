@@ -30,9 +30,18 @@
              <div class="mb-3">
                 <label class="form-label">Tipo</label>
                 <select name="estado" class="form-select" required>
-                    <option value="descanso">Descanso</option>
-                    <option value="ocupado">Ocupado</option>
-                    <option value="recuperacion">Recuperación</option>
+                    @php
+                        // Se conserva el valor guardado aunque no este en la lista: si no,
+                        // el navegador enviaria la primera opcion y el estado cambiaria solo.
+                        $estados = ['descanso' => 'Descanso', 'ocupado' => 'Ocupado', 'recuperacion' => 'Recuperación'];
+                        $estadoActual = old('estado', $potrero->estado);
+                        if ($estadoActual && ! array_key_exists($estadoActual, $estados)) {
+                            $estados[$estadoActual] = $estadoActual;
+                        }
+                    @endphp
+                    @foreach ($estados as $valor => $texto)
+                        <option value="{{ $valor }}" {{ $estadoActual == $valor ? 'selected' : '' }}>{{ $texto }}</option>
+                    @endforeach
                 </select>
             </div>
 

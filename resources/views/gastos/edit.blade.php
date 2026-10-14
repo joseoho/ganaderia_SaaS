@@ -21,9 +21,18 @@
                                 <select name="categoria" class="form-select @error('categoria') is-invalid @enderror" required>
                                     @php
                                         $categorias = ['Nomina', 'Servicios', 'Mantenimiento', 'Combustible', 'Alimentacion', 'Insumos', 'Otros'];
+                                        $categoriaActual = old('categoria', $gasto->categoria);
+                                        // La lista esta en mayusculas y los datos guardados pueden estar
+                                        // en minusculas: sin esto no se marcaba nada y al guardar se
+                                        // sustituia la categoria por la primera de la lista.
+                                        $coincide = collect($categorias)->first(fn ($c) => strcasecmp($c, (string) $categoriaActual) === 0);
+                                        if ($categoriaActual && $coincide === null) {
+                                            $categorias[] = $categoriaActual;
+                                            $coincide = $categoriaActual;
+                                        }
                                     @endphp
                                     @foreach($categorias as $cat)
-                                        <option value="{{ $cat }}" {{ (old('categoria', $gasto->categoria) == $cat) ? 'selected' : '' }}>
+                                        <option value="{{ $cat }}" {{ ($coincide == $cat) ? 'selected' : '' }}>
                                             {{ $cat == 'Nomina' ? 'Pago de Personal (Nómina)' : ($cat == 'Alimentacion' ? 'Suplementos / Alimentación Extra' : $cat) }}
                                         </option>
                                     @endforeach
@@ -46,7 +55,7 @@
 
                         <div class="mb-3">
                             <label class="form-label">Descripción / Notas</label>
-                            <textarea name="description" class="form-control" rows="3 text-secondary">{{ old('descripcion', $gasto->descripcion) }}</textarea>
+                            <textarea name="descripcion" class="form-control" rows="3 text-secondary">{{ old('descripcion', $gasto->descripcion) }}</textarea>
                         </div>
 
                         <div class="d-grid gap-2">

@@ -26,9 +26,16 @@
             <div class="mb-3">
                 <label class="form-label">Tipo</label>
                 <select name="tipo" class="form-select" required>
-                    <option value="entrada" {{ $movilizacione->tipo=='entrada'?'selected':'' }}>Entrada</option>
-                    <option value="salida" {{ $movilizacione->tipo=='salida'?'selected':'' }}>Salida</option>
-                    <option value="interna" {{ $movilizacione->tipo=='interna'?'selected':'' }}>Interna</option>
+                    @php
+                        $tipos = ['entrada' => 'Entrada', 'salida' => 'Salida', 'interna' => 'Interna'];
+                        $tipoActual = old('tipo', $movilizacione->tipo);
+                        if ($tipoActual && ! array_key_exists($tipoActual, $tipos)) {
+                            $tipos[$tipoActual] = ucfirst($tipoActual);
+                        }
+                    @endphp
+                    @foreach ($tipos as $valor => $texto)
+                        <option value="{{ $valor }}" {{ $tipoActual == $valor ? 'selected' : '' }}>{{ $texto }}</option>
+                    @endforeach
                 </select>
             </div>
 

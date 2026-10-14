@@ -20,7 +20,7 @@ class StoreInventarioInsumoRequest extends FormRequest
         return [
             'nombre' => 'required|string|max:255',
             'categoria' => 'nullable|string|max:100',
-            'cantidad' => 'required|integer|min:0',
+            'cantidad' => 'required|numeric|min:0',
             'unidad' => 'required|string|max:50',
             'minimo' => 'nullable|integer|min:0',
             'ubicacion' => 'nullable|string|max:255',

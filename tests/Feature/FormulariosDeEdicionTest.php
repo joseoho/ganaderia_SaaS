@@ -230,4 +230,65 @@ class FormulariosDeEdicionTest extends TestCase
             );
         }
     }
+
+    /**
+     * Campos de lista (select) cuyo valor NO debe cambiar al reenviar el
+     * formulario sin tocarlo.
+     *
+     * Este es el fallo mas silencioso de los encontrados: si un <select> no
+     * marca como `selected` el valor guardado, el navegador envia la PRIMERA
+     * opcion de la lista. La validacion pasa y el dato se sustituye sin que el
+     * usuario se entere. Le pasaba al estado del potrero, al tipo de
+     * movilizacion, al nombre de la vacuna y al tipo de notificacion.
+     *
+     * @return array<string, array{0: class-string, 1: string, 2: string}>
+     */
+    public static function valoresQueNoDebenCambiar(): array
+    {
+        return [
+            'potreros' => [Potrero::class, '/potreros/%d/edit', 'estado'],
+            'movilizaciones' => [Movilizacion::class, '/movilizaciones/%d/edit', 'tipo'],
+            'registro_vacunas' => [RegistroVacuna::class, '/registro_vacunas/%d/edit', 'nombre'],
+            'notificaciones' => [Notificacion::class, '/notificaciones/%d/edit', 'tipo'],
+        ];
+    }
+
+    /**
+     * @param  class-string  $modelo
+     */
+    #[DataProvider('valoresQueNoDebenCambiar')]
+    public function test_reenviar_el_formulario_no_cambia_el_valor_guardado(string $modelo, string $ruta, string $campo): void
+    {
+        $registro = $this->registroDeLaGanaderia($modelo);
+
+        if ($registro === null) {
+            $this->markTestSkipped('Sin registros de este modulo para la ganaderia de prueba.');
+        }
+
+        $valorOriginal = $registro->{$campo};
+
+        if ($valorOriginal === null || $valorOriginal === '') {
+            $this->markTestSkipped('El registro de prueba no tiene valor en '.$campo.'.');
+        }
+
+        $urlEdicion = sprintf($ruta, $registro->id);
+        $html = $this->actingAs($this->usuario)->get($urlEdicion)->getContent();
+        $campos = $this->camposDelFormulario($html);
+
+        $this->actingAs($this->usuario)
+            ->put(preg_replace('#/edit$#', '', $urlEdicion), $campos)
+            ->assertSessionHasNoErrors();
+
+        $this->assertSame(
+            $valorOriginal,
+            $registro->fresh()->{$campo},
+            sprintf(
+                'Al reenviar el formulario de %s sin tocarlo, el campo %s ha pasado de "%s" a "%s": el select no marcaba el valor guardado.',
+                $urlEdicion,
+                $campo,
+                $valorOriginal,
+                $registro->fresh()->{$campo}
+            )
+        );
+    }
 }

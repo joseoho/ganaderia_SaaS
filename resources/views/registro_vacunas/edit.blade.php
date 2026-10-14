@@ -56,9 +56,15 @@
                                         'clostridiales' => 'Clostridiales',
                                         'otra' => 'Otra'
                                     ];
+                                    // El catalogo es fijo pero el registro puede tener un nombre
+                                    // libre: se anade para no perderlo ni sustituirlo en silencio.
+                                    $nombreActual = old('nombre', $registro_vacuna->nombre);
+                                    if ($nombreActual && ! array_key_exists($nombreActual, $vacunas)) {
+                                        $vacunas[$nombreActual] = $nombreActual;
+                                    }
                                 @endphp
                                 @foreach($vacunas as $key => $value)
-                                    <option value="{{ $key }}" {{ old('nombre', $registro_vacuna->nombre) == $key ? 'selected' : '' }}>
+                                    <option value="{{ $key }}" {{ $nombreActual == $key ? 'selected' : '' }}>
                                         {{ $value }}
                                     </option>
                                 @endforeach

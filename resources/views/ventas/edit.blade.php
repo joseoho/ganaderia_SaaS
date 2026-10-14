@@ -21,7 +21,7 @@
     </div>
     <div class="mb-3">
         <label for="monto" class="form-label">Monto</label>
-        <input type="number" step="0.01" name="monto" class="form-control" value="{{ $venta->monto_total }}" required>
+        <input type="number" step="0.01" name="monto_total" class="form-control" value="{{ $venta->monto_total }}" required>
     </div>
     <button type="submit" class="btn btn-primary">Actualizar</button>
 </form>
