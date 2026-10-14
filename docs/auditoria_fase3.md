@@ -159,3 +159,30 @@ ejecucion: riesgo de agotar memoria o tiempo en produccion.
 Las consultas raw de `ReporteController` y `DashboardController` **si filtran por
 `inquilino_id`**: no hay fuga entre ganaderias, solo dependencia de funciones de
 MySQL/MariaDB (MONTH, DATE_ADD, CURDATE), correctas para el motor acordado.
+## Hallazgos posteriores a este informe (encontrados al corregir los anteriores)
+
+Se documentan aqui por honestidad: las reglas automatizadas NO los detectaron.
+
+### P0 - 403 al editar en 7 modulos (encontrado y corregido en el commit 130ce5e)
+
+Siete FormRequest (UpdateGenealogia, UpdateInventarioInsumo, UpdatePotrero,
+UpdateRegistroVacuna, UpdateReproduccion, UpdateTratamiento y UpdateVenta)
+comprobaban la propiedad con `Auth::user()->inquilino->inquilino_id`. El PK de
+`inquilinos` es `id`, no `inquilino_id`, asi que esa propiedad devuelve null,
+la comparacion era siempre false y `authorize()` denegaba la peticion: **el dueno
+legitimo recibia 403 al editar**. Evidencia recogida antes del arreglo:
+
+```
+Auth::user()->inquilino->inquilino_id = NULL
+potrero->inquilino_id === (ese null)  = false   -> 403
+potrero->inquilino_id === Auth::user()->inquilino_id = true  -> correcto
+```
+
+Por que la auditoria automatica no lo vio: el patron estaba en los FormRequest,
+y el auditor solo inspeccionaba controladores. Leccion aplicada: la revision
+manual de flujos es imprescindible; las reglas acotan, no sustituyen.
+
+### P0 - Salto de ganaderia por asignacion masiva (corregido en 130ce5e)
+
+Cinco usos de `$request->all()` permitian enviar `inquilino_id` en un POST y
+mover un registro a otra ganaderia. Sustituidos por datos validados.
