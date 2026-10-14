@@ -37,7 +37,18 @@ Route::get('/', function () {
 
 // =============================
 //   AUTENTICACIÓN
-Auth::routes();
+// Alta publica de ganaderias. Las rutas existen siempre, pero el middleware
+// `registro-abierto` responde 404 si REGISTRO_PUBLICO esta desactivado; asi el
+// interruptor se decide en cada peticion (y se puede probar) en vez de al
+// arrancar la aplicacion. El limite de intentos frena las altas automatizadas.
+Auth::routes(['register' => false]);
+
+Route::get('register', [App\Http\Controllers\Auth\RegisterController::class, 'showRegistrationForm'])
+    ->middleware(['guest', 'registro-abierto'])
+    ->name('register');
+
+Route::post('register', [App\Http\Controllers\Auth\RegisterController::class, 'register'])
+    ->middleware(['guest', 'registro-abierto', 'throttle:10,1']);
 
 // El middleware se declara en la ruta (estilo Laravel 11+) en lugar del
 // constructor del controlador, que es la forma antigua.
@@ -48,7 +59,9 @@ Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])
 // =============================
 //   RUTAS PROTEGIDAS
 // =============================
-Route::middleware(['auth', 'verified', 'tenant'])->group(function () {
+// `solo-admin` limita los borrados (verbo DELETE) al administrador de la
+// ganaderia; el resto del panel queda abierto al operario.
+Route::middleware(['auth', 'verified', 'tenant', 'solo-admin'])->group(function () {
 
     Route::resource('notificaciones', NotificacionController::class)
         ->parameters(['notificaciones' => 'notificacion']);

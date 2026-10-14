@@ -70,6 +70,8 @@ class DatabaseSeeder extends Seeder
                     'name' => 'Administrador '.$g['nombre'],
                     'password' => Hash::make('password'),
                     'email_verified_at' => now(),
+                    // El usuario que se crea con la ganaderia es su administrador.
+                    'rol' => User::ROL_ADMINISTRADOR,
                 ]
             );
 

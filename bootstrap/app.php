@@ -16,6 +16,11 @@ return Application::configure(basePath: dirname(__DIR__))
         // la ganaderia activa. Se aplica en routes/web.php tras 'auth'.
         $middleware->alias([
             'tenant' => \App\Http\Middleware\ResolveTenant::class,
+            // Borrar registros: solo el administrador de la ganaderia. Se aplica
+            // en routes/web.php despues de 'auth'.
+            'solo-admin' => \App\Http\Middleware\SoloAdministradorPuedeBorrar::class,
+            // Puerta del registro publico (REGISTRO_PUBLICO).
+            'registro-abierto' => \App\Http\Middleware\RegistroPublicoAbierto::class,
         ]);
 
         // Detras de un proxy inverso (balanceador, Cloudflare, nginx delante)

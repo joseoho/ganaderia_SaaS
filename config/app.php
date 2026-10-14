@@ -86,6 +86,20 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Registro publico (auto-servicio)
+    |--------------------------------------------------------------------------
+    |
+    | Si esta activo, cualquiera puede crear su ganaderia desde /register y
+    | queda como su administrador. Cerrado por defecto: abrirlo sin correo
+    | configurado deja a los usuarios nuevos sin poder verificar su cuenta, y
+    | sin limite de altas es una puerta abierta al spam. Con el registro
+    | cerrado, las altas se hacen con php artisan ganaderia:ganaderia.
+    |
+    */
+    'registro_publico' => env('REGISTRO_PUBLICO', false),
+
+    /*
+    |--------------------------------------------------------------------------
     | Encryption Key
     |--------------------------------------------------------------------------
     |

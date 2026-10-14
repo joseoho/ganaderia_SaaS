@@ -18,7 +18,7 @@ no está verificado se marca como pendiente**, no como hecho.
 | 2 | `migrate:fresh --seed` reproduce el esquema desde cero | ✅ Verificado |
 | 3 | Suite de pruebas en verde | ✅ **86 pruebas, 0 fallos** |
 | 4 | Análisis estático sin errores | ⛔ **Pendiente: falta aprobar la dependencia** |
-| 5 | Cero hallazgos P0/P1 abiertos | ⚠️ Queda 1 P0 (registro público) |
+| 5 | Cero hallazgos P0/P1 abiertos | ✅ Los P0/P1 conocidos están corregidos |
 | 6 | Aislamiento multi-tenant verificado | ✅ Verificado (A vs B) |
 | 7 | Rutas responden sin errores con el build de producción | ✅ Verificado |
 | 8 | Sin secretos en el repositorio | ✅ Verificado |
@@ -61,7 +61,7 @@ y 0 registros de otra ganadería visibles.
 ## 3. Suite de pruebas
 
 ```
-php artisan test → Tests: 188 passed (607 assertions) · Duration: 37.15s
+php artisan test → Tests: 280 passed (877 assertions) · Duration: 47.57s
 ```
 
 | Bloque | Pruebas | Qué cubre |

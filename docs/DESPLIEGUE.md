@@ -224,3 +224,54 @@ Sin esto, Laravel no ve las cabeceras `X-Forwarded-Proto` y puede generar URLs
 `http://` y cookies no seguras aunque el usuario esté en `https://`. Está
 desactivado por defecto a propósito: si la aplicación está expuesta
 directamente, confiar en cualquier proxy permitiría falsear la IP y el esquema.
+---
+
+## Anexo: altas, roles y registro publico
+
+### Quien puede hacer que
+
+| Rol | Puede |
+|---|---|
+| **administrador** | Todo, incluido **borrar** registros y dar de alta al equipo |
+| **operario** | El dia a dia: registrar, editar, importar, consultar. **No borra** |
+
+El limite se aplica en un middleware por el nombre de la ruta
+(`*.destroy` + verbo DELETE), asi que cualquier modulo que se anada en el futuro
+queda protegido sin tocar su controlador. Ante un rol vacio o desconocido se
+**deniega**.
+
+### Alta de una ganaderia (via por defecto, registro cerrado)
+
+```bash
+php artisan ganaderia:ganaderia "Ganaderia La Esperanza" jefe@ejemplo.com
+```
+
+Crea la ganaderia y su administrador en una transaccion y muestra la contrasena
+generada una sola vez. Opciones: `--persona="Nombre Apellido"`,
+`--password=...`, `--sin-verificar`.
+
+### Alta de un trabajador dentro de una ganaderia
+
+```bash
+php artisan ganaderia:usuario trabajador@ejemplo.com "Nombre Apellido" --inquilino=3
+php artisan ganaderia:rol trabajador@ejemplo.com administrador
+php artisan ganaderia:usuarios          # listado con ganaderia y rol
+```
+
+### Registro publico (auto-servicio)
+
+**Viene cerrado** (`REGISTRO_PUBLICO=false`): `/register` responde 404 y el
+login no ofrece crear cuenta. Motivo: sin correo configurado, quien se registra
+no puede verificar su cuenta y se queda fuera, y sin limite de altas la puerta
+queda abierta al spam.
+
+Para abrirlo, en el `.env` del servidor:
+
+```dotenv
+REGISTRO_PUBLICO=true
+```
+
+y **asegurate antes de que el correo funciona** (la verificacion de email es
+obligatoria para entrar al panel). Con el registro abierto, cada alta crea su
+propia ganaderia y queda como su administrador, y las peticiones van limitadas a
+10 por minuto.
