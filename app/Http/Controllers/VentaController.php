@@ -2,11 +2,11 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\StoreVentaRequest;
+use App\Http\Requests\UpdateVentaRequest;
 use App\Models\Venta;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use App\Http\Requests\StoreVentaRequest;
-use App\Http\Requests\UpdateVentaRequest;
 
 class VentaController extends Controller
 {
@@ -16,8 +16,8 @@ class VentaController extends Controller
 
         if ($request->filled('search')) {
             $query->where(function ($q) use ($request) {
-                $q->where('cliente', 'like', '%' . $request->search . '%')
-                  ->orWhere('descripcion', 'like', '%' . $request->search . '%');
+                $q->where('cliente', 'like', '%'.$request->search.'%')
+                    ->orWhere('descripcion', 'like', '%'.$request->search.'%');
             });
         }
 
@@ -42,10 +42,10 @@ class VentaController extends Controller
     {
         Venta::create([
             'inquilino_id' => Auth::user()->inquilino_id,
-            'cliente'      => $request->cliente,
-            'descripcion'  => $request->descripcion,
-            'fecha'        => $request->fecha,
-            'monto_total'  => $request->monto_total,
+            'cliente' => $request->cliente,
+            'descripcion' => $request->descripcion,
+            'fecha' => $request->fecha,
+            'monto_total' => $request->monto_total,
         ]);
 
         return redirect()->route('ventas.index')->with('success', 'Venta registrada correctamente');

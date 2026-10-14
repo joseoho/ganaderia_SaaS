@@ -2,31 +2,32 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Model;
-
 use App\Models\Concerns\BelongsToTenant;
+use Illuminate\Database\Eloquent\Model;
 
 class Reproduccion extends Model
 {
     use BelongsToTenant;
 
-    protected $table ='reproduccion';
-    protected $fillable = 
-    ['inquilino_id',
-    'animal_id',
-    'tipo',
-    'fecha',
-    'toro',
-    'resultado',
-    'observaciones'
-    ]; 
-    
-    public function animal() 
+    protected $table = 'reproduccion';
+
+    protected $fillable =
+        ['inquilino_id',
+            'animal_id',
+            'tipo',
+            'fecha',
+            'toro',
+            'resultado',
+            'observaciones',
+        ];
+
+    public function animal()
     {
-         return $this->belongsTo(Animal::class, 'animal_id');
+        return $this->belongsTo(Animal::class, 'animal_id');
     }
-    public function inquilino() 
+
+    public function inquilino()
     {
-         return $this->belongsTo(Inquilino::class, 'inquilino_id');
+        return $this->belongsTo(Inquilino::class, 'inquilino_id');
     }
 }

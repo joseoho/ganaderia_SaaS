@@ -4,10 +4,10 @@ namespace App\Http\Controllers;
 
 use App\Models\Animal;
 use App\Models\Compra;
-use App\Models\Venta;
-use App\Models\Notificacion;
 use App\Models\Gastos;
+use App\Models\Notificacion;
 use App\Models\Reproduccion;
+use App\Models\Venta;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -25,9 +25,9 @@ class DashboardController extends Controller
 
         // Totales
         $totalAnimales = Animal::where('inquilino_id', $inquilinoId)->count();
-        $totalCompras  = Compra::where('inquilino_id', $inquilinoId)->sum('monto_total');
-        $totalVentas   = Venta::where('inquilino_id', $inquilinoId)->sum('monto_total');
-        $totalGastos   = Gastos::where('inquilino_id', $inquilinoId)->sum('monto');
+        $totalCompras = Compra::where('inquilino_id', $inquilinoId)->sum('monto_total');
+        $totalVentas = Venta::where('inquilino_id', $inquilinoId)->sum('monto_total');
+        $totalGastos = Gastos::where('inquilino_id', $inquilinoId)->sum('monto');
         $notificacionesPendientes = Notificacion::where('usuario_id', Auth::id())
             ->where('estado', 'pendiente')
             ->count();
@@ -44,7 +44,7 @@ class DashboardController extends Controller
             ->get();
 
         // Totalizar leche y carne del mes
-        $mesActual  = now()->month;
+        $mesActual = now()->month;
         $anioActual = now()->year;
 
         $totalLecheMes = \App\Models\ProduccionLeche::where('inquilino_id', $inquilinoId)
@@ -72,9 +72,14 @@ class DashboardController extends Controller
     }
 
     public function create() {}
+
     public function store(Request $request) {}
+
     public function show(string $id) {}
+
     public function edit(string $id) {}
+
     public function update(Request $request, string $id) {}
+
     public function destroy(string $id) {}
 }

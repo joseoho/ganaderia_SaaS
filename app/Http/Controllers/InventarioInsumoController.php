@@ -2,11 +2,11 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\StoreInventarioInsumoRequest;
+use App\Http\Requests\UpdateInventarioInsumoRequest;
 use App\Models\InventarioInsumo;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use App\Http\Requests\StoreInventarioInsumoRequest;
-use App\Http\Requests\UpdateInventarioInsumoRequest;
 
 class InventarioInsumoController extends Controller
 {
@@ -16,8 +16,8 @@ class InventarioInsumoController extends Controller
 
         if ($request->filled('search')) {
             $query->where(function ($q) use ($request) {
-                $q->where('nombre', 'like', '%' . $request->search . '%')
-                  ->orWhere('categoria', 'like', '%' . $request->search . '%');
+                $q->where('nombre', 'like', '%'.$request->search.'%')
+                    ->orWhere('categoria', 'like', '%'.$request->search.'%');
             });
         }
 
@@ -39,13 +39,13 @@ class InventarioInsumoController extends Controller
     {
         InventarioInsumo::create([
             'inquilino_id' => Auth::user()->inquilino_id,
-            'nombre'       => $request->nombre,
-            'categoria'    => $request->categoria,
-            'cantidad'     => $request->cantidad,
-            'unidad'       => $request->unidad,
-            'minimo'       => $request->minimo,
-            'fecha_ingreso'=> $request->fecha_ingreso,
-            'descripcion'  => $request->descripcion,
+            'nombre' => $request->nombre,
+            'categoria' => $request->categoria,
+            'cantidad' => $request->cantidad,
+            'unidad' => $request->unidad,
+            'minimo' => $request->minimo,
+            'fecha_ingreso' => $request->fecha_ingreso,
+            'descripcion' => $request->descripcion,
         ]);
 
         return redirect()->route('inventario.index')->with('success', 'Insumo registrado');
@@ -53,14 +53,18 @@ class InventarioInsumoController extends Controller
 
     public function show(InventarioInsumo $inventario)
     {
-        if ($inventario->inquilino_id !== Auth::user()->inquilino_id) abort(403);
+        if ($inventario->inquilino_id !== Auth::user()->inquilino_id) {
+            abort(403);
+        }
 
         return view('inventario_insumos.show', compact('inventario'));
     }
 
     public function edit(InventarioInsumo $inventario)
     {
-        if ($inventario->inquilino_id !== Auth::user()->inquilino_id) abort(403);
+        if ($inventario->inquilino_id !== Auth::user()->inquilino_id) {
+            abort(403);
+        }
 
         return view('inventario_insumos.edit', compact('inventario'));
     }
@@ -74,7 +78,9 @@ class InventarioInsumoController extends Controller
 
     public function destroy(InventarioInsumo $inventario)
     {
-        if ($inventario->inquilino_id !== Auth::user()->inquilino_id) abort(403);
+        if ($inventario->inquilino_id !== Auth::user()->inquilino_id) {
+            abort(403);
+        }
 
         $inventario->delete();
 

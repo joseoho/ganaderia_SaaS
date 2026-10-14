@@ -2,13 +2,13 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Reproduccion;
-use App\Models\Animal;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
 use App\Http\Requests\StoreReproduccionRequest;
 use App\Http\Requests\UpdateReproduccionRequest;
+use App\Models\Animal;
+use App\Models\Reproduccion;
 use Carbon\Carbon;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class ReproduccionController extends Controller
 {
@@ -18,7 +18,7 @@ class ReproduccionController extends Controller
 
         if ($request->filled('search')) {
             $query->whereHas('animal', function ($q) use ($request) {
-                $q->where('codigo_interno', 'like', '%' . $request->search . '%');
+                $q->where('codigo_interno', 'like', '%'.$request->search.'%');
             });
         }
 
@@ -43,12 +43,12 @@ class ReproduccionController extends Controller
     public function store(StoreReproduccionRequest $request)
     {
         Reproduccion::create([
-            'inquilino_id'  => Auth::user()->inquilino_id,
-            'animal_id'     => $request->animal_id,
-            'tipo'          => $request->tipo,
-            'fecha'         => $request->fecha,
-            'toro'          => $request->toro,
-            'resultado'     => $request->resultado,
+            'inquilino_id' => Auth::user()->inquilino_id,
+            'animal_id' => $request->animal_id,
+            'tipo' => $request->tipo,
+            'fecha' => $request->fecha,
+            'toro' => $request->toro,
+            'resultado' => $request->resultado,
             'observaciones' => $request->observaciones,
         ]);
 
@@ -57,7 +57,9 @@ class ReproduccionController extends Controller
 
     public function show(Reproduccion $reproduccion)
     {
-        if ($reproduccion->inquilino_id !== Auth::user()->inquilino_id) abort(403);
+        if ($reproduccion->inquilino_id !== Auth::user()->inquilino_id) {
+            abort(403);
+        }
 
         $fecha_probable_parto = null;
         $alerta_parto = null;
@@ -70,7 +72,7 @@ class ReproduccionController extends Controller
                 $alerta_parto = "Atención: faltan $dias_restantes días para el parto.";
             }
             if ($dias_restantes < 0) {
-                $alerta_parto = "La fecha probable de parto ya pasó.";
+                $alerta_parto = 'La fecha probable de parto ya pasó.';
             }
 
             $fecha_probable_parto = $fecha_probable_parto->format('Y-m-d');
@@ -81,7 +83,9 @@ class ReproduccionController extends Controller
 
     public function edit(Reproduccion $reproduccion)
     {
-        if ($reproduccion->inquilino_id !== Auth::user()->inquilino_id) abort(403);
+        if ($reproduccion->inquilino_id !== Auth::user()->inquilino_id) {
+            abort(403);
+        }
 
         $animales = Animal::where('inquilino_id', Auth::user()->inquilino_id)
             ->where('sexo', 'h')
@@ -99,7 +103,9 @@ class ReproduccionController extends Controller
 
     public function destroy(Reproduccion $reproduccion)
     {
-        if ($reproduccion->inquilino_id !== Auth::user()->inquilino_id) abort(403);
+        if ($reproduccion->inquilino_id !== Auth::user()->inquilino_id) {
+            abort(403);
+        }
 
         $reproduccion->delete();
 

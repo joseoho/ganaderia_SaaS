@@ -2,17 +2,17 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\BelongsToTenant;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-
-use App\Models\Concerns\BelongsToTenant;
 
 class Notificacion extends Model
 {
     use BelongsToTenant;
-
     use HasFactory;
-    protected $table ='notificaciones';
+
+    protected $table = 'notificaciones';
+
     protected $fillable = [
         'inquilino_id',
         'usuario_id',

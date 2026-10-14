@@ -2,16 +2,16 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Model;
-
 use App\Models\Concerns\BelongsToTenant;
+use Illuminate\Database\Eloquent\Model;
 
 class Tratamiento extends Model
 {
     use BelongsToTenant;
 
-    protected $table ='tratamientos';
-   protected $fillable = [
+    protected $table = 'tratamientos';
+
+    protected $fillable = [
         'inquilino_id',
         'animal_id',
         'motivo',
@@ -21,14 +21,15 @@ class Tratamiento extends Model
         'fecha',
         'fecha_fin',
         'observaciones',
-]; 
-   
-   public function animal() 
-   { 
-    return $this->belongsTo(Animal::class, 'animal_id');
+    ];
+
+    public function animal()
+    {
+        return $this->belongsTo(Animal::class, 'animal_id');
     }
-    public function inquilino() 
-    { 
+
+    public function inquilino()
+    {
         return $this->belongsTo(Inquilino::class, 'inquilino_id');
     }
 }

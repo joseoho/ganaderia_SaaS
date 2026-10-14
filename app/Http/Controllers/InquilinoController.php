@@ -2,9 +2,9 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Inquilino;
 use App\Http\Requests\StoreInquilinoRequest;
 use App\Http\Requests\UpdateInquilinoRequest;
+use App\Models\Inquilino;
 
 class InquilinoController extends Controller
 {

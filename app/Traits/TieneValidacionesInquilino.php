@@ -1,6 +1,7 @@
 <?php
 
 namespace App\Traits;
+
 use Illuminate\Support\Facades\Auth;
 
 trait TieneValidacionesInquilino
@@ -8,9 +9,10 @@ trait TieneValidacionesInquilino
     public function existsInquilino(string $table, string $column = 'id'): string
     {
         $inquilinoId = Auth::user()->inquilino->inquilino_id ?? null;
-        if (!$inquilinoId) {
+        if (! $inquilinoId) {
             return "exists:{$table},{$column}";
         }
+
         return "exists:{$table},{$column},inquilino_id,{$inquilinoId}";
     }
 
@@ -24,6 +26,7 @@ trait TieneValidacionesInquilino
         if ($inquilinoId) {
             $rule .= ",NULL,id,inquilino_id,{$inquilinoId}";
         }
+
         return $rule;
     }
 }

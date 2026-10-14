@@ -1,32 +1,32 @@
 <?php
 
-use Illuminate\Support\Facades\Route;
-use Illuminate\Support\Facades\Auth;
-
-use App\Http\Controllers\NotificacionController;
 use App\Http\Controllers\AnimalController;
+use App\Http\Controllers\AnimalEtiquetaController;
+use App\Http\Controllers\AnimalQrController;
 use App\Http\Controllers\CompraController;
-use App\Http\Controllers\VentaController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\GastosController;
 use App\Http\Controllers\GenealogiController;
+use App\Http\Controllers\ImportController;
 use App\Http\Controllers\InventarioInsumoController;
 use App\Http\Controllers\MovilizacionController;
+use App\Http\Controllers\NotificacionController;
+use App\Http\Controllers\PotreroController;
 use App\Http\Controllers\ProduccionCarneController;
 use App\Http\Controllers\ProduccionLecheController;
 use App\Http\Controllers\RegistroVacunaController;
+use App\Http\Controllers\ReporteController;
 use App\Http\Controllers\ReproduccionController;
 use App\Http\Controllers\TratamientoController;
-use App\Http\Controllers\ReporteController;
-use App\Http\Controllers\AnimalQrController;
-use App\Http\Controllers\AnimalEtiquetaController;
-use App\Http\Controllers\PotreroController;
-use App\Http\Controllers\GastosController;
-use App\Http\Controllers\ImportController;
+use App\Http\Controllers\VentaController;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Route;
+
 Route::get('/', function () {
     return view('welcome');
 });
 
-//=============================
+// =============================
 //   AUTENTICACIÓN
 Auth::routes();
 
@@ -36,7 +36,6 @@ Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])
     ->middleware(['auth', 'tenant'])
     ->name('home');
 
-
 // =============================
 //   RUTAS PROTEGIDAS
 // =============================
@@ -44,7 +43,7 @@ Route::middleware(['auth', 'verified', 'tenant'])->group(function () {
 
     Route::resource('notificaciones', NotificacionController::class)
         ->parameters(['notificaciones' => 'notificacion']);
- // =============================
+    // =============================
     //   ETIQUETAS QR
     // =============================
     Route::get('/animales/etiquetas', [AnimalEtiquetaController::class, 'index'])
@@ -52,7 +51,7 @@ Route::middleware(['auth', 'verified', 'tenant'])->group(function () {
 
     Route::post('/animales/etiquetas/generar', [AnimalEtiquetaController::class, 'generar'])
         ->name('animales.etiquetas.generar');
-        
+
     Route::resource('animales', AnimalController::class)
         ->parameters(['animales' => 'animal']);
 
@@ -88,15 +87,14 @@ Route::middleware(['auth', 'verified', 'tenant'])->group(function () {
 
     Route::resource('tratamientos', TratamientoController::class)
         ->parameters(['tratamientos' => 'tratamiento']);
-      
+
     Route::resource('potreros', PotreroController::class);
-    
+
     Route::post('potreros/{id}/asignar', [PotreroController::class, 'asignarAnimales'])
         ->name('potreros.asignar');
-    
-        Route::post('potreros/{id}/salida', [PotreroController::class, 'salidaAnimales'])
-        ->name('potreros.salida');
 
+    Route::post('potreros/{id}/salida', [PotreroController::class, 'salidaAnimales'])
+        ->name('potreros.salida');
 
     Route::resource('gastos', GastosController::class);
 
@@ -151,49 +149,48 @@ Route::middleware(['auth', 'verified', 'tenant'])->group(function () {
     Route::get('animal/qr/{id}', [AnimalQrController::class, 'show'])
         ->name('animal.qr.show');
 
-        // =============================
+    // =============================
     //   QR PARA EDITAR LOS DATOS DEL ANIMAL
     // =============================
 
-   Route::get('animal/qr/{id}/editar-todo', [AnimalQrController::class, 'editarTodo'])
-    ->name('animal.qr.editar.todo');
+    Route::get('animal/qr/{id}/editar-todo', [AnimalQrController::class, 'editarTodo'])
+        ->name('animal.qr.editar.todo');
 
     Route::post('animal/qr/{id}/actualizar-todo', [AnimalQrController::class, 'actualizarTodo'])
-    ->name('animal.qr.actualizar.todo');
+        ->name('animal.qr.actualizar.todo');
 
+    // //////dashboad reportes
+    Route::get('dashboard-reportes', [ReporteController::class, 'dashboard'])
+        ->name('reportes.dashboard');
 
-////////dashboad reportes
-        Route::get('dashboard-reportes', [ReporteController::class, 'dashboard'])
-    ->name('reportes.dashboard');
+    // /////Import Controller
+    Route::prefix('importar')->group(function () {
 
-///////Import Controller
-Route::prefix('importar')->group(function () {
+        // Dashboard de importación
+        Route::get('/', [ImportController::class, 'index'])->name('import.index');
 
-    // Dashboard de importación
-    Route::get('/', [ImportController::class, 'index'])->name('import.index');
+        // Animales
+        Route::get('/animales', [ImportController::class, 'animalesForm'])->name('import.animales.form');
+        Route::post('/animales/upload', [ImportController::class, 'animalesUpload'])->name('import.animales.upload');
+        Route::post('/animales/preview', [ImportController::class, 'animalesPreview'])->name('import.animales.preview');
+        Route::post('/animales/import', [ImportController::class, 'animalesImport'])->name('import.animales.import');
 
-    // Animales
-    Route::get('/animales', [ImportController::class, 'animalesForm'])->name('import.animales.form');
-    Route::post('/animales/upload', [ImportController::class, 'animalesUpload'])->name('import.animales.upload');
-    Route::post('/animales/preview', [ImportController::class, 'animalesPreview'])->name('import.animales.preview');
-    Route::post('/animales/import', [ImportController::class, 'animalesImport'])->name('import.animales.import');
+        // Producción
+        Route::get('/produccion', [ImportController::class, 'produccionForm'])->name('import.produccion.form');
+        Route::post('/produccion/upload', [ImportController::class, 'produccionUpload'])->name('import.produccion.upload');
+        Route::post('/produccion/preview', [ImportController::class, 'produccionPreview'])->name('import.produccion.preview');
+        Route::post('/produccion/import', [ImportController::class, 'produccionImport'])->name('import.produccion.import');
 
-    // Producción
-    Route::get('/produccion', [ImportController::class, 'produccionForm'])->name('import.produccion.form');
-    Route::post('/produccion/upload', [ImportController::class, 'produccionUpload'])->name('import.produccion.upload');
-    Route::post('/produccion/preview', [ImportController::class, 'produccionPreview'])->name('import.produccion.preview');
-    Route::post('/produccion/import', [ImportController::class, 'produccionImport'])->name('import.produccion.import');
+        // Compras
+        Route::get('/compras', [ImportController::class, 'comprasForm'])->name('import.compras.form');
+        Route::post('/compras/upload', [ImportController::class, 'comprasUpload'])->name('import.compras.upload');
+        Route::post('/compras/preview', [ImportController::class, 'comprasPreview'])->name('import.compras.preview');
+        Route::post('/compras/import', [ImportController::class, 'comprasImport'])->name('import.compras.import');
 
-    // Compras
-    Route::get('/compras', [ImportController::class, 'comprasForm'])->name('import.compras.form');
-    Route::post('/compras/upload', [ImportController::class, 'comprasUpload'])->name('import.compras.upload');
-    Route::post('/compras/preview', [ImportController::class, 'comprasPreview'])->name('import.compras.preview');
-    Route::post('/compras/import', [ImportController::class, 'comprasImport'])->name('import.compras.import');
-
-    // Ventas
-    Route::get('/ventas', [ImportController::class, 'ventasForm'])->name('import.ventas.form');
-    Route::post('/ventas/upload', [ImportController::class, 'ventasUpload'])->name('import.ventas.upload');
-    Route::post('/ventas/preview', [ImportController::class, 'ventasPreview'])->name('import.ventas.preview');
-    Route::post('/ventas/import', [ImportController::class, 'ventasImport'])->name('import.ventas.import');
-});
+        // Ventas
+        Route::get('/ventas', [ImportController::class, 'ventasForm'])->name('import.ventas.form');
+        Route::post('/ventas/upload', [ImportController::class, 'ventasUpload'])->name('import.ventas.upload');
+        Route::post('/ventas/preview', [ImportController::class, 'ventasPreview'])->name('import.ventas.preview');
+        Route::post('/ventas/import', [ImportController::class, 'ventasImport'])->name('import.ventas.import');
+    });
 }); // ← ESTE ES EL ÚNICO CIERRE CORRECTO

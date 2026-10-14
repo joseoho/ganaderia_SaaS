@@ -8,7 +8,7 @@
 
     <div class="card shadow-sm p-4 mb-4">
         <h5>Información del potrero</h5>
-        <p><strong>Tamaño:</strong> {{ $potrero->tamaño }} ha</p>
+        <p><strong>Tamaño:</strong> {{ $potrero->tamano }} ha</p>
         <p><strong>Tipo de pasto:</strong> {{ $potrero->tipo_pasto }}</p>
         <p><strong>Estado:</strong> {{ ucfirst($potrero->estado) }}</p>
         <p><strong>Último ingreso:</strong> {{ $potrero->fecha_ultimo_ingreso }}</p>

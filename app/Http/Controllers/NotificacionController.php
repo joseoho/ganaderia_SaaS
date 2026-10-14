@@ -2,11 +2,11 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\StoreNotificacionRequest;
+use App\Http\Requests\UpdateNotificacionRequest;
 use App\Models\Notificacion;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use App\Http\Requests\StoreNotificacionRequest;
-use App\Http\Requests\UpdateNotificacionRequest;
 
 class NotificacionController extends Controller
 {
@@ -17,26 +17,24 @@ class NotificacionController extends Controller
     {
         $query = Notificacion::where('usuario_id', Auth::id()); // 👈 filtro por usuario logueado
 
+        // $query = Notificacion::query();
+        // 🔍 Filtro por búsqueda en mensaje
+        if ($request->filled('search')) {
+            $query->where('mensaje', 'like', '%'.$request->search.'%');
+        }
+        // 📅 Filtro por fecha
+        if ($request->filled('fecha')) {
+            $query->whereDate('fecha_envio', $request->fecha);
+        }
+        //  Filtro por tipo
+        if ($request->filled('tipo')) {
+            $query->where('tipo', $request->tipo);
+        }
+        // Traer resultados paginados
+        $notificaciones = $query->orderBy('fecha_envio', 'desc')
+            ->paginate(10);
 
-        // $query = Notificacion::query(); 
-        // 🔍 Filtro por búsqueda en mensaje 
-         if ($request->filled('search')) 
-         { 
-            $query->where('mensaje', 'like', '%' . $request->search . '%'); } 
-            // 📅 Filtro por fecha 
-            if ($request->filled('fecha')) 
-                {
-                     $query->whereDate('fecha_envio', $request->fecha); 
-                } 
-            //  Filtro por tipo 
-            if ($request->filled('tipo')) 
-            {
-               $query->where('tipo', $request->tipo);
-            } 
-                     // Traer resultados paginados 
-                     $notificaciones = $query->orderBy('fecha_envio', 'desc')
-                     ->paginate(10); 
-                     return view('notificaciones.index', compact('notificaciones'));
+        return view('notificaciones.index', compact('notificaciones'));
     }
 
     /**
@@ -52,14 +50,15 @@ class NotificacionController extends Controller
      */
     public function store(StoreNotificacionRequest $request)
     {
-       $request->validate([ 'usuario_id' => 'required|integer',
-        'mensaje' => 'required|string', 
-        'tipo' => 'required|string', 
-        'fecha_envio' => 'required|date', 
-        'estado' => 'required|string', ]);
+        $request->validate(['usuario_id' => 'required|integer',
+            'mensaje' => 'required|string',
+            'tipo' => 'required|string',
+            'fecha_envio' => 'required|date',
+            'estado' => 'required|string', ]);
 
-       Notificacion::create($request->validated());
-       return redirect()->route('notificaciones.index')->with('success', 'Notificación creada correctamente');
+        Notificacion::create($request->validated());
+
+        return redirect()->route('notificaciones.index')->with('success', 'Notificación creada correctamente');
     }
 
     /**
@@ -68,7 +67,7 @@ class NotificacionController extends Controller
     public function show(Notificacion $notificacion)
     {
         // return view('notificaciones.show', compact('notificacion'));
-         // 👇 aseguramos que solo pueda ver sus propias notificaciones
+        // 👇 aseguramos que solo pueda ver sus propias notificaciones
         if ($notificacion->usuario_id !== Auth::id()) {
             abort(403, 'No autorizado');
         }
@@ -89,7 +88,7 @@ class NotificacionController extends Controller
             abort(403, 'No autorizado');
         }
 
-      return view('notificaciones.edit', compact('notificacion'));
+        return view('notificaciones.edit', compact('notificacion'));
     }
 
     /**
@@ -101,11 +100,12 @@ class NotificacionController extends Controller
             abort(403, 'No autorizado');
         }
 
-        $request->validate([ 'mensaje' => 'required|string', 
-        'tipo' => 'required|string', 
-        'fecha_envio' => 'required|date', 
-        'estado' => 'required|string', ]); 
-        $notificacion->update($request->validated()); 
+        $request->validate(['mensaje' => 'required|string',
+            'tipo' => 'required|string',
+            'fecha_envio' => 'required|date',
+            'estado' => 'required|string', ]);
+        $notificacion->update($request->validated());
+
         return redirect()->route('notificaciones.index')->with('success', 'Notificación actualizada correctamente');
     }
 
@@ -120,6 +120,7 @@ class NotificacionController extends Controller
         }
 
         $notificacion->delete();
+
         return redirect()->route('notificaciones.index')->with('success', 'Notificación eliminada');
 
     }

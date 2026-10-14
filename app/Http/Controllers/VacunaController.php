@@ -2,9 +2,9 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Vacuna;
 use App\Http\Requests\StoreVacunaRequest;
 use App\Http\Requests\UpdateVacunaRequest;
+use App\Models\Vacuna;
 
 class VacunaController extends Controller
 {

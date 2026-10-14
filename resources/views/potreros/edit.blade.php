@@ -19,7 +19,7 @@
 
             <div class="mb-3">
                 <label class="form-label">Tamaño (hectáreas)</label>
-                <input type="number" step="0.01" name="tamaño" class="form-control" value="{{ $potrero->tamaño }}" required>
+                <input type="number" step="0.01" name="tamano" class="form-control" value="{{ $potrero->tamano }}" required>
             </div>
 
             <div class="mb-3">

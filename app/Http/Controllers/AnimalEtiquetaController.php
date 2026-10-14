@@ -2,8 +2,8 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
 use App\Models\Animal;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
 class AnimalEtiquetaController extends Controller
@@ -12,7 +12,7 @@ class AnimalEtiquetaController extends Controller
     {
         $inquilino_id = Auth::user()->inquilino_id;
 
-        if (!$inquilino_id) {
+        if (! $inquilino_id) {
             return redirect()->route('home')->with('error', 'No tiene un inquilino asignado.');
         }
 
@@ -40,7 +40,7 @@ class AnimalEtiquetaController extends Controller
     public function generar(Request $request)
     {
         $request->validate([
-            'animales' => 'required|array'
+            'animales' => 'required|array',
         ]);
 
         $animales = Animal::whereIn('id', $request->animales)

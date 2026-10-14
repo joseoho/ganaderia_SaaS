@@ -3,22 +3,22 @@
 namespace App\Http\Controllers;
 
 use App\Models\Animal;
-use App\Models\ProduccionLeche;
-use App\Models\ProduccionCarne;
-use App\Models\Compra;
-use App\Models\Venta;
-use App\Models\Movilizacion;
-use App\Models\Reproduccion;
-use App\Models\InventarioInsumo;
-use App\Models\Tratamiento;
-use App\Models\RegistroVacuna;
-use App\Models\Genealogia;
 use App\Models\AnimalPotrero;
+use App\Models\Compra;
 use App\Models\Gastos;
+use App\Models\Genealogia;
+use App\Models\InventarioInsumo;
+use App\Models\Movilizacion;
 use App\Models\Potrero;
+use App\Models\ProduccionCarne;
+use App\Models\ProduccionLeche;
+use App\Models\RegistroVacuna;
+use App\Models\Reproduccion;
+use App\Models\Tratamiento;
+use App\Models\Venta;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 
 class ReporteController extends Controller
 {
@@ -29,28 +29,28 @@ class ReporteController extends Controller
         $hasta = $request->hasta;
 
         $total_animales = Animal::where('inquilino_id', $inquilino)->count();
-        $machos  = Animal::where('inquilino_id', $inquilino)->where('sexo', 'M')->count();
+        $machos = Animal::where('inquilino_id', $inquilino)->where('sexo', 'M')->count();
         $hembras = Animal::where('inquilino_id', $inquilino)->where('sexo', 'H')->count();
-        $madres  = Animal::where('inquilino_id', $inquilino)->where('tipo', 'Madre')->count();
-        $padres  = Animal::where('inquilino_id', $inquilino)->where('tipo', 'Padre')->count();
-        $mautes  = Animal::where('inquilino_id', $inquilino)->where('tipo', 'Maute')->count();
+        $madres = Animal::where('inquilino_id', $inquilino)->where('tipo', 'Madre')->count();
+        $padres = Animal::where('inquilino_id', $inquilino)->where('tipo', 'Padre')->count();
+        $mautes = Animal::where('inquilino_id', $inquilino)->where('tipo', 'Maute')->count();
 
         $produccion_leche_total = ProduccionLeche::where('inquilino_id', $inquilino)
-            ->when($desde, fn($q) => $q->whereDate('fecha', '>=', $desde))
-            ->when($hasta, fn($q) => $q->whereDate('fecha', '<=', $hasta))
+            ->when($desde, fn ($q) => $q->whereDate('fecha', '>=', $desde))
+            ->when($hasta, fn ($q) => $q->whereDate('fecha', '<=', $hasta))
             ->sum('litros');
 
         $produccion_carne_total = ProduccionCarne::where('inquilino_id', $inquilino)
-            ->when($desde, fn($q) => $q->whereDate('fecha', '>=', $desde))
-            ->when($hasta, fn($q) => $q->whereDate('fecha', '<=', $hasta))
+            ->when($desde, fn ($q) => $q->whereDate('fecha', '>=', $desde))
+            ->when($hasta, fn ($q) => $q->whereDate('fecha', '<=', $hasta))
             ->sum('ganancia_diaria');
 
         $compras = Gastos::where('inquilino_id', $inquilino)->count();
-        $ventas  = Venta::where('inquilino_id', $inquilino)->count();
+        $ventas = Venta::where('inquilino_id', $inquilino)->count();
 
         $total_gastos_operativos = Gastos::where('inquilino_id', $inquilino)
-            ->when($desde, fn($q) => $q->whereDate('fecha', '>=', $desde))
-            ->when($hasta, fn($q) => $q->whereDate('fecha', '<=', $hasta))
+            ->when($desde, fn ($q) => $q->whereDate('fecha', '>=', $desde))
+            ->when($hasta, fn ($q) => $q->whereDate('fecha', '<=', $hasta))
             ->sum('monto');
 
         $movilizaciones = Movilizacion::where('inquilino_id', $inquilino)->count();
@@ -60,7 +60,7 @@ class ReporteController extends Controller
         $tratamientos_activos = Tratamiento::where('inquilino_id', $inquilino)
             ->where(function ($q) {
                 $q->whereNull('fecha_fin')
-                  ->orWhere('fecha_fin', '>=', now()->toDateString());
+                    ->orWhere('fecha_fin', '>=', now()->toDateString());
             })
             ->with('animal')
             ->get();
@@ -95,10 +95,10 @@ class ReporteController extends Controller
 
         $produccion_leche = ProduccionLeche::where('animal_id', $animal->id)->get();
         $produccion_carne = ProduccionCarne::where('animal_id', $animal->id)->get();
-        $tratamientos     = Tratamiento::where('animal_id', $animal->id)->get();
-        $vacunas          = RegistroVacuna::where('animal_id', $animal->id)->get();
-        $reproduccion     = Reproduccion::where('animal_id', $animal->id)->get();
-        $genealogia       = Genealogia::where('animal_id', $animal->id)->first();
+        $tratamientos = Tratamiento::where('animal_id', $animal->id)->get();
+        $vacunas = RegistroVacuna::where('animal_id', $animal->id)->get();
+        $reproduccion = Reproduccion::where('animal_id', $animal->id)->get();
+        $genealogia = Genealogia::where('animal_id', $animal->id)->first();
 
         return view('reportes.poranimal', compact(
             'animal', 'produccion_leche', 'produccion_carne',
@@ -115,20 +115,40 @@ class ReporteController extends Controller
     public function seleccionarAnimal()
     {
         $animales = Animal::where('inquilino_id', Auth::user()->inquilino_id)->get();
+
         return view('reportes.seleccionaranimal', compact('animales'));
     }
 
-    public function reportePotreros() { return view('reportes.potreros.form'); }
-    public function reporteCompras()  { return view('reportes.compras.form'); }
-    public function reporteVentas()   { return view('reportes.ventas.form'); }
-    public function reporteCarne()    { return view('reportes.carne.form'); }
-    public function reporteLeche()    { return view('reportes.leche.form'); }
+    public function reportePotreros()
+    {
+        return view('reportes.potreros.form');
+    }
+
+    public function reporteCompras()
+    {
+        return view('reportes.compras.form');
+    }
+
+    public function reporteVentas()
+    {
+        return view('reportes.ventas.form');
+    }
+
+    public function reporteCarne()
+    {
+        return view('reportes.carne.form');
+    }
+
+    public function reporteLeche()
+    {
+        return view('reportes.leche.form');
+    }
 
     public function generarPotreros(Request $request)
     {
         $request->validate([
             'desde' => 'required|date',
-            'hasta' => 'required|date'
+            'hasta' => 'required|date',
         ]);
 
         $registros = AnimalPotrero::with('animal', 'potrero')
@@ -146,7 +166,7 @@ class ReporteController extends Controller
     {
         $request->validate([
             'desde' => 'required|date',
-            'hasta' => 'required|date'
+            'hasta' => 'required|date',
         ]);
 
         $compras = Gastos::where('inquilino_id', Auth::user()->inquilino_id)
@@ -154,7 +174,7 @@ class ReporteController extends Controller
             ->get();
 
         $totalCompras = $compras->count();
-        $montoTotal   = $compras->sum('monto');
+        $montoTotal = $compras->sum('monto');
 
         return view('reportes.compras.reporte', compact('compras', 'totalCompras', 'montoTotal'));
     }
@@ -163,7 +183,7 @@ class ReporteController extends Controller
     {
         $request->validate([
             'desde' => 'required|date',
-            'hasta' => 'required|date'
+            'hasta' => 'required|date',
         ]);
 
         $ventas = Venta::where('inquilino_id', Auth::user()->inquilino_id)
@@ -171,7 +191,7 @@ class ReporteController extends Controller
             ->get();
 
         $totalVentas = $ventas->count();
-        $montoTotal  = $ventas->sum('monto_total');
+        $montoTotal = $ventas->sum('monto_total');
 
         return view('reportes.ventas.reporte', compact('ventas', 'totalVentas', 'montoTotal'));
     }
@@ -180,7 +200,7 @@ class ReporteController extends Controller
     {
         $request->validate([
             'desde' => 'required|date',
-            'hasta' => 'required|date'
+            'hasta' => 'required|date',
         ]);
 
         $carne = ProduccionCarne::with('animal')
@@ -188,8 +208,8 @@ class ReporteController extends Controller
             ->whereBetween('fecha', [$request->desde, $request->hasta])
             ->get();
 
-        $totalRegistros   = $carne->count();
-        $totalGanado      = $carne->sum('ganancia_diaria');
+        $totalRegistros = $carne->count();
+        $totalGanado = $carne->sum('ganancia_diaria');
         $promedioGanancia = $totalRegistros > 0 ? $totalGanado / $totalRegistros : 0;
 
         return view('reportes.carne.reporte', compact('carne', 'totalRegistros', 'totalGanado', 'promedioGanancia'));
@@ -199,7 +219,7 @@ class ReporteController extends Controller
     {
         $request->validate([
             'desde' => 'required|date',
-            'hasta' => 'required|date'
+            'hasta' => 'required|date',
         ]);
 
         $leche = ProduccionLeche::with('animal')
@@ -208,7 +228,7 @@ class ReporteController extends Controller
             ->get();
 
         $totalRegistros = $leche->count();
-        $totalLitros    = $leche->sum('litros');
+        $totalLitros = $leche->sum('litros');
         $promedioLitros = $totalRegistros > 0 ? $totalLitros / $totalRegistros : 0;
 
         return view('reportes.leche.reporte', compact('leche', 'totalRegistros', 'totalLitros', 'promedioLitros'));
@@ -216,13 +236,13 @@ class ReporteController extends Controller
 
     public function reporteFinanciero()
     {
-        $inquilino  = Auth::user()->inquilino_id;
+        $inquilino = Auth::user()->inquilino_id;
         $anioActual = now()->year;
 
         $totalCompras = Compra::where('inquilino_id', $inquilino)->sum('monto_total');
-        $totalVentas  = Venta::where('inquilino_id', $inquilino)->sum('monto_total');
-        $totalGastos  = Gastos::where('inquilino_id', $inquilino)->sum('monto');
-        $balance      = $totalVentas - ($totalCompras + $totalGastos);
+        $totalVentas = Venta::where('inquilino_id', $inquilino)->sum('monto_total');
+        $totalGastos = Gastos::where('inquilino_id', $inquilino)->sum('monto');
+        $balance = $totalVentas - ($totalCompras + $totalGastos);
 
         $ventasMes = Venta::where('inquilino_id', $inquilino)
             ->whereYear('fecha', $anioActual)
@@ -258,10 +278,10 @@ class ReporteController extends Controller
     {
         $inquilino = Auth::user()->inquilino_id;
 
-        $totalCompras  = Compra::where('inquilino_id', $inquilino)->count();
-        $totalVentas   = Venta::where('inquilino_id', $inquilino)->count();
-        $totalCarne    = ProduccionCarne::where('inquilino_id', $inquilino)->sum('ganancia_diaria');
-        $totalLeche    = ProduccionLeche::where('inquilino_id', $inquilino)->sum('litros');
+        $totalCompras = Compra::where('inquilino_id', $inquilino)->count();
+        $totalVentas = Venta::where('inquilino_id', $inquilino)->count();
+        $totalCarne = ProduccionCarne::where('inquilino_id', $inquilino)->sum('ganancia_diaria');
+        $totalLeche = ProduccionLeche::where('inquilino_id', $inquilino)->sum('litros');
         $totalPotreros = Potrero::where('inquilino_id', $inquilino)->count();
         $totalAnimales = Animal::where('inquilino_id', $inquilino)->count();
 
@@ -269,20 +289,20 @@ class ReporteController extends Controller
             ->with([
                 'produccionCarne' => function ($q) {
                     $q->select('animal_id', DB::raw('SUM(ganancia_diaria) as total_carne'))
-                      ->groupBy('animal_id');
+                        ->groupBy('animal_id');
                 },
                 'produccionLeche' => function ($q) {
                     $q->select('animal_id', DB::raw('SUM(litros) as total_leche'))
-                      ->groupBy('animal_id');
-                }
+                        ->groupBy('animal_id');
+                },
             ])
             ->get()
             ->map(function ($animal) {
                 return [
-                    'codigo'       => $animal->codigo_interno,
-                    'total_carne'  => $animal->produccionCarne->first()->total_carne ?? 0,
-                    'total_leche'  => $animal->produccionLeche->first()->total_leche ?? 0,
-                    'total_general'=> ($animal->produccionCarne->first()->total_carne ?? 0) +
+                    'codigo' => $animal->codigo_interno,
+                    'total_carne' => $animal->produccionCarne->first()->total_carne ?? 0,
+                    'total_leche' => $animal->produccionLeche->first()->total_leche ?? 0,
+                    'total_general' => ($animal->produccionCarne->first()->total_carne ?? 0) +
                                        ($animal->produccionLeche->first()->total_leche ?? 0),
                 ];
             })

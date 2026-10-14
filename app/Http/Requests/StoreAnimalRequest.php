@@ -2,8 +2,8 @@
 
 namespace App\Http\Requests;
 
-use Illuminate\Foundation\Http\FormRequest;
 use App\Traits\TieneValidacionesInquilino;
+use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Support\Facades\Auth;
 
 class StoreAnimalRequest extends FormRequest
@@ -18,20 +18,20 @@ class StoreAnimalRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'codigo_interno'  => [
+            'codigo_interno' => [
                 'required',
                 'string',
                 'max:100',
                 $this->uniqueInquilino('animales', 'codigo_interno'),
             ],
             // 'inquilino_id'   => 'required|exists:inquilinos,id',
-            'categoria'       => 'required|string|max:50',
-            'raza'            => 'required|string|max:50',
-            'tipo'            => 'nullable|string|max:50',
-            'fecha_nacimiento'=> 'required|date',
-            'sexo'            => 'required|string|max:1',
-            'peso_entrada'    => 'nullable|numeric|min:0',
-            'estado'          => 'required|string|max:50',
+            'categoria' => 'required|string|max:50',
+            'raza' => 'required|string|max:50',
+            'tipo' => 'nullable|string|max:50',
+            'fecha_nacimiento' => 'required|date',
+            'sexo' => 'required|string|max:1',
+            'peso_entrada' => 'nullable|numeric|min:0',
+            'estado' => 'required|string|max:50',
         ];
     }
 

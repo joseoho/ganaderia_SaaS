@@ -2,20 +2,25 @@
 
 namespace App\Http\Requests;
 
+use App\Traits\TieneValidacionesInquilino;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Support\Facades\Auth;
-use App\Traits\TieneValidacionesInquilino;
+
 class StoreVentaRequest extends FormRequest
 {
-        use TieneValidacionesInquilino;
-    public function authorize(): bool { return Auth::check(); }
+    use TieneValidacionesInquilino;
+
+    public function authorize(): bool
+    {
+        return Auth::check();
+    }
 
     public function rules(): array
     {
         return [
-            'cliente'     => 'required|string|max:255',
+            'cliente' => 'required|string|max:255',
             'descripcion' => 'required|string|max:500',
-            'fecha'       => 'required|date',
+            'fecha' => 'required|date',
             'monto_total' => 'required|numeric|min:0',
         ];
     }

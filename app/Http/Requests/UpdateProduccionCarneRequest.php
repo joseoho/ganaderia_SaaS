@@ -2,18 +2,21 @@
 
 namespace App\Http\Requests;
 
-use Illuminate\Foundation\Http\FormRequest;
 use App\Traits\TieneValidacionesInquilino;
-
+use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Support\Facades\Auth;
+
 class UpdateProduccionCarneRequest extends FormRequest
 {
     use TieneValidacionesInquilino;
 
     public function authorize(): bool
     {
-        if (!Auth::check()) return false;
+        if (! Auth::check()) {
+            return false;
+        }
         $produccion = $this->route('produccion');
+
         return $produccion && $produccion->inquilino_id === Auth::user()->inquilino_id;
     }
 
@@ -21,8 +24,8 @@ class UpdateProduccionCarneRequest extends FormRequest
     {
         return [
             'animal_id' => ['required', $this->existsInquilino('animales')],
-            'fecha'     => 'required|date',
-            'peso'      => 'required|numeric|min:0',
+            'fecha' => 'required|date',
+            'peso' => 'required|numeric|min:0',
             'observaciones' => 'nullable|string|max:500',
         ];
     }

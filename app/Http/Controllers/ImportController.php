@@ -3,9 +3,9 @@
 namespace App\Http\Controllers;
 
 use App\Models\Animal;
-use App\Models\ProduccionLeche;
-use App\Models\ProduccionCarne;
 use App\Models\Compra;
+use App\Models\ProduccionCarne;
+use App\Models\ProduccionLeche;
 use App\Models\Venta;
 use App\Services\ImportService;
 use Illuminate\Http\Request;
@@ -24,6 +24,7 @@ class ImportController extends Controller
     public function index()
     {
         $importados = session('ultimo_importado', 0);
+
         return view('import.resultado', compact('importados'));
     }
 
@@ -38,10 +39,10 @@ class ImportController extends Controller
     public function animalesUpload(Request $request)
     {
         $request->validate([
-            'archivo' => 'required|file|max:10240'
+            'archivo' => 'required|file|max:10240',
         ]);
 
-        if (!$request->hasFile('archivo') || !$request->file('archivo')->isValid()) {
+        if (! $request->hasFile('archivo') || ! $request->file('archivo')->isValid()) {
             return back()->with('error', 'Archivo no válido o no recibido.');
         }
 
@@ -66,29 +67,30 @@ class ImportController extends Controller
 
             // Definir campos del sistema para el mapeo de animales
             $camposSistema = [
-                'codigo_interno'   => 'Código Interno',
-                'categoria'        => 'Categoría',
-                'raza'             => 'Raza',
-                'tipo'             => 'Tipo',
+                'codigo_interno' => 'Código Interno',
+                'categoria' => 'Categoría',
+                'raza' => 'Raza',
+                'tipo' => 'Tipo',
                 'fecha_nacimiento' => 'Fecha de Nacimiento',
-                'sexo'             => 'Sexo',
-                'peso_entrada'     => 'Peso Entrada',
-                'estado'           => 'Estado',
+                'sexo' => 'Sexo',
+                'peso_entrada' => 'Peso Entrada',
+                'estado' => 'Estado',
             ];
 
             // Sugerir mapeo automático
             $sugerencias = $this->sugerirMapeo($headers, array_keys($camposSistema));
 
             session([
-                'rows_animales'    => $rows,
+                'rows_animales' => $rows,
                 'headers_animales' => $headers,
             ]);
 
             return view('import.animales.map', compact('headers', 'camposSistema', 'sugerencias'));
 
         } catch (\Exception $e) {
-            Log::error('Error en animalesUpload: ' . $e->getMessage());
-            return back()->with('error', 'Error al procesar el archivo: ' . $e->getMessage());
+            Log::error('Error en animalesUpload: '.$e->getMessage());
+
+            return back()->with('error', 'Error al procesar el archivo: '.$e->getMessage());
         }
     }
 
@@ -102,6 +104,7 @@ class ImportController extends Controller
             foreach ($map as $campo => $col) {
                 $data[$campo] = $row[$col] ?? null;
             }
+
             return $data;
         });
 
@@ -124,11 +127,13 @@ class ImportController extends Controller
                 $data[$campo] = $row[$col] ?? null;
             }
 
-            if (empty($data['codigo_interno'])) continue;
+            if (empty($data['codigo_interno'])) {
+                continue;
+            }
 
             Animal::updateOrCreate(
                 [
-                    'inquilino_id'   => $inquilino,
+                    'inquilino_id' => $inquilino,
                     'codigo_interno' => $data['codigo_interno'],
                 ],
                 array_merge($data, ['inquilino_id' => $inquilino])
@@ -138,6 +143,7 @@ class ImportController extends Controller
         }
 
         session(['ultimo_importado' => $importados]);
+
         return view('import.resultado', ['importados' => $importados]);
     }
 
@@ -152,10 +158,10 @@ class ImportController extends Controller
     public function produccionUpload(Request $request)
     {
         $request->validate([
-            'archivo' => 'required|file|max:10240'
+            'archivo' => 'required|file|max:10240',
         ]);
 
-        if (!$request->hasFile('archivo') || !$request->file('archivo')->isValid()) {
+        if (! $request->hasFile('archivo') || ! $request->file('archivo')->isValid()) {
             return back()->with('error', 'Archivo no válido o no recibido.');
         }
 
@@ -180,27 +186,28 @@ class ImportController extends Controller
 
             // Definir campos del sistema para producción
             $camposSistema = [
-                'animal_id'       => 'ID del Animal',
-                'fecha'           => 'Fecha',
-                'litros'          => 'Litros (Leche)',
-                'turno'           => 'Turno',
+                'animal_id' => 'ID del Animal',
+                'fecha' => 'Fecha',
+                'litros' => 'Litros (Leche)',
+                'turno' => 'Turno',
                 'ganancia_diaria' => 'Ganancia Diaria (Carne)',
-                'peso'            => 'Peso (Carne)',
-                'observaciones'   => 'Observaciones',
+                'peso' => 'Peso (Carne)',
+                'observaciones' => 'Observaciones',
             ];
 
             $sugerencias = $this->sugerirMapeo($headers, array_keys($camposSistema));
 
             session([
-                'rows_produccion'    => $rows,
+                'rows_produccion' => $rows,
                 'headers_produccion' => $headers,
             ]);
 
             return view('import.produccion.map', compact('headers', 'camposSistema', 'sugerencias'));
 
         } catch (\Exception $e) {
-            Log::error('Error en produccionUpload: ' . $e->getMessage());
-            return back()->with('error', 'Error al procesar el archivo: ' . $e->getMessage());
+            Log::error('Error en produccionUpload: '.$e->getMessage());
+
+            return back()->with('error', 'Error al procesar el archivo: '.$e->getMessage());
         }
     }
 
@@ -214,6 +221,7 @@ class ImportController extends Controller
             foreach ($map as $campo => $col) {
                 $data[$campo] = $row[$col] ?? null;
             }
+
             return $data;
         });
 
@@ -236,7 +244,9 @@ class ImportController extends Controller
                 $data[$campo] = $row[$col] ?? null;
             }
 
-            if (empty($data['animal_id'])) continue;
+            if (empty($data['animal_id'])) {
+                continue;
+            }
 
             if (isset($data['litros'])) {
                 ProduccionLeche::create($data + ['inquilino_id' => $inquilino]);
@@ -250,6 +260,7 @@ class ImportController extends Controller
         }
 
         session(['ultimo_importado' => $importados]);
+
         return view('import.resultado', ['importados' => $importados]);
     }
 
@@ -264,10 +275,10 @@ class ImportController extends Controller
     public function comprasUpload(Request $request)
     {
         $request->validate([
-            'archivo' => 'required|file|max:10240'
+            'archivo' => 'required|file|max:10240',
         ]);
 
-        if (!$request->hasFile('archivo') || !$request->file('archivo')->isValid()) {
+        if (! $request->hasFile('archivo') || ! $request->file('archivo')->isValid()) {
             return back()->with('error', 'Archivo no válido o no recibido.');
         }
 
@@ -292,24 +303,25 @@ class ImportController extends Controller
 
             // Definir campos del sistema para compras
             $camposSistema = [
-                'fecha'       => 'Fecha',
+                'fecha' => 'Fecha',
                 'descripcion' => 'Descripción',
                 'monto_total' => 'Monto Total',
-                'proveedor'   => 'Proveedor',
+                'proveedor' => 'Proveedor',
             ];
 
             $sugerencias = $this->sugerirMapeo($headers, array_keys($camposSistema));
 
             session([
-                'rows_compras'    => $rows,
+                'rows_compras' => $rows,
                 'headers_compras' => $headers,
             ]);
 
             return view('import.compras.map', compact('headers', 'camposSistema', 'sugerencias'));
 
         } catch (\Exception $e) {
-            Log::error('Error en comprasUpload: ' . $e->getMessage());
-            return back()->with('error', 'Error al procesar el archivo: ' . $e->getMessage());
+            Log::error('Error en comprasUpload: '.$e->getMessage());
+
+            return back()->with('error', 'Error al procesar el archivo: '.$e->getMessage());
         }
     }
 
@@ -323,6 +335,7 @@ class ImportController extends Controller
             foreach ($map as $campo => $col) {
                 $data[$campo] = $row[$col] ?? null;
             }
+
             return $data;
         });
 
@@ -350,6 +363,7 @@ class ImportController extends Controller
         }
 
         session(['ultimo_importado' => $importados]);
+
         return view('import.resultado', ['importados' => $importados]);
     }
 
@@ -364,10 +378,10 @@ class ImportController extends Controller
     public function ventasUpload(Request $request)
     {
         $request->validate([
-            'archivo' => 'required|file|max:10240'
+            'archivo' => 'required|file|max:10240',
         ]);
 
-        if (!$request->hasFile('archivo') || !$request->file('archivo')->isValid()) {
+        if (! $request->hasFile('archivo') || ! $request->file('archivo')->isValid()) {
             return back()->with('error', 'Archivo no válido o no recibido.');
         }
 
@@ -392,8 +406,8 @@ class ImportController extends Controller
 
             // Definir campos del sistema para ventas
             $camposSistema = [
-                'cliente'     => 'Cliente',
-                'fecha'       => 'Fecha',
+                'cliente' => 'Cliente',
+                'fecha' => 'Fecha',
                 'descripcion' => 'Descripción',
                 'monto_total' => 'Monto Total',
             ];
@@ -401,15 +415,16 @@ class ImportController extends Controller
             $sugerencias = $this->sugerirMapeo($headers, array_keys($camposSistema));
 
             session([
-                'rows_ventas'    => $rows,
+                'rows_ventas' => $rows,
                 'headers_ventas' => $headers,
             ]);
 
             return view('import.ventas.map', compact('headers', 'camposSistema', 'sugerencias'));
 
         } catch (\Exception $e) {
-            Log::error('Error en ventasUpload: ' . $e->getMessage());
-            return back()->with('error', 'Error al procesar el archivo: ' . $e->getMessage());
+            Log::error('Error en ventasUpload: '.$e->getMessage());
+
+            return back()->with('error', 'Error al procesar el archivo: '.$e->getMessage());
         }
     }
 
@@ -423,6 +438,7 @@ class ImportController extends Controller
             foreach ($map as $campo => $col) {
                 $data[$campo] = $row[$col] ?? null;
             }
+
             return $data;
         });
 
@@ -450,6 +466,7 @@ class ImportController extends Controller
         }
 
         session(['ultimo_importado' => $importados]);
+
         return view('import.resultado', ['importados' => $importados]);
     }
 
@@ -465,12 +482,13 @@ class ImportController extends Controller
 
         foreach ($camposEsperados as $campo) {
             // Buscar coincidencia exacta (case-insensitive)
-            $match = array_filter($headers, function($h) use ($campo) {
+            $match = array_filter($headers, function ($h) use ($campo) {
                 return strtolower(trim($h)) === strtolower(trim($campo));
             });
 
-            if (!empty($match)) {
+            if (! empty($match)) {
                 $sugerencias[$campo] = reset($match);
+
                 continue;
             }
 

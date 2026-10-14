@@ -2,12 +2,12 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Genealogia;
-use App\Models\Animal;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
 use App\Http\Requests\StoreGenealogiaRequest;
 use App\Http\Requests\UpdateGenealogiaRequest;
+use App\Models\Animal;
+use App\Models\Genealogia;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class GenealogiController extends Controller
 {
@@ -17,7 +17,7 @@ class GenealogiController extends Controller
 
         if ($request->filled('search')) {
             $query->whereHas('animal', function ($q) use ($request) {
-                $q->where('codigo_interno', 'like', '%' . $request->search . '%');
+                $q->where('codigo_interno', 'like', '%'.$request->search.'%');
             });
         }
 
@@ -29,7 +29,7 @@ class GenealogiController extends Controller
     public function create()
     {
         $inquilino = Auth::user()->inquilino_id;
-        $animales  = Animal::where('inquilino_id', $inquilino)->get();
+        $animales = Animal::where('inquilino_id', $inquilino)->get();
 
         return view('genealogia.create', compact('animales'));
     }
@@ -37,10 +37,10 @@ class GenealogiController extends Controller
     public function store(StoreGenealogiaRequest $request)
     {
         Genealogia::create([
-            'inquilino_id'  => Auth::user()->inquilino_id,
-            'animal_id'     => $request->animal_id,
-            'padre_id'      => $request->padre_id,
-            'madre_id'      => $request->madre_id,
+            'inquilino_id' => Auth::user()->inquilino_id,
+            'animal_id' => $request->animal_id,
+            'padre_id' => $request->padre_id,
+            'madre_id' => $request->madre_id,
             'observaciones' => $request->observaciones,
         ]);
 
@@ -71,9 +71,9 @@ class GenealogiController extends Controller
     {
         // $genealogium->update($request->validated());
         $genealogium->update([
-            'animal_id'     => $request->animal_id,
-            'padre_id'      => $request->padre_id,
-            'madre_id'      => $request->madre_id,
+            'animal_id' => $request->animal_id,
+            'padre_id' => $request->padre_id,
+            'madre_id' => $request->madre_id,
             'observaciones' => $request->observaciones,
         ]);
 

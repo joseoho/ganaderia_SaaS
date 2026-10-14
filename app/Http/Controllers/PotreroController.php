@@ -2,10 +2,10 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
-use App\Models\Potrero;
 use App\Models\AnimalPotrero;
+use App\Models\Potrero;
 use App\Models\Rotacion;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
 class PotreroController extends Controller
@@ -13,6 +13,7 @@ class PotreroController extends Controller
     public function index()
     {
         $potreros = Potrero::where('inquilino_id', Auth::user()->inquilino_id)->get();
+
         return view('potreros.index', compact('potreros'));
     }
 
@@ -25,15 +26,15 @@ class PotreroController extends Controller
     {
         $request->validate([
             'nombre' => 'required',
-            'tamaño' => 'required|numeric'
+            'tamano' => 'required|numeric',
         ]);
 
         Potrero::create([
             'inquilino_id' => Auth::user()->inquilino_id,
-            'nombre'       => $request->nombre,
-            'tamaño'       => $request->tamaño,
-            'tipo_pasto'   => $request->tipo_pasto,
-            'estado'       => $request->estado ?? 'descanso',
+            'nombre' => $request->nombre,
+            'tamano' => $request->tamano,
+            'tipo_pasto' => $request->tipo_pasto,
+            'estado' => $request->estado ?? 'descanso',
         ]);
 
         return redirect()->route('potreros.index')->with('success', 'Potrero creado');
@@ -60,10 +61,10 @@ class PotreroController extends Controller
     public function update(Request $request, Potrero $potrero)
     {
         $datos = $request->validate([
-            'nombre'     => 'required',
-            'tamaño'     => 'required|numeric',
+            'nombre' => 'required',
+            'tamano' => 'required|numeric',
             'tipo_pasto' => 'nullable|string',
-            'estado'     => 'required|string',
+            'estado' => 'required|string',
         ]);
 
         $potrero->update($datos);
@@ -79,16 +80,16 @@ class PotreroController extends Controller
 
         foreach ($request->animales as $animal_id) {
             AnimalPotrero::create([
-                'animal_id'     => $animal_id,
-                'potrero_id'    => $id,
-                'inquilino_id'  => Auth::user()->inquilino_id,
-                'fecha_entrada' => now()->toDateString()
+                'animal_id' => $animal_id,
+                'potrero_id' => $id,
+                'inquilino_id' => Auth::user()->inquilino_id,
+                'fecha_entrada' => now()->toDateString(),
             ]);
         }
 
         $potrero->update([
-            'estado'               => 'ocupado',
-            'fecha_ultimo_ingreso' => now()->toDateString()
+            'estado' => 'ocupado',
+            'fecha_ultimo_ingreso' => now()->toDateString(),
         ]);
 
         return back()->with('success', 'Animales asignados');
@@ -108,21 +109,21 @@ class PotreroController extends Controller
             $a->update(['fecha_salida' => now()->toDateString()]);
         }
 
-        $dias  = now()->diffInDays($potrero->fecha_ultimo_ingreso);
-        $carga = $animales->count() / $potrero->tamaño;
+        $dias = now()->diffInDays($potrero->fecha_ultimo_ingreso);
+        $carga = $animales->count() / $potrero->tamano;
 
         Rotacion::create([
-            'potrero_id'     => $id,
-            'inquilino_id'   => Auth::user()->inquilino_id,
-            'fecha_entrada'  => $potrero->fecha_ultimo_ingreso,
-            'fecha_salida'   => now()->toDateString(),
+            'potrero_id' => $id,
+            'inquilino_id' => Auth::user()->inquilino_id,
+            'fecha_entrada' => $potrero->fecha_ultimo_ingreso,
+            'fecha_salida' => now()->toDateString(),
             'dias_ocupacion' => $dias,
-            'carga_animal'   => $carga
+            'carga_animal' => $carga,
         ]);
 
         $potrero->update([
-            'estado'                => 'descanso',
-            'fecha_ultimo_descanso' => now()->toDateString()
+            'estado' => 'descanso',
+            'fecha_ultimo_descanso' => now()->toDateString(),
         ]);
 
         return back()->with('success', 'Salida registrada y rotación creada');

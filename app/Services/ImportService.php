@@ -2,9 +2,9 @@
 
 namespace App\Services;
 
-use Maatwebsite\Excel\Facades\Excel;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Log;
+use Maatwebsite\Excel\Facades\Excel;
 
 class ImportService
 {
@@ -14,22 +14,23 @@ class ImportService
     public function leerArchivo($file): Collection
     {
         // Si no hay archivo, devolver colección vacía
-        if (!$file || !$file->isValid()) {
+        if (! $file || ! $file->isValid()) {
             return collect([]);
         }
 
         try {
             $coleccion = Excel::toCollection(null, $file);
-            
+
             // La hoja 0 es la primera pestaña
-            if ($coleccion->isEmpty() || !isset($coleccion[0])) {
+            if ($coleccion->isEmpty() || ! isset($coleccion[0])) {
                 return collect([]);
             }
 
             return $coleccion[0];
-            
+
         } catch (\Exception $e) {
-            Log::error('Error ImportService@leerArchivo: ' . $e->getMessage());
+            Log::error('Error ImportService@leerArchivo: '.$e->getMessage());
+
             return collect([]);
         }
     }
@@ -56,7 +57,7 @@ class ImportService
         // Si es un array simple
         if (is_array($primeraFila)) {
             return array_map(function ($item) {
-                return trim((string)$item, " \t\n\r\0\x0B\"'");
+                return trim((string) $item, " \t\n\r\0\x0B\"'");
             }, $primeraFila);
         }
 
@@ -83,7 +84,8 @@ class ImportService
                     return $value !== null && $value !== '';
                 })->isNotEmpty();
             }
-            return !empty(array_filter((array)$row));
+
+            return ! empty(array_filter((array) $row));
         });
 
         // Volver a unir encabezados + datos limpios

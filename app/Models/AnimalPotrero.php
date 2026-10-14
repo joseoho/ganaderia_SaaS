@@ -2,9 +2,8 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Model;
-
 use App\Models\Concerns\BelongsToTenant;
+use Illuminate\Database\Eloquent\Model;
 
 class AnimalPotrero extends Model
 {
@@ -17,7 +16,7 @@ class AnimalPotrero extends Model
         'potrero_id',
         'inquilino_id',
         'fecha_entrada',
-        'fecha_salida'
+        'fecha_salida',
     ];
 
     public function animal()

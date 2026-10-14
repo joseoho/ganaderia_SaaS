@@ -33,7 +33,6 @@ class Kernel extends HttpKernel
             // 👇 nuestro middleware multi-tenant
             \App\Http\Middleware\TenancyMiddleware::class,
 
-
         ],
 
         'api' => [

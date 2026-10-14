@@ -2,9 +2,8 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Model;
-
 use App\Models\Concerns\BelongsToTenant;
+use Illuminate\Database\Eloquent\Model;
 
 class Rotacion extends Model
 {
@@ -16,7 +15,7 @@ class Rotacion extends Model
         'fecha_entrada',
         'fecha_salida',
         'dias_ocupacion',
-        'carga_animal'
+        'carga_animal',
     ];
 
     public function potrero()

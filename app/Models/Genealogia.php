@@ -2,27 +2,29 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Model;
-
 use App\Models\Concerns\BelongsToTenant;
+use Illuminate\Database\Eloquent\Model;
 
 class Genealogia extends Model
 {
     use BelongsToTenant;
 
-    protected $table ='genealogia';
-    protected $fillable = ['animal_id','inquilino_id','padre_id','madre_id','observaciones']; 
-    
+    protected $table = 'genealogia';
+
+    protected $fillable = ['animal_id', 'inquilino_id', 'padre_id', 'madre_id', 'observaciones'];
+
     public function animal()
-     { 
+    {
         return $this->belongsTo(Animal::class, 'animal_id');
-     } 
-     public function padre() 
-     { 
+    }
+
+    public function padre()
+    {
         return $this->belongsTo(Animal::class, 'padre_id');
-     } 
-     public function madre() 
-     { 
-        return $this->belongsTo(Animal::class, 'madre_id'); 
+    }
+
+    public function madre()
+    {
+        return $this->belongsTo(Animal::class, 'madre_id');
     }
 }

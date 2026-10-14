@@ -5,8 +5,6 @@ namespace App\Http\Controllers;
 use App\Models\Compra;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use App\Http\Requests\StoreCompraRequest;
-use App\Http\Requests\UpdateCompraRequest;
 
 class CompraController extends Controller
 {
@@ -15,8 +13,8 @@ class CompraController extends Controller
         $query = Compra::where('inquilino_id', Auth::user()->inquilino_id);
 
         if ($request->filled('search')) {
-            $query->where('proveedor', 'like', '%' . $request->search . '%')
-                  ->orWhere('descripcion', 'like', '%' . $request->search . '%');
+            $query->where('proveedor', 'like', '%'.$request->search.'%')
+                ->orWhere('descripcion', 'like', '%'.$request->search.'%');
         }
 
         if ($request->filled('fecha_desde')) {
@@ -61,6 +59,7 @@ class CompraController extends Controller
         if ($compra->inquilino_id !== Auth::user()->inquilino_id) {
             abort(403, 'No autorizado');
         }
+
         return view('compras.show', compact('compra'));
     }
 
@@ -69,6 +68,7 @@ class CompraController extends Controller
         if ($compra->inquilino_id !== Auth::user()->inquilino_id) {
             abort(403, 'No autorizado');
         }
+
         return view('compras.edit', compact('compra'));
     }
 
@@ -79,7 +79,7 @@ class CompraController extends Controller
         }
 
         $datos = $request->validate([
-            'fecha' => 'required|date',    
+            'fecha' => 'required|date',
             'proveedor' => 'required|string|max:255',
             'descripcion' => 'required|string',
             'monto_total' => 'required|numeric',
@@ -97,6 +97,7 @@ class CompraController extends Controller
         }
 
         $compra->delete();
+
         return redirect()->route('compras.index')->with('success', 'Compra eliminada');
     }
 }

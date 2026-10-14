@@ -60,7 +60,7 @@ class EdicionModulosTest extends TestCase
     {
         return [
             'potreros' => [Potrero::class, '/potreros/%d', [
-                'nombre' => 'Potrero Editado', 'tamaño' => 9.75, 'tipo_pasto' => 'Brachiaria', 'estado' => 'disponible',
+                'nombre' => 'Potrero Editado', 'tamano' => 9.75, 'tipo_pasto' => 'Brachiaria', 'estado' => 'disponible',
             ]],
             'compras' => [Compra::class, '/compras/%d', [
                 'fecha' => '2026-03-02', 'proveedor' => 'Proveedor Editado',

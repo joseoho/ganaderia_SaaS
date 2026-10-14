@@ -2,9 +2,8 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Model;
-
 use App\Models\Concerns\BelongsToTenant;
+use Illuminate\Database\Eloquent\Model;
 
 class Potrero extends Model
 {
@@ -13,11 +12,11 @@ class Potrero extends Model
     protected $fillable = [
         'inquilino_id',
         'nombre',
-        'tamaño',
+        'tamano',
         'tipo_pasto',
         'estado',
         'fecha_ultimo_ingreso',
-        'fecha_ultimo_descanso'
+        'fecha_ultimo_descanso',
     ];
 
     public function animales()

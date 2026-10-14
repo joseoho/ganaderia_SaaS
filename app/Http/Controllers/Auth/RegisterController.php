@@ -3,8 +3,8 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
-use App\Models\User;
 use App\Models\Inquilino;
+use App\Models\User;
 use Illuminate\Foundation\Auth\RegistersUsers;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
@@ -23,14 +23,15 @@ class RegisterController extends Controller
     */
 
     use RegistersUsers;
-            protected function showRegistrationForm()
-            {
-                // Obtener todas las categorías desde la base de datos
-                $inquilinos = Inquilino::all();
 
-                // Pasar las categorías a la vista
-                return view('auth.register', compact('inquilinos'));
-            }
+    protected function showRegistrationForm()
+    {
+        // Obtener todas las categorías desde la base de datos
+        $inquilinos = Inquilino::all();
+
+        // Pasar las categorías a la vista
+        return view('auth.register', compact('inquilinos'));
+    }
 
     /**
      * Where to redirect users after registration.
@@ -52,7 +53,6 @@ class RegisterController extends Controller
     /**
      * Get a validator for an incoming registration request.
      *
-     * @param  array  $data
      * @return \Illuminate\Contracts\Validation\Validator
      */
     protected function validator(array $data)
@@ -61,25 +61,24 @@ class RegisterController extends Controller
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'string', 'email', 'max:255', 'unique:users'],
             'password' => ['required', 'string', 'min:8', 'confirmed'],
-            // 'inquilino_id' => ['required', 'exists:inquilinos,inquilino_id']    
-            
+            // 'inquilino_id' => ['required', 'exists:inquilinos,inquilino_id']
+
         ]);
     }
 
     /**
      * Create a new user instance after a valid registration.
      *
-     * @param  array  $data
      * @return \App\Models\User
      */
     protected function create(array $data)
     {
         return User::create([
-            
+
             'name' => $data['name'],
             'email' => $data['email'],
             'password' => Hash::make($data['password']),
-            'inquilino_id' => $data['inquilino']
+            'inquilino_id' => $data['inquilino'],
         ]);
     }
 }

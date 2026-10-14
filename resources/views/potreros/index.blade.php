@@ -13,7 +13,7 @@
         <div class="card shadow-sm mb-3">
             <div class="card-body">
                 <h5>{{ $p->nombre }}</h5>
-                <p>{{ $p->tamaño }} ha</p>
+                <p>{{ $p->tamano }} ha</p>
                 <p>Estado: <strong>{{ $p->estado }}</strong></p>
                 <a href="{{ route('potreros.show', $p->id) }}" class="btn btn-info btn-sm">Ver</a>
             </div>

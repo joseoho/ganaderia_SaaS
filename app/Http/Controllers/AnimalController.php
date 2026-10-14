@@ -2,54 +2,54 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\StoreAnimalRequest;
+use App\Http\Requests\UpdateAnimalRequest;
 use App\Models\Animal;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use App\Http\Requests\StoreAnimalRequest;       
-use App\Http\Requests\UpdateAnimalRequest;
 
 class AnimalController extends Controller
 {
     public function index(Request $request)
-{
-    // $query = Animal::query();
-    $query = Animal::where('inquilino_id', Auth::user()->inquilino_id); // 👈 filtro por usuario logueado
-    // 🔍 Búsqueda por código interno o raza
-    if ($request->filled('search')) {
-        $query->where(function($q) use ($request) {
-            $q->where('codigo_interno', 'like', '%' . $request->search . '%')
-              ->orWhere('raza', 'like', '%' . $request->search . '%');
-        });
-    }
+    {
+        // $query = Animal::query();
+        $query = Animal::where('inquilino_id', Auth::user()->inquilino_id); // 👈 filtro por usuario logueado
+        // 🔍 Búsqueda por código interno o raza
+        if ($request->filled('search')) {
+            $query->where(function ($q) use ($request) {
+                $q->where('codigo_interno', 'like', '%'.$request->search.'%')
+                    ->orWhere('raza', 'like', '%'.$request->search.'%');
+            });
+        }
 
-    // 📂 Filtro por categoría
-    if ($request->filled('categoria')) {
-        $query->where('categoria', $request->categoria);
-    }
+        // 📂 Filtro por categoría
+        if ($request->filled('categoria')) {
+            $query->where('categoria', $request->categoria);
+        }
 
-    // 🐄 Filtro por sexo
-    if ($request->filled('sexo')) {
-        $query->where('sexo', $request->sexo);
-    }
+        // 🐄 Filtro por sexo
+        if ($request->filled('sexo')) {
+            $query->where('sexo', $request->sexo);
+        }
 
-    // 📅 Filtro por rango de fechas de nacimiento
-    if ($request->filled('fecha_desde')) {
-        $query->whereDate('fecha_nacimiento', '>=', $request->fecha_desde);
-    }
-    if ($request->filled('fecha_hasta')) {
-        $query->whereDate('fecha_nacimiento', '<=', $request->fecha_hasta);
-    }
+        // 📅 Filtro por rango de fechas de nacimiento
+        if ($request->filled('fecha_desde')) {
+            $query->whereDate('fecha_nacimiento', '>=', $request->fecha_desde);
+        }
+        if ($request->filled('fecha_hasta')) {
+            $query->whereDate('fecha_nacimiento', '<=', $request->fecha_hasta);
+        }
 
-    // ⚡ Filtro por estado
-    if ($request->filled('estado')) {
-        $query->where('estado', $request->estado);
+        // ⚡ Filtro por estado
+        if ($request->filled('estado')) {
+            $query->where('estado', $request->estado);
+        }
+
+        // Resultados paginados
+        $animales = $query->orderBy('fecha_nacimiento', 'desc')->paginate(10);
+
+        return view('animales.index', compact('animales'));
     }
-
-    // Resultados paginados
-    $animales = $query->orderBy('fecha_nacimiento', 'desc')->paginate(10);
-
-    return view('animales.index', compact('animales'));
-}
 
     public function create()
     {
@@ -60,11 +60,10 @@ class AnimalController extends Controller
     {
 
         $data = $request->validated();
-     // Agregar el inquilino_id a los datos
+        // Agregar el inquilino_id a los datos
         $data['inquilino_id'] = Auth::user()->inquilino_id; // 👈 multi-tenant automático
         // Crear el nuevo registro de Animal con los datos
         Animal::create($data);
-    
 
         // Animal::create([
         //     'inquilino_id' => Auth::user()->inquilino_id, // 👈 multi-tenant automático
@@ -79,7 +78,7 @@ class AnimalController extends Controller
         // ]);
 
         return redirect()->route('animales.index')
-        ->with('success', 'Animal registrado correctamente');
+            ->with('success', 'Animal registrado correctamente');
     }
 
     public function show(Animal $animal)
@@ -114,7 +113,7 @@ class AnimalController extends Controller
         // $animal->update($request->all());
 
         // return redirect()->route('animales.index')->with('success', 'Animal actualizado correctamente');
-         $animal->update($request->validated());
+        $animal->update($request->validated());
 
         return redirect()->route('animales.index')->with('success', 'Animal actualizado correctamente');
     }
@@ -128,17 +127,19 @@ class AnimalController extends Controller
         }
 
         $animal->delete();
+
         return redirect()->route('animales.index')->with('success', 'Animal eliminado');
 
     }
 
     public function qr(Animal $animal)
-{
-    if ($animal->inquilino_id !== Auth::user()->inquilino_id) abort(403);
+    {
+        if ($animal->inquilino_id !== Auth::user()->inquilino_id) {
+            abort(403);
+        }
 
-    $url = route('animal.qr.show', $animal->id);
+        $url = route('animal.qr.show', $animal->id);
 
-    return view('animales.qr', compact('animal', 'url'));
-}
-
+        return view('animales.qr', compact('animal', 'url'));
+    }
 }

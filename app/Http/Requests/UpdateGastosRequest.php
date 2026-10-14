@@ -2,21 +2,25 @@
 
 namespace App\Http\Requests;
 
-use Illuminate\Foundation\Http\FormRequest;
 use App\Traits\TieneValidacionesInquilino;
+use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Support\Facades\Auth;
 
 class UpdateGastosRequest extends FormRequest
 {
-       use TieneValidacionesInquilino;
-    public function authorize(): bool { return Auth::check(); }
+    use TieneValidacionesInquilino;
+
+    public function authorize(): bool
+    {
+        return Auth::check();
+    }
 
     public function rules(): array
     {
         return [
-            'categoria'   => 'required|string|max:100',
-            'monto'       => 'required|numeric|min:0',
-            'fecha'       => 'required|date',
+            'categoria' => 'required|string|max:100',
+            'monto' => 'required|numeric|min:0',
+            'fecha' => 'required|date',
             'descripcion' => 'nullable|string|max:500',
         ];
     }

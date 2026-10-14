@@ -2,22 +2,21 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\StoreGastosRequest;
+use App\Http\Requests\UpdateGastosRequest;
 use App\Models\Gastos;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use App\Http\Requests\StoreGastosRequest;
-use App\Http\Requests\UpdateGastosRequest;
-
 
 class GastosController extends Controller
 {
     public function index(Request $request)
     {
-         $query = Gastos::where('inquilino_id', Auth::user()->inquilino_id);
+        $query = Gastos::where('inquilino_id', Auth::user()->inquilino_id);
 
         if ($request->filled('search')) {
-            $query->where('categoria', 'like', '%' . $request->search . '%')
-                  ->orWhere('descripcion', 'like', '%' . $request->search . '%');
+            $query->where('categoria', 'like', '%'.$request->search.'%')
+                ->orWhere('descripcion', 'like', '%'.$request->search.'%');
         }
 
         if ($request->filled('fecha_desde')) {

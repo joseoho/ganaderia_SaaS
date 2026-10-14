@@ -88,9 +88,9 @@ class DatabaseSeeder extends Seeder
 
         // --- Potreros ---
         $potreros = collect([
-            ['nombre' => 'Potrero Norte', 'tamaño' => 12.50, 'tipo_pasto' => 'Brachiaria', 'estado' => 'ocupado'],
-            ['nombre' => 'Potrero Sur', 'tamaño' => 8.75, 'tipo_pasto' => 'Estrella', 'estado' => 'descanso'],
-            ['nombre' => 'Potrero El Alto', 'tamaño' => 20.00, 'tipo_pasto' => 'Kikuyo', 'estado' => 'disponible'],
+            ['nombre' => 'Potrero Norte', 'tamano' => 12.50, 'tipo_pasto' => 'Brachiaria', 'estado' => 'ocupado'],
+            ['nombre' => 'Potrero Sur', 'tamano' => 8.75, 'tipo_pasto' => 'Estrella', 'estado' => 'descanso'],
+            ['nombre' => 'Potrero El Alto', 'tamano' => 20.00, 'tipo_pasto' => 'Kikuyo', 'estado' => 'disponible'],
         ])->map(fn (array $p) => Potrero::create($p + [
             'inquilino_id' => $tenant,
             'fecha_ultimo_ingreso' => now()->subDays(30)->toDateString(),

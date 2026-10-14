@@ -2,9 +2,9 @@
 
 namespace App\Http\Requests;
 
-use Illuminate\Foundation\Http\FormRequest;
 use App\Traits\TieneValidacionesInquilino;
-use Illuminate\Support\Facades\Auth;    
+use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Support\Facades\Auth;
 
 class StoreProduccionLecheRequest extends FormRequest
 {
@@ -22,9 +22,9 @@ class StoreProduccionLecheRequest extends FormRequest
                 'required',
                 $this->existsInquilino('animales'),
             ],
-            'fecha'     => 'required|date',
-            'turno'     => 'nullable|string|max:20',
-            'litros'    => 'required|numeric|min:0',
+            'fecha' => 'required|date',
+            'turno' => 'nullable|string|max:20',
+            'litros' => 'required|numeric|min:0',
             'observaciones' => 'nullable|string|max:500',
         ];
     }

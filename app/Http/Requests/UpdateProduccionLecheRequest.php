@@ -2,8 +2,8 @@
 
 namespace App\Http\Requests;
 
-use Illuminate\Foundation\Http\FormRequest;
 use App\Traits\TieneValidacionesInquilino;
+use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Support\Facades\Auth;
 
 class UpdateProduccionLecheRequest extends FormRequest
@@ -12,8 +12,11 @@ class UpdateProduccionLecheRequest extends FormRequest
 
     public function authorize(): bool
     {
-        if (!Auth::check()) return false;
+        if (! Auth::check()) {
+            return false;
+        }
         $produccion = $this->route('produccion_leche');
+
         return $produccion && $produccion->inquilino_id === Auth::user()->inquilino_id;
     }
 
@@ -24,9 +27,9 @@ class UpdateProduccionLecheRequest extends FormRequest
                 'required',
                 $this->existsInquilino('animales'),
             ],
-            'fecha'     => 'required|date',
-            'turno'     => 'nullable|string|max:20',
-            'litros'    => 'required|numeric|min:0',
+            'fecha' => 'required|date',
+            'turno' => 'nullable|string|max:20',
+            'litros' => 'required|numeric|min:0',
             'observaciones' => 'nullable|string|max:500',
         ];
     }

@@ -2,13 +2,13 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\ProduccionLeche;
-use App\Models\Animal;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
 use App\Http\Requests\StoreProduccionLecheRequest;
 use App\Http\Requests\UpdateProduccionLecheRequest;
+use App\Models\Animal;
+use App\Models\ProduccionLeche;
 use Carbon\Carbon;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class ProduccionLecheController extends Controller
 {
@@ -18,7 +18,7 @@ class ProduccionLecheController extends Controller
 
         if ($request->filled('search')) {
             $query->whereHas('animal', function ($q) use ($request) {
-                $q->where('codigo_interno', 'like', '%' . $request->search . '%');
+                $q->where('codigo_interno', 'like', '%'.$request->search.'%');
             });
         }
 
@@ -54,14 +54,14 @@ class ProduccionLecheController extends Controller
         }
 
         ProduccionLeche::create([
-            'inquilino_id'     => Auth::user()->inquilino_id,
-            'animal_id'        => $request->animal_id,
-            'fecha'            => $request->fecha,
-            'turno'            => $request->turno,
-            'litros'           => $request->litros,
-            'litros_anteriores'=> $litros_anteriores,
-            'variacion'        => $variacion,
-            'observaciones'    => $request->observaciones,
+            'inquilino_id' => Auth::user()->inquilino_id,
+            'animal_id' => $request->animal_id,
+            'fecha' => $request->fecha,
+            'turno' => $request->turno,
+            'litros' => $request->litros,
+            'litros_anteriores' => $litros_anteriores,
+            'variacion' => $variacion,
+            'observaciones' => $request->observaciones,
         ]);
 
         return redirect()->route('produccion_leche.index')->with('success', 'Registro de producción guardado');
@@ -69,9 +69,11 @@ class ProduccionLecheController extends Controller
 
     public function show(ProduccionLeche $produccion_leche)
     {
-        if ($produccion_leche->inquilino_id !== Auth::user()->inquilino_id) abort(403);
+        if ($produccion_leche->inquilino_id !== Auth::user()->inquilino_id) {
+            abort(403);
+        }
 
-        $mes  = Carbon::parse($produccion_leche->fecha)->month;
+        $mes = Carbon::parse($produccion_leche->fecha)->month;
         $anio = Carbon::parse($produccion_leche->fecha)->year;
 
         $total_mes = ProduccionLeche::where('animal_id', $produccion_leche->animal_id)
@@ -80,8 +82,8 @@ class ProduccionLecheController extends Controller
             ->sum('litros');
 
         $alerta_baja = null;
-        if (!is_null($produccion_leche->variacion) && $produccion_leche->variacion < 0) {
-            $alerta_baja = "Atención: este animal bajó su producción en " . abs($produccion_leche->variacion) . " litros.";
+        if (! is_null($produccion_leche->variacion) && $produccion_leche->variacion < 0) {
+            $alerta_baja = 'Atención: este animal bajó su producción en '.abs($produccion_leche->variacion).' litros.';
         }
 
         return view('produccion_leche.show', compact('produccion_leche', 'total_mes', 'alerta_baja'));
@@ -89,7 +91,9 @@ class ProduccionLecheController extends Controller
 
     public function edit(ProduccionLeche $produccion_leche)
     {
-        if ($produccion_leche->inquilino_id !== Auth::user()->inquilino_id) abort(403);
+        if ($produccion_leche->inquilino_id !== Auth::user()->inquilino_id) {
+            abort(403);
+        }
 
         $animales = Animal::where('inquilino_id', Auth::user()->inquilino_id)
             ->where('sexo', 'h')
@@ -135,7 +139,9 @@ class ProduccionLecheController extends Controller
 
     public function destroy(ProduccionLeche $produccion_leche)
     {
-        if ($produccion_leche->inquilino_id !== Auth::user()->inquilino_id) abort(403);
+        if ($produccion_leche->inquilino_id !== Auth::user()->inquilino_id) {
+            abort(403);
+        }
 
         $produccion_leche->delete();
 

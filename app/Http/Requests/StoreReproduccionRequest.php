@@ -2,23 +2,26 @@
 
 namespace App\Http\Requests;
 
-use Illuminate\Foundation\Http\FormRequest;
 use App\Traits\TieneValidacionesInquilino;
+use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Support\Facades\Auth;
 
 class StoreReproduccionRequest extends FormRequest
 {
     use TieneValidacionesInquilino;
 
-    public function authorize(): bool { return Auth::check(); }
+    public function authorize(): bool
+    {
+        return Auth::check();
+    }
 
     public function rules(): array
     {
         return [
             'animal_id' => ['required', $this->existsInquilino('animales')],
-            'tipo'      => 'required|string|max:50',
-            'fecha'     => 'required|date',
-            'toro'      => 'nullable|string|max:100',
+            'tipo' => 'required|string|max:50',
+            'fecha' => 'required|date',
+            'toro' => 'nullable|string|max:100',
             'resultado' => 'nullable|string|max:100',
             'observaciones' => 'nullable|string|max:500',
         ];

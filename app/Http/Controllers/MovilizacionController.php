@@ -2,8 +2,8 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Movilizacion;
 use App\Models\Animal;
+use App\Models\Movilizacion;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -14,8 +14,8 @@ class MovilizacionController extends Controller
         $query = Movilizacion::where('inquilino_id', Auth::user()->inquilino_id);
 
         if ($request->filled('search')) {
-            $query->whereHas('animal', function($q) use ($request) {
-                $q->where('codigo_interno', 'like', '%' . $request->search . '%');
+            $query->whereHas('animal', function ($q) use ($request) {
+                $q->where('codigo_interno', 'like', '%'.$request->search.'%');
             });
         }
 
@@ -31,6 +31,7 @@ class MovilizacionController extends Controller
     public function create()
     {
         $animales = Animal::where('inquilino_id', Auth::user()->inquilino_id)->get();
+
         return view('movilizacion.create', compact('animales'));
     }
 
@@ -57,14 +58,18 @@ class MovilizacionController extends Controller
 
     public function show(Movilizacion $movilizacione)
     {
-        if ($movilizacione->inquilino_id !== Auth::user()->inquilino_id) abort(403);
+        if ($movilizacione->inquilino_id !== Auth::user()->inquilino_id) {
+            abort(403);
+        }
 
         return view('movilizacion.show', compact('movilizacione'));
     }
 
     public function edit(Movilizacion $movilizacione)
     {
-        if ($movilizacione->inquilino_id !== Auth::user()->inquilino_id) abort(403);
+        if ($movilizacione->inquilino_id !== Auth::user()->inquilino_id) {
+            abort(403);
+        }
 
         $animales = Animal::where('inquilino_id', Auth::user()->inquilino_id)->get();
 
@@ -73,7 +78,9 @@ class MovilizacionController extends Controller
 
     public function update(Request $request, Movilizacion $movilizacione)
     {
-        if ($movilizacione->inquilino_id !== Auth::user()->inquilino_id) abort(403);
+        if ($movilizacione->inquilino_id !== Auth::user()->inquilino_id) {
+            abort(403);
+        }
 
         $datos = $request->validate([
             'animal_id' => 'required',
@@ -88,7 +95,9 @@ class MovilizacionController extends Controller
 
     public function destroy(Movilizacion $movilizacione)
     {
-        if ($movilizacione->inquilino_id !== Auth::user()->inquilino_id) abort(403);
+        if ($movilizacione->inquilino_id !== Auth::user()->inquilino_id) {
+            abort(403);
+        }
 
         $movilizacione->delete();
 

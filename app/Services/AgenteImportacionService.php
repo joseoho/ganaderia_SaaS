@@ -6,179 +6,179 @@ use Illuminate\Support\Collection;
 
 class AgenteImportacionService
 {
-// //     public function sugerirMapeo(array $headers): array
-// //     {
-// //         // ============================================
-// //     // 1. Sugerir mapeo automático
-// //     // ============================================
-   
-// //         $sugerencias = [];
+    // //     public function sugerirMapeo(array $headers): array
+    // //     {
+    // //         // ============================================
+    // //     // 1. Sugerir mapeo automático
+    // //     // ============================================
 
-// //         $patrones = [
-// //             'codigo_interno'   => ['codigo', 'cod', 'id', 'identificacion', 'arete'],
-// //             'raza'             => ['raza', 'breed'],
-// //             'sexo'             => ['sexo', 'gender', 'sex'],
-// //             'fecha_nacimiento' => ['fecha_nac', 'nacimiento', 'birth', 'fnac'],
-// //             'peso_actual'      => ['peso', 'weight', 'kg', 'kgs'],
-// //             'estado'           => ['estado', 'status'],
-// //         ];
+    // //         $sugerencias = [];
 
-// //         foreach ($patrones as $campo => $posibles) {
-// //             foreach ($headers as $h) {
-// //                 $hLower = strtolower($h);
-// //                 foreach ($posibles as $p) {
-// //                     if (str_contains($hLower, $p)) {
-// //                         $sugerencias[$campo] = $h;
-// //                         break 2;
-// //                     }
-// //                 }
-// //             }
-// //         }
+    // //         $patrones = [
+    // //             'codigo_interno'   => ['codigo', 'cod', 'id', 'identificacion', 'arete'],
+    // //             'raza'             => ['raza', 'breed'],
+    // //             'sexo'             => ['sexo', 'gender', 'sex'],
+    // //             'fecha_nacimiento' => ['fecha_nac', 'nacimiento', 'birth', 'fnac'],
+    // //             'peso_actual'      => ['peso', 'weight', 'kg', 'kgs'],
+    // //             'estado'           => ['estado', 'status'],
+    // //         ];
 
-// //         return $sugerencias;
-// //     }
+    // //         foreach ($patrones as $campo => $posibles) {
+    // //             foreach ($headers as $h) {
+    // //                 $hLower = strtolower($h);
+    // //                 foreach ($posibles as $p) {
+    // //                     if (str_contains($hLower, $p)) {
+    // //                         $sugerencias[$campo] = $h;
+    // //                         break 2;
+    // //                     }
+    // //                 }
+    // //             }
+    // //         }
 
-// //     // ============================================
-// //     // 2. Limpieza automática de datos
-// //     // ============================================
-// //     public function limpiarFila(array $row): array
-// //     {
-// //         foreach ($row as $key => $value) {
+    // //         return $sugerencias;
+    // //     }
 
-// //             // Limpiar espacios
-// //             if (is_string($value)) {
-// //                 $value = trim($value);
-// //             }
+    // //     // ============================================
+    // //     // 2. Limpieza automática de datos
+    // //     // ============================================
+    // //     public function limpiarFila(array $row): array
+    // //     {
+    // //         foreach ($row as $key => $value) {
 
-// //             // Limpiar peso (ej: "120kg" → 120)
-// //             if (is_string($value) && preg_match('/^\d+(\.\d+)?\s*kg$/i', $value)) {
-// //                 $value = floatval($value);
-// //             }
+    // //             // Limpiar espacios
+    // //             if (is_string($value)) {
+    // //                 $value = trim($value);
+    // //             }
 
-// //             // Normalizar fechas
-// //             if ($this->esFecha($value)) {
-// //                 $value = date('Y-m-d', strtotime($value));
-// //             }
+    // //             // Limpiar peso (ej: "120kg" → 120)
+    // //             if (is_string($value) && preg_match('/^\d+(\.\d+)?\s*kg$/i', $value)) {
+    // //                 $value = floatval($value);
+    // //             }
 
-// //             $row[$key] = $value;
-// //         }
+    // //             // Normalizar fechas
+    // //             if ($this->esFecha($value)) {
+    // //                 $value = date('Y-m-d', strtotime($value));
+    // //             }
 
-// //         return $row;
-// //     }
+    // //             $row[$key] = $value;
+    // //         }
 
-// //     // ============================================
-// //     // 3. Detectar si un valor es fecha
-// //     // ============================================
-// //     private function esFecha($value): bool
-// //     {
-// //         if (!$value) return false;
-// //         return strtotime($value) !== false;
-// //     }
+    // //         return $row;
+    // //     }
 
-// //     // ============================================
-// //     // 4. Detectar problemas en el archivo
-// //     // ============================================
-// //     public function detectarProblemas(Collection $rows, array $map): array
-// //     {
-// //         $problemas = [
-// //             'fechas_invalidas' => 0,
-// //             'pesos_invalidos'  => 0,
-// //             'codigos_vacios'   => 0,
-// //             'duplicados'       => 0,
-// //         ];
+    // //     // ============================================
+    // //     // 3. Detectar si un valor es fecha
+    // //     // ============================================
+    // //     private function esFecha($value): bool
+    // //     {
+    // //         if (!$value) return false;
+    // //         return strtotime($value) !== false;
+    // //     }
 
-// //         $codigos = [];
+    // //     // ============================================
+    // //     // 4. Detectar problemas en el archivo
+    // //     // ============================================
+    // //     public function detectarProblemas(Collection $rows, array $map): array
+    // //     {
+    // //         $problemas = [
+    // //             'fechas_invalidas' => 0,
+    // //             'pesos_invalidos'  => 0,
+    // //             'codigos_vacios'   => 0,
+    // //             'duplicados'       => 0,
+    // //         ];
 
-// //         foreach ($rows as $row) {
+    // //         $codigos = [];
 
-// //             // Código vacío
-// //             if (empty($row[$map['codigo_interno']] ?? null)) {
-// // $problemas['codigos_vacios']++;
-// //             }
+    // //         foreach ($rows as $row) {
 
-// //             // Duplicados
-// //             $codigo = $row[$map['codigo_interno']] ?? null;
-// //             if ($codigo) {
-// //                 if (in_array($codigo, $codigos)) {
-// //                     $problemas['duplicados']++;
-// //                 }
-// //                 $codigos[] = $codigo;
-// //             }
+    // //             // Código vacío
+    // //             if (empty($row[$map['codigo_interno']] ?? null)) {
+    // // $problemas['codigos_vacios']++;
+    // //             }
 
-// //             // Peso inválido
-// //             if (isset($map['peso_actual'])) {
-// //                 $peso = $row[$map['peso_actual']] ?? null;
-// //                 if ($peso && !is_numeric($peso)) {
-// //                     $problemas['pesos_invalidos']++;
-// //                 }
-// //             }
+    // //             // Duplicados
+    // //             $codigo = $row[$map['codigo_interno']] ?? null;
+    // //             if ($codigo) {
+    // //                 if (in_array($codigo, $codigos)) {
+    // //                     $problemas['duplicados']++;
+    // //                 }
+    // //                 $codigos[] = $codigo;
+    // //             }
 
-// //             // Fecha inválida
-// //             if (isset($map['fecha_nacimiento'])) {
-// //                 $fecha = $row[$map['fecha_nacimiento']] ?? null;
-// //                 if ($fecha && !$this->esFecha($fecha)) {
-// //                     $problemas['fechas_invalidas']++;
-// //                 }
-// //             }
-// //         }
+    // //             // Peso inválido
+    // //             if (isset($map['peso_actual'])) {
+    // //                 $peso = $row[$map['peso_actual']] ?? null;
+    // //                 if ($peso && !is_numeric($peso)) {
+    // //                     $problemas['pesos_invalidos']++;
+    // //                 }
+    // //             }
 
-// //         return $problemas;
-// //     }
+    // //             // Fecha inválida
+    // //             if (isset($map['fecha_nacimiento'])) {
+    // //                 $fecha = $row[$map['fecha_nacimiento']] ?? null;
+    // //                 if ($fecha && !$this->esFecha($fecha)) {
+    // //                     $problemas['fechas_invalidas']++;
+    // //                 }
+    // //             }
+    // //         }
 
-// //     // ============================================
-// //     // 5. Correcciones automáticas
-// //     // ============================================
-// //     public function corregirAutomaticamente(array $row, array $map): array
-// //     {
-// //         // Peso → si no es numérico, poner 0
-// //         if (isset($map['peso_actual'])) {
-// //             $peso = $row[$map['peso_actual']] ?? null;
-// //             if ($peso && !is_numeric($peso)) {
-// //                 $row[$map['peso_actual']] = 0;
-// //             }
-// //         }
+    // //         return $problemas;
+    // //     }
 
-// //         // Estado → si está vacío, poner "activo"
-// //         if (isset($map['estado'])) {
-// //             if (empty($row[$map['estado']])) {
-// //                 $row[$map['estado']] = 'activo';
-// //             }
-// //         }
+    // //     // ============================================
+    // //     // 5. Correcciones automáticas
+    // //     // ============================================
+    // //     public function corregirAutomaticamente(array $row, array $map): array
+    // //     {
+    // //         // Peso → si no es numérico, poner 0
+    // //         if (isset($map['peso_actual'])) {
+    // //             $peso = $row[$map['peso_actual']] ?? null;
+    // //             if ($peso && !is_numeric($peso)) {
+    // //                 $row[$map['peso_actual']] = 0;
+    // //             }
+    // //         }
 
-// //         return $row;
-// //     }
+    // //         // Estado → si está vacío, poner "activo"
+    // //         if (isset($map['estado'])) {
+    // //             if (empty($row[$map['estado']])) {
+    // //                 $row[$map['estado']] = 'activo';
+    // //             }
+    // //         }
 
-// //     // ============================================
-// //     // 6. Mensajes inteligentes
-// //     // ============================================
-// //     public function generarMensajes(array $problemas, array $sugerencias): array
-// //     {
-// //         $mensajes = [];
+    // //         return $row;
+    // //     }
 
-// //         if (!empty($sugerencias)) {
-// //             $mensajes[] = "Detecté automáticamente columnas que coinciden con los campos del sistema. Ya preseleccioné algunas para ayudarte.";
-// //         }
+    // //     // ============================================
+    // //     // 6. Mensajes inteligentes
+    // //     // ============================================
+    // //     public function generarMensajes(array $problemas, array $sugerencias): array
+    // //     {
+    // //         $mensajes = [];
 
-// //         if ($problemas['duplicados'] > 0) {
-// //             $mensajes[] = "Hay {$problemas['duplicados']} códigos duplicados. Se actualizarán los animales existentes en lugar de crear nuevos.";
-// //         }
+    // //         if (!empty($sugerencias)) {
+    // //             $mensajes[] = "Detecté automáticamente columnas que coinciden con los campos del sistema. Ya preseleccioné algunas para ayudarte.";
+    // //         }
 
-// //         if ($problemas['fechas_invalidas'] > 0) {
-// //             $mensajes[] = "Hay {$problemas['fechas_invalidas']} fechas inválidas. Serán ignoradas o corregidas automáticamente.";
-// //         }
+    // //         if ($problemas['duplicados'] > 0) {
+    // //             $mensajes[] = "Hay {$problemas['duplicados']} códigos duplicados. Se actualizarán los animales existentes en lugar de crear nuevos.";
+    // //         }
 
-// //         if ($problemas['pesos_invalidos'] > 0) {
-// //             $mensajes[] = "Hay {$problemas['pesos_invalidos']} pesos no numéricos. Serán convertidos a 0.";
-// //         }
+    // //         if ($problemas['fechas_invalidas'] > 0) {
+    // //             $mensajes[] = "Hay {$problemas['fechas_invalidas']} fechas inválidas. Serán ignoradas o corregidas automáticamente.";
+    // //         }
 
-// //         if ($problemas['codigos_vacios'] > 0) {
-// //             $mensajes[] = "Hay {$problemas['codigos_vacios']} animales sin código. No podrán importarse.";
-// //         }
+    // //         if ($problemas['pesos_invalidos'] > 0) {
+    // //             $mensajes[] = "Hay {$problemas['pesos_invalidos']} pesos no numéricos. Serán convertidos a 0.";
+    // //         }
 
-// //         if (empty($mensajes)) {
-// //             $mensajes[] = "Todo se ve perfecto. Tu archivo está listo para importar sin problemas.";
-// //         }
+    // //         if ($problemas['codigos_vacios'] > 0) {
+    // //             $mensajes[] = "Hay {$problemas['codigos_vacios']} animales sin código. No podrán importarse.";
+    // //         }
 
-// //         return $mensajes;
-//     }
+    // //         if (empty($mensajes)) {
+    // //             $mensajes[] = "Todo se ve perfecto. Tu archivo está listo para importar sin problemas.";
+    // //         }
+
+    // //         return $mensajes;
+    //     }
 }
