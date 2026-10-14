@@ -74,11 +74,20 @@ class ImportService
 
         $primeraFila = $rows->first();
 
-        // Si es un array asociativo (tipo Collection con keys)
         if ($primeraFila instanceof \Illuminate\Support\Collection) {
-            // Quitar espacios y comillas a los nombres de columna
-            return $primeraFila->keys()->map(function ($key) {
-                return trim($key, " \t\n\r\0\x0B\"'");
+            $claves = $primeraFila->keys();
+
+            // Laravel Excel devuelve las filas con claves NUMERICAS cuando el
+            // archivo no declara fila de encabezado. En ese caso los nombres de
+            // columna son los VALORES de la primera fila; devolver las claves
+            // hacia que la pantalla de mapeo ofreciera "0", "1", "2"... y que
+            // las sugerencias automaticas no coincidieran nunca.
+            $numericas = $claves->every(fn ($clave) => is_int($clave) || ctype_digit((string) $clave));
+
+            $valores = $numericas ? $primeraFila->values() : $claves;
+
+            return $valores->map(function ($valor) {
+                return trim((string) $valor, " \t\n\r\0\x0B\"'");
             })->toArray();
         }
 
@@ -93,7 +102,19 @@ class ImportService
     }
 
     /**
-     * Limpia filas vacías y normaliza los datos.
+     * Limpia filas vacías y nombra las columnas con los encabezados.
+     *
+     * La primera fila son los encabezados: se usa para poner nombre a cada
+     * columna y NO se devuelve como dato.
+     *
+     * Antes hacia justo lo contrario: filtraba las filas vacias y volvia a
+     * insertar la fila de encabezados al principio. Con eso la importacion
+     * creaba un registro de mas, con los propios nombres de columna como
+     * contenido (un animal llamado "codigo_interno"), y las filas quedaban con
+     * claves numericas, asi que el mapeo del usuario apuntaba a "0", "1", "2"...
+     * en lugar de a los nombres de columna.
+     *
+     * @return Collection<int, Collection<string, mixed>>
      */
     public function limpiarFilas(Collection $rows): Collection
     {
@@ -101,22 +122,34 @@ class ImportService
             return $rows;
         }
 
-        // Saltar la primera fila (encabezados) para limpiar solo los datos
-        $headers = $rows->first();
-        $dataRows = $rows->slice(1);
+        $nombres = collect($rows->first())
+            ->map(fn ($valor) => trim((string) $valor, " \t\n\r\0\x0B\"'"))
+            ->values()
+            ->all();
 
-        // Filtrar filas vacías (todas las celdas null o vacías)
-        $dataRows = $dataRows->filter(function ($row) {
-            if ($row instanceof \Illuminate\Support\Collection) {
-                return $row->filter(function ($value) {
-                    return $value !== null && $value !== '';
-                })->isNotEmpty();
+        $filas = collect();
+
+        foreach ($rows->slice(1) as $fila) {
+            $valores = collect($fila)->values()->all();
+
+            // Se descartan las filas vacias.
+            if (collect($valores)->filter(fn ($valor) => $valor !== null && $valor !== '')->isEmpty()) {
+                continue;
             }
 
-            return ! empty(array_filter((array) $row));
-        });
+            // Un CSV puede traer filas con mas celdas que encabezados: se
+            // nombran las sobrantes para no perder el dato.
+            $nombresFila = $nombres;
+            for ($i = count($nombresFila); $i < count($valores); $i++) {
+                $nombresFila[] = 'columna_'.$i;
+            }
 
-        // Volver a unir encabezados + datos limpios
-        return $dataRows->prepend($headers)->values();
+            $filas->push(collect(array_combine(
+                $nombresFila,
+                array_pad($valores, count($nombresFila), null)
+            )));
+        }
+
+        return $filas->values();
     }
 }

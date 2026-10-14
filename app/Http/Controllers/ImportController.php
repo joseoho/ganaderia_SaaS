@@ -9,17 +9,49 @@ use App\Models\ProduccionLeche;
 use App\Models\Venta;
 use App\Services\ImportService;
 use Illuminate\Http\Request;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Validation\ValidationException;
 
 class ImportController extends Controller
 {
+    /** Minutos que se conservan las filas de una importacion a medio hacer. */
+    private const MINUTOS_FILAS = 30;
+
     protected ImportService $importService;
 
     public function __construct(ImportService $importService)
     {
         $this->importService = $importService;
+    }
+
+    /**
+     * Guarda las filas leidas del archivo entre el paso de mapeo y el de
+     * confirmacion.
+     *
+     * NO se guardan en la sesion: con SESSION_DRIVER=database el contenido
+     * entero de la sesion se escribe y se RELEE EN CADA PETICION del usuario,
+     * asi que un CSV de miles de filas penalizaba todas las paginas que visitara
+     * despues durante las dos horas de vida de la sesion. En la cache el
+     * payload solo se lee cuando se pide de verdad, y caduca solo.
+     *
+     * La clave incluye el usuario para que dos personas no se pisen el archivo.
+     */
+    private function guardarFilas(string $tipo, Collection $filas): void
+    {
+        Cache::put($this->claveFilas($tipo), $filas, now()->addMinutes(self::MINUTOS_FILAS));
+    }
+
+    private function leerFilas(string $tipo): Collection
+    {
+        return collect(Cache::get($this->claveFilas($tipo), []));
+    }
+
+    private function claveFilas(string $tipo): string
+    {
+        return 'importacion:'.Auth::id().':'.$tipo;
     }
 
     public function index()
@@ -54,13 +86,15 @@ class ImportController extends Controller
                 return back()->with('error', 'El archivo está vacío o no se pudo leer.');
             }
 
+            // Los encabezados se leen ANTES de limpiar: limpiarFilas descarta la primera
+            // fila (la de encabezados), asi que despues ya no se pueden obtener.
+            $headers = $this->importService->obtenerEncabezados($rows);
+
             $rows = $this->importService->limpiarFilas($rows);
 
             if ($rows->isEmpty()) {
                 return back()->with('error', 'No se encontraron datos válidos en el archivo.');
             }
-
-            $headers = $this->importService->obtenerEncabezados($rows);
 
             if (empty($headers)) {
                 return back()->with('error', 'No se detectaron encabezados en el archivo.');
@@ -81,10 +115,8 @@ class ImportController extends Controller
             // Sugerir mapeo automático
             $sugerencias = $this->sugerirMapeo($headers, array_keys($camposSistema));
 
-            session([
-                'rows_animales' => $rows,
-                'headers_animales' => $headers,
-            ]);
+            $this->guardarFilas('animales', $rows);
+            session(['headers_animales' => $headers]);
 
             return view('import.animales.map', compact('headers', 'camposSistema', 'sugerencias'));
 
@@ -100,7 +132,7 @@ class ImportController extends Controller
     public function animalesPreview(Request $request)
     {
         $map = $request->map;
-        $rows = collect(session('rows_animales'));
+        $rows = $this->leerFilas('animales');
 
         $preview = $rows->take(20)->map(function ($row) use ($map) {
             $data = [];
@@ -118,7 +150,7 @@ class ImportController extends Controller
 
     public function animalesImport()
     {
-        $rows = collect(session('rows_animales'));
+        $rows = $this->leerFilas('animales');
         $map = session('map_animales');
         $inquilino = Auth::user()->inquilino_id;
 
@@ -175,13 +207,15 @@ class ImportController extends Controller
                 return back()->with('error', 'El archivo está vacío o no se pudo leer.');
             }
 
+            // Los encabezados se leen ANTES de limpiar: limpiarFilas descarta la primera
+            // fila (la de encabezados), asi que despues ya no se pueden obtener.
+            $headers = $this->importService->obtenerEncabezados($rows);
+
             $rows = $this->importService->limpiarFilas($rows);
 
             if ($rows->isEmpty()) {
                 return back()->with('error', 'No se encontraron datos válidos en el archivo.');
             }
-
-            $headers = $this->importService->obtenerEncabezados($rows);
 
             if (empty($headers)) {
                 return back()->with('error', 'No se detectaron encabezados en el archivo.');
@@ -200,10 +234,8 @@ class ImportController extends Controller
 
             $sugerencias = $this->sugerirMapeo($headers, array_keys($camposSistema));
 
-            session([
-                'rows_produccion' => $rows,
-                'headers_produccion' => $headers,
-            ]);
+            $this->guardarFilas('produccion', $rows);
+            session(['headers_produccion' => $headers]);
 
             return view('import.produccion.map', compact('headers', 'camposSistema', 'sugerencias'));
 
@@ -219,7 +251,7 @@ class ImportController extends Controller
     public function produccionPreview(Request $request)
     {
         $map = $request->map;
-        $rows = collect(session('rows_produccion'));
+        $rows = $this->leerFilas('produccion');
 
         $preview = $rows->take(20)->map(function ($row) use ($map) {
             $data = [];
@@ -237,7 +269,7 @@ class ImportController extends Controller
 
     public function produccionImport()
     {
-        $rows = collect(session('rows_produccion'));
+        $rows = $this->leerFilas('produccion');
         $map = session('map_produccion');
         $inquilino = Auth::user()->inquilino_id;
 
@@ -294,13 +326,15 @@ class ImportController extends Controller
                 return back()->with('error', 'El archivo está vacío o no se pudo leer.');
             }
 
+            // Los encabezados se leen ANTES de limpiar: limpiarFilas descarta la primera
+            // fila (la de encabezados), asi que despues ya no se pueden obtener.
+            $headers = $this->importService->obtenerEncabezados($rows);
+
             $rows = $this->importService->limpiarFilas($rows);
 
             if ($rows->isEmpty()) {
                 return back()->with('error', 'No se encontraron datos válidos en el archivo.');
             }
-
-            $headers = $this->importService->obtenerEncabezados($rows);
 
             if (empty($headers)) {
                 return back()->with('error', 'No se detectaron encabezados en el archivo.');
@@ -316,10 +350,8 @@ class ImportController extends Controller
 
             $sugerencias = $this->sugerirMapeo($headers, array_keys($camposSistema));
 
-            session([
-                'rows_compras' => $rows,
-                'headers_compras' => $headers,
-            ]);
+            $this->guardarFilas('compras', $rows);
+            session(['headers_compras' => $headers]);
 
             return view('import.compras.map', compact('headers', 'camposSistema', 'sugerencias'));
 
@@ -335,7 +367,7 @@ class ImportController extends Controller
     public function comprasPreview(Request $request)
     {
         $map = $request->map;
-        $rows = collect(session('rows_compras'));
+        $rows = $this->leerFilas('compras');
 
         $preview = $rows->take(20)->map(function ($row) use ($map) {
             $data = [];
@@ -353,7 +385,7 @@ class ImportController extends Controller
 
     public function comprasImport()
     {
-        $rows = collect(session('rows_compras'));
+        $rows = $this->leerFilas('compras');
         $map = session('map_compras');
         $inquilino = Auth::user()->inquilino_id;
 
@@ -399,13 +431,15 @@ class ImportController extends Controller
                 return back()->with('error', 'El archivo está vacío o no se pudo leer.');
             }
 
+            // Los encabezados se leen ANTES de limpiar: limpiarFilas descarta la primera
+            // fila (la de encabezados), asi que despues ya no se pueden obtener.
+            $headers = $this->importService->obtenerEncabezados($rows);
+
             $rows = $this->importService->limpiarFilas($rows);
 
             if ($rows->isEmpty()) {
                 return back()->with('error', 'No se encontraron datos válidos en el archivo.');
             }
-
-            $headers = $this->importService->obtenerEncabezados($rows);
 
             if (empty($headers)) {
                 return back()->with('error', 'No se detectaron encabezados en el archivo.');
@@ -421,10 +455,8 @@ class ImportController extends Controller
 
             $sugerencias = $this->sugerirMapeo($headers, array_keys($camposSistema));
 
-            session([
-                'rows_ventas' => $rows,
-                'headers_ventas' => $headers,
-            ]);
+            $this->guardarFilas('ventas', $rows);
+            session(['headers_ventas' => $headers]);
 
             return view('import.ventas.map', compact('headers', 'camposSistema', 'sugerencias'));
 
@@ -440,7 +472,7 @@ class ImportController extends Controller
     public function ventasPreview(Request $request)
     {
         $map = $request->map;
-        $rows = collect(session('rows_ventas'));
+        $rows = $this->leerFilas('ventas');
 
         $preview = $rows->take(20)->map(function ($row) use ($map) {
             $data = [];
@@ -458,7 +490,7 @@ class ImportController extends Controller
 
     public function ventasImport()
     {
-        $rows = collect(session('rows_ventas'));
+        $rows = $this->leerFilas('ventas');
         $map = session('map_ventas');
         $inquilino = Auth::user()->inquilino_id;
 

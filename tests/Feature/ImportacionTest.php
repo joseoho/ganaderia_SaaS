@@ -96,29 +96,119 @@ class ImportacionTest extends TestCase
 
     public function test_la_importacion_confirmada_crea_los_animales_en_la_ganaderia_activa(): void
     {
-        $codigo = 'IMP-CONFIRMADO';
+        // Flujo completo de verdad: subir, confirmar el mapeo y confirmar la
+        // importacion. Antes esta prueba preparaba la sesion a mano, de modo que
+        // comprobaba DONDE se guardan las filas y no que el flujo funcione. Al
+        // mover las filas de la sesion a la cache se rompio, que es justo lo que
+        // debe pasarle a una prueba que vigila un detalle interno.
+        $mapa = [
+            'codigo_interno' => 'codigo_interno',
+            'categoria' => 'categoria',
+            'raza' => 'raza',
+            'fecha_nacimiento' => 'fecha_nacimiento',
+            'sexo' => 'sexo',
+            'estado' => 'estado',
+        ];
 
         $this->actingAs($this->usuario)
-            ->withSession([
-                'rows_animales' => collect([
-                    ['codigo_interno' => $codigo, 'categoria' => 'bovino', 'raza' => 'Holstein',
-                        'fecha_nacimiento' => '2025-01-01', 'sexo' => 'M', 'estado' => 'activo'],
-                ]),
-                'map_animales' => [
-                    'codigo_interno' => 'codigo_interno',
-                    'categoria' => 'categoria',
-                    'raza' => 'raza',
-                    'fecha_nacimiento' => 'fecha_nacimiento',
-                    'sexo' => 'sexo',
-                    'estado' => 'estado',
-                ],
+            ->post('/importar/animales/upload', [
+                'archivo' => UploadedFile::fake()->createWithContent('animales.csv', $this->csv(2)),
             ])
+            ->assertSessionHasNoErrors()
+            ->assertOk();
+
+        $this->actingAs($this->usuario)
+            ->post('/importar/animales/preview', ['map' => $mapa])
+            ->assertOk();
+
+        $this->actingAs($this->usuario)
             ->post('/importar/animales/import')
             ->assertOk();
 
-        $animal = Animal::withoutTenantScope()->where('codigo_interno', $codigo)->first();
+        $animal = Animal::withoutTenantScope()->where('codigo_interno', 'IMP-1')->first();
 
         $this->assertNotNull($animal, 'La importacion confirmada no creo el animal.');
         $this->assertSame($this->usuario->inquilino_id, $animal->inquilino_id);
+    }
+
+    public function test_las_filas_del_archivo_no_viajan_en_la_sesion(): void
+    {
+        // Con SESSION_DRIVER=database, todo lo que se guarda en la sesion se
+        // escribe y se RELEE EN CADA PETICION del usuario. Un CSV de miles de
+        // filas ahi penalizaba todas las paginas que visitara despues durante
+        // las dos horas de vida de la sesion. Ahora viven en la cache, con
+        // caducidad, y solo se leen cuando se piden.
+        $respuesta = $this->actingAs($this->usuario)
+            ->post('/importar/animales/upload', [
+                'archivo' => UploadedFile::fake()->createWithContent('animales.csv', $this->csv(3)),
+            ]);
+
+        $respuesta->assertSessionHasNoErrors();
+        $respuesta->assertSessionMissing('rows_animales');
+
+        // Y aun asi el paso siguiente encuentra las filas.
+        $this->actingAs($this->usuario)
+            ->post('/importar/animales/preview', [
+                'map' => ['codigo_interno' => 'codigo_interno'],
+            ])
+            ->assertOk()
+            ->assertSee('IMP-1');
+    }
+
+    public function test_la_pantalla_de_mapeo_ofrece_los_nombres_reales_de_columna(): void
+    {
+        // Antes de corregirlo, la pantalla de mapeo pedia elegir entre "0", "1",
+        // "2"... porque los encabezados se leian DESPUES de descartar la fila de
+        // encabezados. Ademas, con esas claves numericas, las sugerencias
+        // automaticas de mapeo no coincidian nunca.
+        $respuesta = $this->actingAs($this->usuario)
+            ->post('/importar/animales/upload', [
+                'archivo' => UploadedFile::fake()->createWithContent('animales.csv', $this->csv(2)),
+            ]);
+
+        $respuesta->assertOk();
+        $respuesta->assertSee('codigo_interno');
+        $respuesta->assertSee('fecha_nacimiento');
+    }
+
+    public function test_la_fila_de_encabezados_no_se_importa_como_registro(): void
+    {
+        // limpiarFilas volvia a insertar la fila de encabezados al principio, asi
+        // que la importacion creaba un registro de mas cuyo contenido eran los
+        // propios nombres de columna: un animal con codigo_interno
+        // "codigo_interno".
+        $mapa = [
+            'codigo_interno' => 'codigo_interno',
+            'categoria' => 'categoria',
+            'raza' => 'raza',
+            'fecha_nacimiento' => 'fecha_nacimiento',
+            'sexo' => 'sexo',
+            'estado' => 'estado',
+        ];
+
+        $this->actingAs($this->usuario)
+            ->post('/importar/animales/upload', [
+                'archivo' => UploadedFile::fake()->createWithContent('animales.csv', $this->csv(3)),
+            ])
+            ->assertOk();
+
+        $this->actingAs($this->usuario)
+            ->post('/importar/animales/preview', ['map' => $mapa])
+            ->assertOk();
+
+        $this->actingAs($this->usuario)
+            ->post('/importar/animales/import')
+            ->assertOk();
+
+        $this->assertNull(
+            Animal::withoutTenantScope()->where('codigo_interno', 'codigo_interno')->first(),
+            'Se importo la fila de encabezados como si fuera un registro.'
+        );
+
+        $this->assertSame(
+            3,
+            Animal::withoutTenantScope()->where('codigo_interno', 'like', 'IMP-%')->count(),
+            'No se importaron exactamente las filas de datos.'
+        );
     }
 }
