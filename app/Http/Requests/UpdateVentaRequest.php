@@ -13,7 +13,7 @@ class UpdateVentaRequest extends FormRequest
     {
         if (!Auth::check()) return false;
         $venta = $this->route('venta');
-        return $venta && $venta->inquilino_id === Auth::user()->inquilino->inquilino_id;
+        return $venta && $venta->inquilino_id === Auth::user()->inquilino_id;
     }
 
     public function rules(): array

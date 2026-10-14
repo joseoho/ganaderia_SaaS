@@ -13,7 +13,7 @@ class UpdatePotreroRequest extends FormRequest
     {
         if (!Auth::check()) return false;
         $potrero = $this->route('potrero');
-        return $potrero && $potrero->inquilino_id === Auth::user()->inquilino->inquilino_id;
+        return $potrero && $potrero->inquilino_id === Auth::user()->inquilino_id;
     }
 
     public function rules(): array

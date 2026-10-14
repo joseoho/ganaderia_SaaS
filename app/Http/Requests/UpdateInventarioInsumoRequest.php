@@ -13,7 +13,7 @@ class UpdateInventarioInsumoRequest extends FormRequest
     {
         if (!Auth::check()) return false;
         $insumo = $this->route('inventario');
-        return $insumo && $insumo->inquilino_id === Auth::user()->inquilino->inquilino_id;
+        return $insumo && $insumo->inquilino_id === Auth::user()->inquilino_id;
     }
 
     public function rules(): array

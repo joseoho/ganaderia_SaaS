@@ -58,7 +58,7 @@ class NotificacionController extends Controller
         'fecha_envio' => 'required|date', 
         'estado' => 'required|string', ]);
 
-       Notificacion::create($request->all());
+       Notificacion::create($request->validated());
        return redirect()->route('notificaciones.index')->with('success', 'Notificación creada correctamente');
     }
 
@@ -82,7 +82,13 @@ class NotificacionController extends Controller
      */
     public function edit(Notificacion $notificacion)
     {
-        
+        // Mismo control de propiedad que show() y destroy(). Sin esto, un
+        // usuario podia editar notificaciones de OTRO usuario de su misma
+        // ganaderia: el TenantScope aisla por ganaderia, no por usuario.
+        if ($notificacion->usuario_id !== Auth::id()) {
+            abort(403, 'No autorizado');
+        }
+
       return view('notificaciones.edit', compact('notificacion'));
     }
 
@@ -91,11 +97,15 @@ class NotificacionController extends Controller
      */
     public function update(UpdateNotificacionRequest $request, Notificacion $notificacion)
     {
+        if ($notificacion->usuario_id !== Auth::id()) {
+            abort(403, 'No autorizado');
+        }
+
         $request->validate([ 'mensaje' => 'required|string', 
         'tipo' => 'required|string', 
         'fecha_envio' => 'required|date', 
         'estado' => 'required|string', ]); 
-        $notificacion->update($request->all()); 
+        $notificacion->update($request->validated()); 
         return redirect()->route('notificaciones.index')->with('success', 'Notificación actualizada correctamente');
     }
 

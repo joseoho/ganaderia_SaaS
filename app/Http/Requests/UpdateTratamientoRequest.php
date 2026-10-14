@@ -14,7 +14,7 @@ class UpdateTratamientoRequest extends FormRequest
     {
         if (!Auth::check()) return false;
         $tratamiento = $this->route('tratamiento');
-        return $tratamiento && $tratamiento->inquilino_id === Auth::user()->inquilino->inquilino_id;
+        return $tratamiento && $tratamiento->inquilino_id === Auth::user()->inquilino_id;
     }
 
     public function rules(): array

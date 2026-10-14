@@ -59,14 +59,14 @@ class PotreroController extends Controller
 
     public function update(Request $request, Potrero $potrero)
     {
-        $request->validate([
+        $datos = $request->validate([
             'nombre'     => 'required',
             'tamaño'     => 'required|numeric',
             'tipo_pasto' => 'nullable|string',
             'estado'     => 'required|string',
         ]);
 
-        $potrero->update($request->all());
+        $potrero->update($datos);
 
         return redirect()->route('potreros.index')->with('success', 'Potrero actualizado correctamente');
     }

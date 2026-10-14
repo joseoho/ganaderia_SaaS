@@ -7,17 +7,11 @@ use Illuminate\Http\Request;
 class HomeController extends Controller
 {
     /**
-     * Create a new controller instance.
-     *
-     * @return void
-     */
-    public function __construct()
-    {
-        $this->middleware('auth');
-    }
-
-    /**
      * Show the application dashboard.
+     *
+     * El middleware 'auth' y 'tenant' se declara ahora en la ruta
+     * (routes/web.php). El estilo antiguo $this->middleware() en el
+     * constructor ya no es la forma recomendada en Laravel 11+.
      *
      * @return \Illuminate\Contracts\Support\Renderable
      */

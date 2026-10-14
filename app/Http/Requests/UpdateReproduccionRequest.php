@@ -14,7 +14,7 @@ class UpdateReproduccionRequest extends FormRequest
     {
         if (!Auth::check()) return false;
         $reproduccion = $this->route('reproduccion');
-        return $reproduccion && $reproduccion->inquilino_id === Auth::user()->inquilino->inquilino_id;
+        return $reproduccion && $reproduccion->inquilino_id === Auth::user()->inquilino_id;
     }
 //Auth::user()->inquilino->nombre
     public function rules(): array

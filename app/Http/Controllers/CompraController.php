@@ -78,14 +78,14 @@ class CompraController extends Controller
             abort(403, 'No autorizado');
         }
 
-        $request->validate([
+        $datos = $request->validate([
             'fecha' => 'required|date',    
             'proveedor' => 'required|string|max:255',
             'descripcion' => 'required|string',
             'monto_total' => 'required|numeric',
         ]);
 
-        $compra->update($request->all());
+        $compra->update($datos);
 
         return redirect()->route('compras.index')->with('success', 'Compra actualizada correctamente');
     }

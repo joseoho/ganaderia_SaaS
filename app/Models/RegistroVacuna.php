@@ -15,6 +15,7 @@ class RegistroVacuna extends Model
   protected $fillable = [
     'inquilino_id',
     'animal_id',
+    'vacuna_id',
     'nombre',
     'lote',
     'proveedor',

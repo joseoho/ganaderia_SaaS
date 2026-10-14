@@ -30,7 +30,11 @@ Route::get('/', function () {
 //   AUTENTICACIÓN
 Auth::routes();
 
-Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name('home');
+// El middleware se declara en la ruta (estilo Laravel 11+) en lugar del
+// constructor del controlador, que es la forma antigua.
+Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])
+    ->middleware(['auth', 'tenant'])
+    ->name('home');
 
 
 // =============================

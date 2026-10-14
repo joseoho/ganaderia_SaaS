@@ -14,7 +14,7 @@ class UpdateGenealogiaRequest extends FormRequest
     {
         if (!Auth::check()) return false;
         $genealogia = $this->route('genealogium');
-        return $genealogia && $genealogia->inquilino_id === Auth::user()->inquilino->inquilino_id;
+        return $genealogia && $genealogia->inquilino_id === Auth::user()->inquilino_id;
     }
 
     public function rules(): array

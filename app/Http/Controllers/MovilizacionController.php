@@ -75,13 +75,13 @@ class MovilizacionController extends Controller
     {
         if ($movilizacione->inquilino_id !== Auth::user()->inquilino_id) abort(403);
 
-        $request->validate([
+        $datos = $request->validate([
             'animal_id' => 'required',
             'tipo' => 'required|string',
             'fecha' => 'required|date',
         ]);
 
-        $movilizacione->update($request->all());
+        $movilizacione->update($datos);
 
         return redirect()->route('movilizaciones.index')->with('success', 'Movilización actualizada');
     }

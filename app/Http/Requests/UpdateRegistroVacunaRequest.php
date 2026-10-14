@@ -14,7 +14,7 @@ class UpdateRegistroVacunaRequest extends FormRequest
     {
         if (!Auth::check()) return false;
         $vacuna = $this->route('registro_vacuna');
-        return $vacuna && $vacuna->inquilino_id === Auth::user()->inquilino->inquilino_id;
+        return $vacuna && $vacuna->inquilino_id === Auth::user()->inquilino_id;
     }
 
     public function rules(): array
