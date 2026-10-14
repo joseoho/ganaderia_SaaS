@@ -59,7 +59,10 @@
 
         <h3>Datos Sanitarios</h3>
 
-        <label>Último tratamiento</label>
+        <label>Medicamento del último tratamiento</label>
+        <input type="text" name="ultimo_medicamento" value="{{ optional($animal->tratamientos->last())->medicamento }}" maxlength="250">
+
+        <label>Motivo del último tratamiento</label>
         <textarea name="ultimo_tratamiento">{{ optional($animal->tratamientos->last())->motivo }}</textarea>
 
         <label>Última vacuna</label>
@@ -68,10 +71,10 @@
         <h3>Datos Reproductivos</h3>
 
         <label>Padre</label>
-        <input type="text" name="padre" value="{{ optional($animal->genealogia)->padre }}" readonly>
+        <input type="text" name="padre" value="{{ optional($animal->genealogia)->padre?->codigo_interno ?? 'Sin registrar' }}" readonly>
 
         <label>Madre</label>
-        <input type="text" name="madre" value="{{ optional($animal->genealogia)->madre }}" readonly>
+        <input type="text" name="madre" value="{{ optional($animal->genealogia)->madre?->codigo_interno ?? 'Sin registrar' }}" readonly>
 
         <button type="submit">Guardar Cambios</button>
 
