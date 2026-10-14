@@ -22,9 +22,18 @@ use App\Http\Controllers\VentaController;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 
+// Portada: redirige al panel si hay sesion y al login si no.
+//
+// NO se usa la vista `welcome` de Laravel: pide `resources/css/app.css`, que es
+// Tailwind v4 y no esta en los inputs de Vite (la interfaz de este proyecto es
+// Bootstrap), asi que en produccion devolvia un error 500. Era el unico test en
+// rojo de la suite. Si algun dia se quiere una portada publica de verdad, se
+// crea una vista propia y se cambia solo esta ruta.
 Route::get('/', function () {
-    return view('welcome');
-});
+    return Auth::check()
+        ? redirect()->route('dashboard')
+        : redirect()->route('login');
+})->name('inicio');
 
 // =============================
 //   AUTENTICACIÓN

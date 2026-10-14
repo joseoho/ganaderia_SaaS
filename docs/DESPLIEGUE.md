@@ -205,6 +205,22 @@ Pruebas funcionales concretas recomendadas:
   `admin@ganaderia.test` y `admin@esperanza.test` (contraseña `password`). **No
   ejecutar el seeder en producción**, o cambiar esas credenciales de inmediato.
 - **Pendientes conocidos** (ver `docs/auditoria_fase3.md`): el registro público de
-  usuarios está roto y la ruta `/` falla con el build de producción. Ninguno de
+  usuarios está roto y la portada `/` ya redirige correctamente. Ninguno de
   los dos afecta al panel interno, pero deben resolverse antes de abrir la
   aplicación al público.
+
+---
+
+## Anexo: proxy inverso y HTTPS
+
+Si la aplicación queda detrás de un proxy inverso (nginx, balanceador,
+Cloudflare), definir en el `.env` del servidor:
+
+```dotenv
+TRUSTED_PROXIES=10.0.0.1,10.0.0.2     # o "*" si el proxy es de confianza plena
+```
+
+Sin esto, Laravel no ve las cabeceras `X-Forwarded-Proto` y puede generar URLs
+`http://` y cookies no seguras aunque el usuario esté en `https://`. Está
+desactivado por defecto a propósito: si la aplicación está expuesta
+directamente, confiar en cualquier proxy permitiría falsear la IP y el esquema.
