@@ -10,9 +10,11 @@
         <h5>Información del potrero</h5>
         <p><strong>Tamaño:</strong> {{ $potrero->tamano }} ha</p>
         <p><strong>Tipo de pasto:</strong> {{ $potrero->tipo_pasto }}</p>
-        <p><strong>Estado:</strong> {{ ucfirst($potrero->estado) }}</p>
-        <p><strong>Último ingreso:</strong> {{ $potrero->fecha_ultimo_ingreso }}</p>
-        <p><strong>Último descanso:</strong> {{ $potrero->fecha_ultimo_descanso }}</p>
+        <p><strong>Estado:</strong> {{ ucfirst($potrero->estado ?? '') }}</p>
+        {{-- Formato::fecha acepta tanto cadena como Carbon: los modelos declaran
+             el cast `date`, y sin formatear se veria "2026-09-19 00:00:00". --}}
+        <p><strong>Último ingreso:</strong> {{ \App\Support\Formato::fecha($potrero->fecha_ultimo_ingreso) }}</p>
+        <p><strong>Último descanso:</strong> {{ \App\Support\Formato::fecha($potrero->fecha_ultimo_descanso) }}</p>
 
         <a href="{{ route('potreros.edit', $potrero->id) }}" class="btn btn-warning btn-sm">Editar</a>
     </div>
@@ -21,15 +23,15 @@
     <div class="card shadow-sm p-4 mb-4">
         <h5>Animales dentro del potrero</h5>
 
-        @if($animalesDentro->count() == 0)
+        @if($animalesDentro->isEmpty())
             <p class="text-muted">No hay animales en este potrero.</p>
         @else
             <ul class="list-group">
                 @foreach($animalesDentro as $a)
                     <li class="list-group-item">
-                        {{ $a->animal->codigo_interno }} — {{ $a->animal->raza }}
+                        {{ $a->animal?->codigo_interno }} — {{ $a->animal?->raza }}
                         <span class="text-muted float-end">
-                            Entrada: {{ $a->fecha_entrada }}
+                            Entrada: {{ \App\Support\Formato::fecha($a->fecha_entrada) }}
                         </span>
                     </li>
                 @endforeach
@@ -52,7 +54,7 @@
             <div class="mb-3">
                 <label class="form-label">Seleccione animales</label>
                 <select name="animales[]" class="form-select" multiple required>
-                    @foreach(\App\Models\Animal::where('inquilino_id', Auth::user()->inquilino_id)->get() as $animal)
+                    @foreach($animalesDisponibles as $animal)
                         <option value="{{ $animal->id }}">
                             {{ $animal->codigo_interno }} — {{ $animal->raza }}
                         </option>
@@ -68,11 +70,7 @@
     <div class="card shadow-sm p-4">
         <h5>Historial de rotaciones</h5>
 
-        @php
-            $rotaciones = \App\Models\Rotacion::where('potrero_id', $potrero->id)->get();
-        @endphp
-
-        @if($rotaciones->count() == 0)
+        @if($rotaciones->isEmpty())
             <p class="text-muted">No hay rotaciones registradas.</p>
         @else
             <table class="table table-bordered">
@@ -87,8 +85,8 @@
                 <tbody>
                     @foreach($rotaciones as $r)
                         <tr>
-                            <td>{{ $r->fecha_entrada }}</td>
-                            <td>{{ $r->fecha_salida }}</td>
+                            <td>{{ \App\Support\Formato::fecha($r->fecha_entrada) }}</td>
+                            <td>{{ \App\Support\Formato::fecha($r->fecha_salida) }}</td>
                             <td>{{ $r->dias_ocupacion }}</td>
                             <td>{{ $r->carga_animal }} animales/ha</td>
                         </tr>

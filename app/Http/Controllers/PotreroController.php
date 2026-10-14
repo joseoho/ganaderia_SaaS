@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Animal;
 use App\Models\AnimalPotrero;
 use App\Models\Potrero;
 use App\Models\Rotacion;
@@ -46,11 +47,23 @@ class PotreroController extends Controller
             ->where('inquilino_id', Auth::user()->inquilino_id)
             ->firstOrFail();
 
-        $animalesDentro = AnimalPotrero::where('potrero_id', $id)
+        // `with('animal')`: antes se accedia a $a->animal dentro del @foreach de
+        // la vista, lo que lanzaba una consulta POR CADA animal del potrero.
+        $animalesDentro = AnimalPotrero::with('animal')
+            ->where('potrero_id', $id)
             ->whereNull('fecha_salida')
             ->get();
 
-        return view('potreros.show', compact('potrero', 'animalesDentro'));
+        // Estas dos consultas estaban DENTRO de la vista (potreros/show.blade.php).
+        $animalesDisponibles = Animal::where('inquilino_id', Auth::user()->inquilino_id)
+            ->orderBy('codigo_interno')
+            ->get();
+
+        $rotaciones = Rotacion::where('potrero_id', $id)
+            ->orderByDesc('fecha_entrada')
+            ->get();
+
+        return view('potreros.show', compact('potrero', 'animalesDentro', 'animalesDisponibles', 'rotaciones'));
     }
 
     public function edit(Potrero $potrero)
