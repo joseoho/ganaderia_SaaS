@@ -16,7 +16,7 @@ no está verificado se marca como pendiente**, no como hecho.
 |---|---|---|
 | 1 | Instalación limpia (`composer install` + build) levanta la aplicación | ✅ Verificado |
 | 2 | `migrate:fresh --seed` reproduce el esquema desde cero | ✅ Verificado |
-| 3 | Suite de pruebas en verde | ✅ **86 pruebas, 0 fallos** |
+| 3 | Suite de pruebas en verde | ✅ **282 pruebas, 0 fallos** |
 | 4 | Análisis estático sin errores | ✅ **PHPStan nivel 5: 0 errores** |
 | 5 | Cero hallazgos P0/P1 abiertos | ✅ Los P0/P1 conocidos están corregidos |
 | 6 | Aislamiento multi-tenant verificado | ✅ Verificado (A vs B) |

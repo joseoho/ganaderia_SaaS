@@ -208,3 +208,16 @@ Queda anotado como deuda (no corregido): las filas se guardan **en la sesion**
 entre el paso de mapeo y el de confirmacion, lo que con archivos grandes infla
 la sesion y penaliza cada peticion. Lo correcto seria un almacenamiento temporal
 en disco o en base de datos.
+---
+
+## Estado final de los P2 (actualizado)
+
+| P2 | Estado |
+|---|---|
+| Metodos vacios de AnimalEtiquetaController y DashboardController | **Resuelto**: eliminados (los controladores siguen en uso para sus metodos reales). |
+| Stubs InquilinoController, UsuarioController y VacunaController | **Resuelto**: los tres controladores y sus 12 FormRequest vacios, borrados por no tener ninguna referencia. |
+| Ruta 'home' autenticada sin middleware tenant | **Resuelto**: `/home` y el grupo del panel llevan `tenant`. |
+| Vistas que consultan la base de datos (N+1) en `potreros/show` | **Resuelto**: el controlador carga las relaciones con `with()` y prepara los datos; hay una prueba que dobla los animales y exige que el numero de consultas no crezca. |
+| Columna `tamaño` con enie | **Resuelto** en la Fase 4 (renombrada a `tamano`). |
+| Importacion Excel sin limites ni pruebas | **Resuelto**: lista blanca de formato, tope de filas, errores visibles y 14 pruebas. |
+| Filas de importacion guardadas en la sesion | **Resuelto**: viven en la cache con caducidad, no en la sesion. |
