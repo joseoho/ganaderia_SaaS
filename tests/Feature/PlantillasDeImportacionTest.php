@@ -130,7 +130,7 @@ class PlantillasDeImportacionTest extends TestCase
         }
 
         $csv = str_replace(
-            ["1,2026-02-01", "1,2026-02-02"],
+            ['1,2026-02-01', '1,2026-02-02'],
             [$animales[0].',2026-02-01', $animales[0].',2026-02-02'],
             $this->plantilla('plantilla_produccion.csv')
         );
