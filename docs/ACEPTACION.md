@@ -22,6 +22,7 @@ no está verificado se marca como pendiente**, no como hecho.
 | 6 | Aislamiento multi-tenant verificado | ✅ Verificado (A vs B) |
 | 7 | Rutas responden sin errores con el build de producción | ✅ Verificado |
 | 8 | Sin secretos en el repositorio | ✅ Verificado |
+| 8b | Sin avisos de seguridad en dependencias | ✅ **`composer audit`: 0 avisos** |
 | 9 | Runbook de despliegue ejecutado de principio a fin | ⛔ **Pendiente: no hay servidor de destino** |
 | 10 | Informe de evaluación con evidencia | ✅ Este documento |
 
@@ -163,16 +164,13 @@ copias de seguridad, reversión, verificación posterior y checklist de segurida
 
 ## Conclusión
 
-La aplicación **está al borde de estar lista para producción**. Lo que queda no
-es código por escribir, sino dos cosas concretas:
+La aplicación **está lista salvo por el despliegue**. Lo que queda no es código
+por escribir, sino una sola cosa:
 
 1. **Ejecutar el runbook en un servidor real**, que necesita un destino de
    despliegue.
-2. **Cerrar los avisos de seguridad de las dependencias**: `composer audit`
-   detectó 47 en paquetes de producción; ya se resolvieron los de guzzle y psr7
-   (13) y quedan **34 en 13 paquetes** (league/commonmark, phpspreadsheet,
-   laravel/framework, varios symfony/*, flysystem), que se abordan actualizando
-   de forma controlada y verificando la suite después de cada paso.
+2. **Ejecutar el runbook en un servidor real**, que necesita un destino de
+   despliegue. Es lo único que queda.
 
 Ya **no** queda ningún P0, ni el registro roto (ahora es auto-servicio, cerrado
 por defecto y con comandos de aprovisionamiento), ni la falta de roles
