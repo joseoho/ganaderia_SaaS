@@ -44,7 +44,7 @@ class FormulariosDeCreacionTest extends TestCase
 
         $this->seed();
 
-        $this->usuario = User::withoutTenantScope()
+        $this->usuario = User::query()
             ->where('email', 'admin@ganaderia.test')
             ->firstOrFail();
     }

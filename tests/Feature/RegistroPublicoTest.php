@@ -40,7 +40,7 @@ class RegistroPublicoTest extends TestCase
             'password_confirmation' => 'contrasena-larga',
         ])->assertNotFound();
 
-        $this->assertNull(User::withoutTenantScope()->where('email', 'pirata@ejemplo.test')->first());
+        $this->assertNull(User::query()->where('email', 'pirata@ejemplo.test')->first());
     }
 
     public function test_con_el_registro_cerrado_el_login_no_ofrece_crear_cuenta(): void
@@ -95,7 +95,7 @@ class RegistroPublicoTest extends TestCase
         $this->assertSame($antes + 1, Inquilino::count(), 'No se creo la ganaderia.');
 
         $inquilino = Inquilino::where('nombre', 'Ganaderia Nueva')->firstOrFail();
-        $usuario = User::withoutTenantScope()->where('email', 'maria@ejemplo.test')->first();
+        $usuario = User::query()->where('email', 'maria@ejemplo.test')->first();
 
         $this->assertNotNull($usuario, 'No se creo el usuario.');
         $this->assertSame((int) $inquilino->id, (int) $usuario->inquilino_id, 'El usuario quedo en otra ganaderia.');
@@ -118,7 +118,7 @@ class RegistroPublicoTest extends TestCase
             'password_confirmation' => 'otra-cosa',
         ])->assertSessionHasErrors(['ganaderia', 'password']);
 
-        $this->assertNull(User::withoutTenantScope()->where('email', 'singanaderia@ejemplo.test')->first());
+        $this->assertNull(User::query()->where('email', 'singanaderia@ejemplo.test')->first());
     }
 
     public function test_el_registro_no_repite_correos(): void
@@ -157,7 +157,7 @@ class RegistroPublicoTest extends TestCase
         $this->assertSame(0, $codigo);
 
         $inquilino = Inquilino::where('nombre', 'Ganaderia Por Consola')->first();
-        $usuario = User::withoutTenantScope()->where('email', 'jefe@consola.test')->first();
+        $usuario = User::query()->where('email', 'jefe@consola.test')->first();
 
         $this->assertNotNull($inquilino);
         $this->assertNotNull($usuario);
@@ -175,7 +175,7 @@ class RegistroPublicoTest extends TestCase
             '--sin-verificar' => true,
         ]);
 
-        $usuario = User::withoutTenantScope()->where('email', 'pendiente@consola.test')->first();
+        $usuario = User::query()->where('email', 'pendiente@consola.test')->first();
 
         $this->assertNotNull($usuario);
         $this->assertNull($usuario->email_verified_at);

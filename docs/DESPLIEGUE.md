@@ -196,7 +196,7 @@ Pruebas funcionales concretas recomendadas:
 
 ## 10. Notas específicas de este proyecto
 
-- **Multi-tenant**: el aislamiento lo aplica un `TenantScope` global sobre los 19
+- **Multi-tenant**: el aislamiento lo aplica un `TenantScope` global sobre los 18
   modelos de negocio. Si se añade un modelo nuevo con `inquilino_id`, **debe**
   usar el trait `App\Models\Concerns\BelongsToTenant`; hay un test que lo exige.
 - **Portal de clientes**: si se activa un portal público, recordar que las rutas

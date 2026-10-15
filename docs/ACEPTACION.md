@@ -56,7 +56,7 @@ php artisan migrate:fresh --seed --force → código de salida 0
 | Identificadores no ASCII | 1 (`tamaño`) | **0** |
 | Columnas eliminadas | — | 0 |
 
-Lectura posterior con Eloquent contra el esquema nuevo: **19 modelos, 0 fallos**,
+Lectura posterior con Eloquent contra el esquema nuevo: **18 modelos de negocio, 0 fallos**,
 y 0 registros de otra ganadería visibles.
 
 ## 3. Suite de pruebas
@@ -67,7 +67,7 @@ php artisan test → Tests: 280 passed (877 assertions) · Duration: 47.57s
 
 | Bloque | Pruebas | Qué cubre |
 |---|---|---|
-| Aislamiento multi-tenant | 8 | 19/19 modelos con filtro, conteos disjuntos por ganadería, registro ajeno → 404, sin salto de tenant, falla cerrado |
+| Aislamiento multi-tenant | 8 | 18/18 modelos de negocio con filtro, conteos disjuntos por ganadería, registro ajeno → 404, sin salto de tenant, falla cerrado |
 | Edición por módulo | 21 | 9 módulos: el dueño edita, el ajeno recibe 404, no hay IDOR |
 | Formularios de edición | 46 | 14 módulos × 3: la página carga, las fechas salen en ISO y el formulario se reenvía tal cual |
 | Persistencia al editar | 8 | Lo que se escribe en el formulario se guarda de verdad (no basta con que se acepte) |
@@ -79,7 +79,8 @@ php artisan test → Tests: 280 passed (877 assertions) · Duration: 47.57s
 | Invariancia de valores | 4 | Reenviar un formulario no cambia el valor guardado |
 | Importación Excel/CSV | 5 | Formato, tamaño, tope de filas y alta real |
 | Páginas de error | 2 | 404 propia y las 5 vistas compilan sin Vite |
-| Portada | 3 | `/` redirige a login o al panel |
+| Portada | 3 | / redirige a login o al panel |
+| Sesión real | 4 | Se entra por el formulario (no con ctingAs) y el panel carga: la tabla de usuarios NO lleva filtro por ganadería, porque la ganadería se deduce del usuario |
 
 ## 4. Análisis estático
 
@@ -129,7 +130,7 @@ falla.
 Verificado en tres capas:
 
 1. **Esquema**: `inquilino_id` NOT NULL + FK en las 19 tablas de negocio.
-2. **Framework**: `TenantScope` global sobre los 19 modelos, resolución perezosa
+2. **Framework**: `TenantScope` global sobre los 18 modelos de negocio, resolución perezosa
    del tenant desde la sesión, y **falla cerrado** si no hay tenant.
 3. **Pruebas**: conteos disjuntos por ganadería, registro ajeno inaccesible por
    URL (404) y escritura ajena bloqueada.

@@ -48,7 +48,7 @@ class EdicionModulosTest extends TestCase
 
         $this->seed();
 
-        $this->usuario = User::withoutTenantScope()
+        $this->usuario = User::query()
             ->where('email', 'admin@ganaderia.test')
             ->firstOrFail();
     }
@@ -162,7 +162,7 @@ class EdicionModulosTest extends TestCase
 
     public function test_un_usuario_no_puede_editar_la_notificacion_de_otro(): void
     {
-        $otro = User::withoutTenantScope()
+        $otro = User::query()
             ->where('inquilino_id', $this->usuario->inquilino_id)
             ->where('id', '!=', $this->usuario->id)
             ->first();

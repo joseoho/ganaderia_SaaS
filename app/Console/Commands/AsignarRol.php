@@ -27,7 +27,7 @@ class AsignarRol extends Command
             return self::FAILURE;
         }
 
-        $usuario = User::withoutTenantScope()
+        $usuario = User::query()
             ->where('email', $this->argument('email'))
             ->first();
 

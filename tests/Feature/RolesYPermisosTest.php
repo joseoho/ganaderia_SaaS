@@ -28,7 +28,7 @@ class RolesYPermisosTest extends TestCase
 
         $this->seed();
 
-        $this->administrador = User::withoutTenantScope()
+        $this->administrador = User::query()
             ->where('email', 'admin@ganaderia.test')
             ->firstOrFail();
     }
@@ -186,7 +186,7 @@ class RolesYPermisosTest extends TestCase
 
         $this->assertSame(0, $codigo);
 
-        $creado = User::withoutTenantScope()->where('email', 'nuevo@ganaderia.test')->first();
+        $creado = User::query()->where('email', 'nuevo@ganaderia.test')->first();
 
         $this->assertNotNull($creado);
         $this->assertSame((int) $this->administrador->inquilino_id, (int) $creado->inquilino_id);
@@ -215,6 +215,6 @@ class RolesYPermisosTest extends TestCase
         ]);
 
         $this->assertSame(1, $codigo);
-        $this->assertNull(User::withoutTenantScope()->where('email', 'sinelegir@ganaderia.test')->first());
+        $this->assertNull(User::query()->where('email', 'sinelegir@ganaderia.test')->first());
     }
 }

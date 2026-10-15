@@ -20,7 +20,7 @@ class ListarUsuarios extends Command
 
     public function handle(): int
     {
-        $consulta = User::withoutTenantScope()->with('inquilino');
+        $consulta = User::query()->with('inquilino');
 
         if ($this->option('inquilino') !== null) {
             $consulta->where('inquilino_id', $this->option('inquilino'));

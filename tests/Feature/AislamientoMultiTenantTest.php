@@ -56,7 +56,6 @@ class AislamientoMultiTenantTest extends TestCase
         Reproduccion::class,
         Rotacion::class,
         Tratamiento::class,
-        User::class,
         Vacuna::class,
         Venta::class,
     ];
@@ -76,7 +75,7 @@ class AislamientoMultiTenantTest extends TestCase
 
         $this->ganaderiaA = Inquilino::orderBy('id')->firstOrFail();
         $this->ganaderiaB = Inquilino::orderBy('id')->skip(1)->firstOrFail();
-        $this->usuarioA = User::withoutTenantScope()
+        $this->usuarioA = User::query()
             ->where('inquilino_id', $this->ganaderiaA->id)
             ->firstOrFail();
 
@@ -92,6 +91,30 @@ class AislamientoMultiTenantTest extends TestCase
                 "El modelo {$modelo} no aplica el aislamiento multi-tenant."
             );
         }
+    }
+
+    public function test_el_modelo_de_usuarios_no_lleva_el_filtro_y_es_a_proposito(): void
+    {
+        // Parece una excepcion rara, y es la correccion de un fallo grave.
+        //
+        // User llevaba el filtro global por ganaderia, pero la ganaderia se
+        // deduce DEL usuario (de su sesion). Al entrar con el formulario, o al
+        // recuperarlo de la sesion en cada peticion, hay que consultar la tabla
+        // `users` ANTES de saber su ganaderia, asi que el filtro —que falla
+        // cerrado— abortaba y NADIE podia iniciar sesion:
+        //
+        //     Consulta a [App\Models\User] sin ganaderia activa.
+        //
+        // Esta prueba existe para que no se lo vuelvan a poner.
+        $this->assertNotContains(
+            TenantScope::class,
+            array_keys((new User)->getGlobalScopes()),
+            'User no debe llevar el filtro por ganaderia: rompe el inicio de sesion. '
+            .'El aislamiento de los datos de negocio lo cubren los demas modelos.'
+        );
+
+        // El aislamiento de los datos de negocio sigue intacto.
+        $this->assertNotEmpty(self::MODELOS_DE_NEGOCIO);
     }
 
     public function test_ningun_modelo_devuelve_registros_de_otra_ganaderia(): void
@@ -115,7 +138,12 @@ class AislamientoMultiTenantTest extends TestCase
     {
         $contexto = app(TenantContext::class);
 
-        $modelos = [Animal::class, Potrero::class, Venta::class, ProduccionLeche::class, Notificacion::class, User::class];
+        // User NO entra aqui: no lleva el filtro global a proposito (romperia el
+        // inicio de sesion) y por tanto no tiene withoutTenantScope(). Su
+        // aislamiento se comprueba en SesionRealTest, entrando de verdad: la
+        // sesion queda en la ganaderia correcta y los registros de otra no son
+        // alcanzables.
+        $modelos = [Animal::class, Potrero::class, Venta::class, ProduccionLeche::class, Notificacion::class];
 
         foreach ($modelos as $modelo) {
             $total = $modelo::withoutTenantScope()->count();

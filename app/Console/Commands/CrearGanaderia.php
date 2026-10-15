@@ -37,7 +37,7 @@ class CrearGanaderia extends Command
     {
         $email = (string) $this->argument('email');
 
-        if (User::withoutTenantScope()->where('email', $email)->exists()) {
+        if (User::query()->where('email', $email)->exists()) {
             $this->error('Ya existe un usuario con el correo '.$email.'.');
 
             return self::FAILURE;

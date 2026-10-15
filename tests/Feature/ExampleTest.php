@@ -27,7 +27,7 @@ class ExampleTest extends TestCase
     {
         $this->seed();
 
-        $usuario = User::withoutTenantScope()
+        $usuario = User::query()
             ->where('email', 'admin@ganaderia.test')
             ->firstOrFail();
 
@@ -38,7 +38,7 @@ class ExampleTest extends TestCase
     {
         $this->seed();
 
-        $usuario = User::withoutTenantScope()
+        $usuario = User::query()
             ->where('email', 'admin@ganaderia.test')
             ->firstOrFail();
 
