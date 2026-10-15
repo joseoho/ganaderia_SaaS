@@ -73,6 +73,7 @@
         @if($rotaciones->isEmpty())
             <p class="text-muted">No hay rotaciones registradas.</p>
         @else
+            <div class="table-responsive">
             <table class="table table-bordered">
                 <thead>
                     <tr>
@@ -93,6 +94,7 @@
                     @endforeach
                 </tbody>
             </table>
+            </div>
         @endif
     </div>
 

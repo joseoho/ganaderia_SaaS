@@ -18,6 +18,7 @@
 
     <h2 class="mb-4">Reporte de Compras por Fecha</h2>
 
+    <div class="table-responsive">
     <table class="table table-bordered">
         <thead>
             <tr>
@@ -38,6 +39,7 @@
             @endforeach
         </tbody>
     </table>
+    </div>
 
     <hr>
 

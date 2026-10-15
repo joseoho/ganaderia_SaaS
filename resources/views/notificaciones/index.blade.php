@@ -42,6 +42,7 @@
 
 <a href="{{ route('notificaciones.create') }}" class="btn btn-success mb-3">Nueva Notificación</a>
 
+<div class="table-responsive">
 <table class="table table-bordered">
     <thead>
         <tr>
@@ -73,6 +74,7 @@
         @endforelse
     </tbody>
 </table>
+</div>
 
 <!-- 📄 Paginación -->
 {{ $notificaciones->links() }}

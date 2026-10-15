@@ -109,6 +109,7 @@
     <div class="card shadow-sm p-4">
         <h4 class="mb-3">Producción Total por Animal (Carne + Leche)</h4>
 
+        <div class="table-responsive">
         <table class="table table-bordered">
             <thead>
                 <tr>
@@ -129,6 +130,7 @@
                 @endforeach
             </tbody>
         </table>
+        </div>
 
     </div>
 

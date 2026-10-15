@@ -8,6 +8,7 @@
 
     <p class="text-muted">Revisa que los datos se vean correctos.</p>
 
+    <div class="table-responsive">
     <table class="table table-bordered">
         <thead>
             <tr>
@@ -26,6 +27,7 @@
             @endforeach
         </tbody>
     </table>
+    </div>
 
     <form action="{{ route('import.produccion.import') }}" method="POST" class="mt-3">
         @csrf

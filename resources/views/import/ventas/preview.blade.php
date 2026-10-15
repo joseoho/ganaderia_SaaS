@@ -6,6 +6,7 @@
 
 <div class="card shadow-sm p-4">
 
+    <div class="table-responsive">
     <table class="table table-bordered">
         <thead>
             <tr>
@@ -24,6 +25,7 @@
             @endforeach
         </tbody>
     </table>
+    </div>
 
     <form action="{{ route('import.ventas.import') }}" method="POST" class="mt-3">
         @csrf

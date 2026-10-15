@@ -12,6 +12,7 @@
                     </span>
                 </div>
                 <div class="card-body">
+                    <div class="table-responsive">
                     <table class="table table-striped">
                         <tr>
                             <th>Categoría:</th>
@@ -49,6 +50,7 @@
                             </td>
                         </tr>
                     </table>
+                    </div>
                 </div>
                 <div class="card-footer d-flex justify-content-between">
                     <a href="{{ route('animales.index') }}" class="btn btn-secondary">Volver al listado</a>

@@ -11,6 +11,7 @@
         Revisa que los datos se vean correctos. Solo se muestran las primeras filas.
     </p>
 
+    <div class="table-responsive">
     <table class="table table-bordered">
         <thead>
             <tr>
@@ -29,6 +30,7 @@
             @endforeach
         </tbody>
     </table>
+    </div>
 
     <form action="{{ route('import.animales.import') }}" method="POST" class="mt-3">
         @csrf

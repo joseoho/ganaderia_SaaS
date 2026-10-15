@@ -34,6 +34,7 @@
     </div>
 
     <div class="card shadow-sm pt-3 px-3">
+        <div class="table-responsive">
         <table class="table table-hover align-middle">
             <thead class="table-light">
                 <tr>
@@ -82,6 +83,7 @@
             </tfoot>
             @endif
         </table>
+        </div>
         <div class="d-flex justify-content-center">
             {{ $gastos->links() }}
         </div>

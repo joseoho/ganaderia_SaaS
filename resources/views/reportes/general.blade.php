@@ -92,6 +92,7 @@
     <hr>
 
     <h4>6. Inventario de Insumos</h4>
+    <div class="table-responsive">
     <table class="table table-bordered">
         <thead>
             <tr>
@@ -110,6 +111,7 @@
             @endforeach
         </tbody>
     </table>
+    </div>
 
     <hr>
 

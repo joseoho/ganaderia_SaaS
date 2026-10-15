@@ -50,6 +50,7 @@
 
 <a href="{{ route('animales.create') }}" class="btn btn-success mb-3">Registrar Animal</a>
 
+<div class="table-responsive">
 <table class="table table-bordered">
     <thead>
         <tr>
@@ -96,6 +97,7 @@
         @endforelse
     </tbody>
 </table>
+</div>
 
 <!-- 📄 Paginación -->
 {{ $animales->links() }}
