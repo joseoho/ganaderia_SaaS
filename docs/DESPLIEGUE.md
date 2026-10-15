@@ -275,3 +275,37 @@ y **asegurate antes de que el correo funciona** (la verificacion de email es
 obligatoria para entrar al panel). Con el registro abierto, cada alta crea su
 propia ganaderia y queda como su administrador, y las peticiones van limitadas a
 10 por minuto.
+---
+
+## Anexo: ensayo de despliegue (comprobado en local)
+
+Los cuatro comandos que deja preparados el despliegue se han ejecutado y
+funcionan:
+
+```bash
+php artisan config:cache     # OK
+php artisan route:cache      # OK (Laravel 12 si serializa rutas con closure)
+php artisan view:cache       # OK
+php artisan event:cache      # OK
+```
+
+Con las cuatro cachés activadas —el estado real de producción— la aplicación
+responde: `/login` 200, `/up` 200 y las rutas protegidas redirigen al login.
+
+### Aviso importante: NO ejecutar las pruebas en el servidor
+
+Con `config:cache` activo, Laravel deja de leer el `.env`: la configuración
+queda congelada en `bootstrap/cache/config.php`. Si en ese estado se lanzara
+`php artisan test`, la suite iría contra la base de datos de PRODUCCIÓN y
+`RefreshDatabase` la vaciaría.
+
+Hay una guarda que lo impide: las pruebas abortan con
+
+```
+BLOQUEADO: los tests solo pueden ejecutarse contra la base de pruebas
+'ganaderia_saas_test'. Base detectada: 'ganaderia_saas_v2'
+```
+
+No es una molestia, es el seguro. Si alguna vez hay que ejecutar la suite en el
+servidor, se hace `php artisan optimize:clear` antes y se vuelve a `optimize`
+después.

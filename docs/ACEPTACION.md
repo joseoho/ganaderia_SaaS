@@ -23,7 +23,7 @@ no está verificado se marca como pendiente**, no como hecho.
 | 7 | Rutas responden sin errores con el build de producción | ✅ Verificado |
 | 8 | Sin secretos en el repositorio | ✅ Verificado |
 | 8b | Sin avisos de seguridad en dependencias | ✅ **`composer audit`: 0 avisos** |
-| 9 | Runbook de despliegue ejecutado de principio a fin | ⛔ **Pendiente: no hay servidor de destino** |
+| 9 | Runbook de despliegue ejecutado de principio a fin | ⚠️ **Ensayo local hecho; falta un servidor real** |
 | 10 | Informe de evaluación con evidencia | ✅ Este documento |
 
 ---
