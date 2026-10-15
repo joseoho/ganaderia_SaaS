@@ -204,10 +204,9 @@ Pruebas funcionales concretas recomendadas:
 - **Datos de demostración**: `--seed` crea dos ganaderías con usuarios
   `admin@ganaderia.test` y `admin@esperanza.test` (contraseña `password`). **No
   ejecutar el seeder en producción**, o cambiar esas credenciales de inmediato.
-- **Pendientes conocidos** (ver `docs/auditoria_fase3.md`): el registro público de
-  usuarios está roto y la portada `/` ya redirige correctamente. Ninguno de
-  los dos afecta al panel interno, pero deben resolverse antes de abrir la
-  aplicación al público.
+- **Pendientes conocidos**: ninguno de los documentados en
+  `docs/auditoria_fase3.md`. El registro público funciona (crea la ganadería y
+  su administrador) y la portada `/` redirige al panel o al login.
 
 ---
 
