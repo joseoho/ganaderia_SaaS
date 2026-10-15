@@ -9,11 +9,14 @@ use App\Models\ProduccionLeche;
 use App\Models\Venta;
 use App\Services\ImportService;
 use Illuminate\Http\Request;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Validation\ValidationException;
+use Throwable;
 
 class ImportController extends Controller
 {
@@ -54,6 +57,100 @@ class ImportController extends Controller
         return 'importacion:'.Auth::id().':'.$tipo;
     }
 
+    /**
+     * Ejecuta la importacion fila a fila, contando lo que entra y lo que no.
+     *
+     * Cada fila va en su propia transaccion y con su propio try. Una fila
+     * invalida (una fecha mal escrita, por ejemplo) se cuenta como omitida y el
+     * resto del archivo sigue entrando: antes, esa fila tumbaba la importacion
+     * entera con un error 500 y dejaba dentro lo que ya se hubiera guardado.
+     *
+     * @param  Collection<int, mixed>  $rows
+     * @param  array<string, string>  $map
+     * @param  callable(array<string, mixed>): bool  $guardar
+     * @return array{0: int, 1: int} [importados, omitidos]
+     */
+    private function importarFilas(Collection $rows, array $map, callable $guardar): array
+    {
+        $importados = 0;
+        $omitidos = 0;
+
+        foreach ($rows as $row) {
+            $data = [];
+
+            foreach ($map as $campo => $col) {
+                $data[$campo] = $row[$col] ?? null;
+            }
+
+            // Una celda vacia de una hoja de calculo llega como cadena vacia, no
+            // como null. Sin normalizarla, ese "" acaba en una columna decimal o
+            // en una NOT NULL y revienta. Un 0 de verdad se respeta.
+            foreach ($data as $campo => $valor) {
+                if (is_string($valor) && trim($valor) === '') {
+                    $data[$campo] = null;
+                }
+            }
+
+            // Las fechas se normalizan AQUI, sin depender del modo de la base de
+            // datos. Con el modo estricto apagado (el de este equipo), MariaDB
+            // acepta una fecha imposible y la guarda como 0000-00-00 sin avisar;
+            // con el estricto encendido (el de produccion) la rechaza. En los dos
+            // casos se pierde una fila: aqui se convierte en una fila OMITIDA y
+            // contada, y nunca en un dato en cero.
+            foreach ($data as $campo => $valor) {
+                if (is_string($valor) && (str_starts_with($campo, 'fecha') || $campo === 'proxima_dosis')) {
+                    $data[$campo] = $this->normalizarFecha($valor);
+                }
+            }
+
+            try {
+                $guardado = DB::transaction(fn (): bool => $guardar($data));
+            } catch (Throwable $e) {
+                Log::error('Importacion: fila omitida', [
+                    'error' => $e->getMessage(),
+                    'datos' => $data,
+                ]);
+
+                $omitidos++;
+
+                continue;
+            }
+
+            $guardado ? $importados++ : $omitidos++;
+        }
+
+        return [$importados, $omitidos];
+    }
+
+    /**
+     * Convierte una fecha del archivo a AAAA-MM-DD, o null si no es una fecha.
+     */
+    private function normalizarFecha(string $valor): ?string
+    {
+        try {
+            return Carbon::parse($valor)->toDateString();
+        } catch (Throwable) {
+            return null;
+        }
+    }
+
+    /**
+     * Comprueba que la fila traiga las columnas que la tabla exige (NOT NULL).
+     *
+     * @param  array<string, mixed>  $data
+     * @param  array<int, string>  $obligatorios
+     */
+    private function faltaAlguno(array $data, array $obligatorios): bool
+    {
+        foreach ($obligatorios as $campo) {
+            if (! isset($data[$campo]) || $data[$campo] === '') {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
     public function index()
     {
         $importados = session('ultimo_importado', 0);
@@ -73,6 +170,16 @@ class ImportController extends Controller
     {
         $request->validate([
             'archivo' => 'required|file|max:10240|mimes:csv,txt,xlsx,xls',
+        ], [
+            // El limite que manda es el de PHP, no el de esta validacion:
+            // con upload_max_filesize en 2M el servidor descarta el archivo
+            // antes de que la aplicacion lo lea, y el mensaje por defecto
+            // ("failed to upload") no explica nada.
+            'archivo.uploaded' => 'No se pudo subir el archivo. Si pesa mas de 2 MB, el servidor lo rechaza antes de leerlo (upload_max_filesize). Dividelo o sube ese limite en el php.ini.',
+            'archivo.file' => 'No se pudo subir el archivo. Si pesa mas de 2 MB, el servidor lo rechaza antes de leerlo (upload_max_filesize). Dividelo o sube ese limite en el php.ini.',
+            'archivo.max' => 'El archivo no puede pasar de 10 MB. Dividelo en varios.',
+            'archivo.mimes' => 'Formato no admitido: sube un CSV o un Excel (xlsx o xls).',
+            'archivo.required' => 'Selecciona un archivo.',
         ]);
 
         if (! $request->hasFile('archivo') || ! $request->file('archivo')->isValid()) {
@@ -150,36 +257,34 @@ class ImportController extends Controller
 
     public function animalesImport()
     {
-        $rows = $this->leerFilas('animales');
-        $map = session('map_animales');
         $inquilino = Auth::user()->inquilino_id;
 
-        $importados = 0;
+        [$importados, $omitidos] = $this->importarFilas(
+            $this->leerFilas('animales'),
+            session('map_animales') ?? [],
+            function (array $data) use ($inquilino): bool {
+                // Sin codigo interno no hay forma de identificar al animal.
+                if (empty($data['codigo_interno'])) {
+                    return false;
+                }
 
-        foreach ($rows as $row) {
-            $data = [];
-            foreach ($map as $campo => $col) {
-                $data[$campo] = $row[$col] ?? null;
+                // updateOrCreate por (ganaderia, codigo): volver a importar el
+                // mismo archivo ACTUALIZA los animales en vez de duplicarlos.
+                Animal::updateOrCreate(
+                    [
+                        'inquilino_id' => $inquilino,
+                        'codigo_interno' => $data['codigo_interno'],
+                    ],
+                    array_merge($data, ['inquilino_id' => $inquilino])
+                );
+
+                return true;
             }
-
-            if (empty($data['codigo_interno'])) {
-                continue;
-            }
-
-            Animal::updateOrCreate(
-                [
-                    'inquilino_id' => $inquilino,
-                    'codigo_interno' => $data['codigo_interno'],
-                ],
-                array_merge($data, ['inquilino_id' => $inquilino])
-            );
-
-            $importados++;
-        }
+        );
 
         session(['ultimo_importado' => $importados]);
 
-        return view('import.resultado', ['importados' => $importados]);
+        return view('import.resultado', compact('importados', 'omitidos'));
     }
 
     // ============================
@@ -194,6 +299,16 @@ class ImportController extends Controller
     {
         $request->validate([
             'archivo' => 'required|file|max:10240|mimes:csv,txt,xlsx,xls',
+        ], [
+            // El limite que manda es el de PHP, no el de esta validacion:
+            // con upload_max_filesize en 2M el servidor descarta el archivo
+            // antes de que la aplicacion lo lea, y el mensaje por defecto
+            // ("failed to upload") no explica nada.
+            'archivo.uploaded' => 'No se pudo subir el archivo. Si pesa mas de 2 MB, el servidor lo rechaza antes de leerlo (upload_max_filesize). Dividelo o sube ese limite en el php.ini.',
+            'archivo.file' => 'No se pudo subir el archivo. Si pesa mas de 2 MB, el servidor lo rechaza antes de leerlo (upload_max_filesize). Dividelo o sube ese limite en el php.ini.',
+            'archivo.max' => 'El archivo no puede pasar de 10 MB. Dividelo en varios.',
+            'archivo.mimes' => 'Formato no admitido: sube un CSV o un Excel (xlsx o xls).',
+            'archivo.required' => 'Selecciona un archivo.',
         ]);
 
         if (! $request->hasFile('archivo') || ! $request->file('archivo')->isValid()) {
@@ -269,36 +384,37 @@ class ImportController extends Controller
 
     public function produccionImport()
     {
-        $rows = $this->leerFilas('produccion');
-        $map = session('map_produccion');
         $inquilino = Auth::user()->inquilino_id;
 
-        $importados = 0;
+        [$importados, $omitidos] = $this->importarFilas(
+            $this->leerFilas('produccion'),
+            session('map_produccion') ?? [],
+            function (array $data) use ($inquilino): bool {
+                // Sin animal no se sabe a quien pertenece la produccion.
+                if ($this->faltaAlguno($data, ['animal_id', 'fecha'])) {
+                    return false;
+                }
 
-        foreach ($rows as $row) {
-            $data = [];
-            foreach ($map as $campo => $col) {
-                $data[$campo] = $row[$col] ?? null;
-            }
+                $guardado = false;
 
-            if (empty($data['animal_id'])) {
-                continue;
-            }
+                // Una misma fila puede traer leche y carne: se crean las dos.
+                if (($data['litros'] ?? null) !== null) {
+                    ProduccionLeche::create($data + ['inquilino_id' => $inquilino]);
+                    $guardado = true;
+                }
 
-            if (isset($data['litros'])) {
-                ProduccionLeche::create($data + ['inquilino_id' => $inquilino]);
-                $importados++;
-            }
+                if (($data['ganancia_diaria'] ?? null) !== null || ($data['peso'] ?? null) !== null) {
+                    ProduccionCarne::create($data + ['inquilino_id' => $inquilino]);
+                    $guardado = true;
+                }
 
-            if (isset($data['ganancia_diaria']) || isset($data['peso'])) {
-                ProduccionCarne::create($data + ['inquilino_id' => $inquilino]);
-                $importados++;
+                return $guardado;
             }
-        }
+        );
 
         session(['ultimo_importado' => $importados]);
 
-        return view('import.resultado', ['importados' => $importados]);
+        return view('import.resultado', compact('importados', 'omitidos'));
     }
 
     // ============================
@@ -313,6 +429,16 @@ class ImportController extends Controller
     {
         $request->validate([
             'archivo' => 'required|file|max:10240|mimes:csv,txt,xlsx,xls',
+        ], [
+            // El limite que manda es el de PHP, no el de esta validacion:
+            // con upload_max_filesize en 2M el servidor descarta el archivo
+            // antes de que la aplicacion lo lea, y el mensaje por defecto
+            // ("failed to upload") no explica nada.
+            'archivo.uploaded' => 'No se pudo subir el archivo. Si pesa mas de 2 MB, el servidor lo rechaza antes de leerlo (upload_max_filesize). Dividelo o sube ese limite en el php.ini.',
+            'archivo.file' => 'No se pudo subir el archivo. Si pesa mas de 2 MB, el servidor lo rechaza antes de leerlo (upload_max_filesize). Dividelo o sube ese limite en el php.ini.',
+            'archivo.max' => 'El archivo no puede pasar de 10 MB. Dividelo en varios.',
+            'archivo.mimes' => 'Formato no admitido: sube un CSV o un Excel (xlsx o xls).',
+            'archivo.required' => 'Selecciona un archivo.',
         ]);
 
         if (! $request->hasFile('archivo') || ! $request->file('archivo')->isValid()) {
@@ -385,25 +511,27 @@ class ImportController extends Controller
 
     public function comprasImport()
     {
-        $rows = $this->leerFilas('compras');
-        $map = session('map_compras');
         $inquilino = Auth::user()->inquilino_id;
 
-        $importados = 0;
+        [$importados, $omitidos] = $this->importarFilas(
+            $this->leerFilas('compras'),
+            session('map_compras') ?? [],
+            function (array $data) use ($inquilino): bool {
+                // La tabla exige estas cuatro columnas. Una fila a la que le
+                // falte cualquiera no se inventa: se omite y se avisa.
+                if ($this->faltaAlguno($data, ['fecha', 'proveedor', 'descripcion', 'monto_total'])) {
+                    return false;
+                }
 
-        foreach ($rows as $row) {
-            $data = [];
-            foreach ($map as $campo => $col) {
-                $data[$campo] = $row[$col] ?? null;
+                Compra::create($data + ['inquilino_id' => $inquilino]);
+
+                return true;
             }
-
-            Compra::create($data + ['inquilino_id' => $inquilino]);
-            $importados++;
-        }
+        );
 
         session(['ultimo_importado' => $importados]);
 
-        return view('import.resultado', ['importados' => $importados]);
+        return view('import.resultado', compact('importados', 'omitidos'));
     }
 
     // ============================
@@ -418,6 +546,16 @@ class ImportController extends Controller
     {
         $request->validate([
             'archivo' => 'required|file|max:10240|mimes:csv,txt,xlsx,xls',
+        ], [
+            // El limite que manda es el de PHP, no el de esta validacion:
+            // con upload_max_filesize en 2M el servidor descarta el archivo
+            // antes de que la aplicacion lo lea, y el mensaje por defecto
+            // ("failed to upload") no explica nada.
+            'archivo.uploaded' => 'No se pudo subir el archivo. Si pesa mas de 2 MB, el servidor lo rechaza antes de leerlo (upload_max_filesize). Dividelo o sube ese limite en el php.ini.',
+            'archivo.file' => 'No se pudo subir el archivo. Si pesa mas de 2 MB, el servidor lo rechaza antes de leerlo (upload_max_filesize). Dividelo o sube ese limite en el php.ini.',
+            'archivo.max' => 'El archivo no puede pasar de 10 MB. Dividelo en varios.',
+            'archivo.mimes' => 'Formato no admitido: sube un CSV o un Excel (xlsx o xls).',
+            'archivo.required' => 'Selecciona un archivo.',
         ]);
 
         if (! $request->hasFile('archivo') || ! $request->file('archivo')->isValid()) {
@@ -490,25 +628,26 @@ class ImportController extends Controller
 
     public function ventasImport()
     {
-        $rows = $this->leerFilas('ventas');
-        $map = session('map_ventas');
         $inquilino = Auth::user()->inquilino_id;
 
-        $importados = 0;
+        [$importados, $omitidos] = $this->importarFilas(
+            $this->leerFilas('ventas'),
+            session('map_ventas') ?? [],
+            function (array $data) use ($inquilino): bool {
+                // La tabla exige estas cuatro columnas.
+                if ($this->faltaAlguno($data, ['fecha', 'cliente', 'descripcion', 'monto_total'])) {
+                    return false;
+                }
 
-        foreach ($rows as $row) {
-            $data = [];
-            foreach ($map as $campo => $col) {
-                $data[$campo] = $row[$col] ?? null;
+                Venta::create($data + ['inquilino_id' => $inquilino]);
+
+                return true;
             }
-
-            Venta::create($data + ['inquilino_id' => $inquilino]);
-            $importados++;
-        }
+        );
 
         session(['ultimo_importado' => $importados]);
 
-        return view('import.resultado', ['importados' => $importados]);
+        return view('import.resultado', compact('importados', 'omitidos'));
     }
 
     // ============================

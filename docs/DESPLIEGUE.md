@@ -308,3 +308,15 @@ BLOQUEADO: los tests solo pueden ejecutarse contra la base de pruebas
 No es una molestia, es el seguro. Si alguna vez hay que ejecutar la suite en el
 servidor, se hace `php artisan optimize:clear` antes y se vuelve a `optimize`
 después.
+---
+
+## Anexo: importacion de datos
+
+El formato que deben tener los archivos (columnas por modulo, fechas, decimales,
+limites de tamano y filas) esta en `docs/FORMATO_IMPORTACION.md`, con plantillas
+listas para usar en `docs/plantillas/`.
+
+Aviso de despliegue: el limite real de tamano lo pone PHP
+(`upload_max_filesize`, 2 MB de fabrica), no la validacion de la aplicacion. Si
+se van a importar archivos mayores, hay que subir `upload_max_filesize` y
+`post_max_size` en el `php.ini` del servidor.
