@@ -31,8 +31,8 @@
         <tbody>
             @foreach($registros as $r)
             <tr>
-                <td>{{ $r->animal->codigo_interno }}</td>
-                <td>{{ $r->potrero->nombre }}</td>
+                <td>{{ $r->animal?->codigo_interno }}</td>
+                <td>{{ $r->potrero?->nombre ?? '—' }}</td>
                 <td>{{ \App\Support\Formato::fecha($r->fecha_entrada) }}</td>
                 <td>{{ \App\Support\Formato::fecha($r->fecha_salida) ?: '—' }}</td>
             </tr>

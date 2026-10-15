@@ -128,7 +128,7 @@
                     $fpp = \Carbon\Carbon::parse($p->fecha)->addDays(283)->format('Y-m-d');
                 @endphp
                 <li class="list-group-item">
-                    <strong>{{ $p->animal->codigo_interno }}</strong>
+                    <strong>{{ $p->animal?->codigo_interno }}</strong>
                     <span class="float-end">{{ $fpp }}</span>
                 </li>
             @empty

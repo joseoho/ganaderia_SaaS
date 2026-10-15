@@ -29,7 +29,7 @@
             <div class="card shadow-sm h-100">
                 <div class="card-body">
                     <h5 class="card-title">
-                        Animal: {{ $g->animal->codigo_interno }}
+                        Animal: {{ $g->animal?->codigo_interno }}
                     </h5>
 
                     <ul class="list-group list-group-flush mb-3">

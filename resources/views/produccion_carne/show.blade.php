@@ -8,11 +8,11 @@
     <div class="card-body">
 
         <h5 class="card-title">
-            Animal: {{ $produccion->animal->codigo_interno }}
+            Animal: {{ $produccion->animal?->codigo_interno }}
         </h5>
 
         <ul class="list-group list-group-flush mb-3">
-            <li class="list-group-item"><strong>Peso de Ingreso del Animal:</strong> {{ $produccion->animal->peso_entrada }} kg</li>
+            <li class="list-group-item"><strong>Peso de Ingreso del Animal:</strong> {{ $produccion->animal?->peso_entrada }} kg</li>
             <li class="list-group-item"><strong>Peso:</strong> {{ $produccion->peso }} kg</li>
             <li class="list-group-item"><strong>Peso anterior:</strong> {{ $produccion->peso_anterior ?? 'N/A' }} kg</li>
             <li class="list-group-item"><strong>GDP:</strong> {{ $produccion->ganancia_diaria ? number_format($produccion->ganancia_diaria, 2) : 'N/A' }} kg/día</li>

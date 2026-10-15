@@ -40,7 +40,7 @@
                 <div class="card-body">
 
                     <h5 class="card-title">
-                        Animal: {{ $m->animal->codigo_interno }}
+                        Animal: {{ $m->animal?->codigo_interno }}
                     </h5>
 
                     <p class="text-muted">{{ ucfirst($m->tipo) }}</p>

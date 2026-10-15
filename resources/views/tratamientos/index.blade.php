@@ -37,7 +37,7 @@
                 <div class="card-body">
 
                     <h5 class="card-title">
-                        Animal: {{ $t->animal->codigo_interno }}
+                        Animal: {{ $t->animal?->codigo_interno }}
                     </h5>
 
                     <p class="text-muted">{{ $t->motivo }}</p>

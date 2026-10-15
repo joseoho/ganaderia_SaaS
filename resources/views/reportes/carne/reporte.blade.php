@@ -31,7 +31,7 @@
         <tbody>
             @foreach($carne as $c)
             <tr>
-                <td>{{ $c->animal->codigo_interno }}</td>
+                <td>{{ $c->animal?->codigo_interno }}</td>
                 <td>{{ \App\Support\Formato::fecha($c->fecha) }}</td>
                 <td>{{ $c->peso }}</td>
                 <td>{{ $c->ganancia_diaria }}</td>

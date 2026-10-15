@@ -31,7 +31,7 @@
         <tbody>
             @foreach($leche as $l)
             <tr>
-                <td>{{ $l->animal->codigo_interno }}</td>
+                <td>{{ $l->animal?->codigo_interno }}</td>
                 <td>{{ \App\Support\Formato::fecha($l->fecha) }}</td>
                 <td>{{ $l->litros }}</td>
                 <td>

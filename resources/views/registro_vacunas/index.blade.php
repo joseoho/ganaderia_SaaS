@@ -38,7 +38,7 @@
                 <div class="card-body">
 
                     <h5 class="card-title">
-                        Animal: {{ $v->animal->codigo_interno }}
+                        Animal: {{ $v->animal?->codigo_interno }}
                     </h5>
 
                     <p class="text-muted">{{ $v->nombre }}</p>

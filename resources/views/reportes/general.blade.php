@@ -119,7 +119,7 @@
     <ul>
         @forelse($tratamientos_activos as $t)
             <li>
-                <strong>{{ $t->animal->codigo_interno }}</strong> — {{ $t->motivo }}  
+                <strong>{{ $t->animal?->codigo_interno }}</strong> — {{ $t->motivo }}  
                 ({{ $t->medicamento }}, desde {{ \App\Support\Formato::fecha($t->fecha) }})
             </li>
         @empty
@@ -133,7 +133,7 @@
     <ul>
         @foreach($tratamientos_historico as $t)
             <li>
-                <strong>{{ $t->animal->codigo_interno }}</strong> — {{ $t->motivo }}  
+                <strong>{{ $t->animal?->codigo_interno }}</strong> — {{ $t->motivo }}  
                 ({{ \App\Support\Formato::fecha($t->fecha_inicio) }} a {{ \App\Support\Formato::fecha($t->fecha_fin) ?: 'En curso' }})
             </li>
         @endforeach
@@ -145,7 +145,7 @@
     <ul>
         @foreach($vacunas as $v)
             <li>
-                <strong>{{ $v->animal->codigo_interno }}</strong> — {{ $v->nombre }}  
+                <strong>{{ $v->animal?->codigo_interno }}</strong> — {{ $v->nombre }}  
                 ({{ \App\Support\Formato::fecha($v->fecha) }})
             </li>
         @endforeach
@@ -157,7 +157,7 @@
     <ul>
         @foreach($genealogia as $g)
             <li>
-                <strong>{{ $g->animal->codigo_interno }}</strong>  
+                <strong>{{ $g->animal?->codigo_interno }}</strong>  
                 Padre: {{ $g->padre ?? 'N/A' }} — Madre: {{ $g->madre ?? 'N/A' }}
             </li>
         @endforeach

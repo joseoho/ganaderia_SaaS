@@ -8,7 +8,7 @@
     <div class="card-body">
 
         <h5 class="card-title">
-            Animal: {{ $produccion_leche->animal->codigo_interno }}
+            Animal: {{ $produccion_leche->animal?->codigo_interno }}
         </h5>
 
         <ul class="list-group list-group-flush mb-3">

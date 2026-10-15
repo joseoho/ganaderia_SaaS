@@ -44,7 +44,7 @@
                 <div class="card-body">
 
                     <h5 class="card-title">
-                        Animal: {{ $p->animal->codigo_interno }}
+                        Animal: {{ $p->animal?->codigo_interno }}
                     </h5>
 
                     <p class="text-muted">Turno: {{ ucfirst($p->turno) }}</p>

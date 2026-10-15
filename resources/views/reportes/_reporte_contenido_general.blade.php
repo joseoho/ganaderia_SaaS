@@ -73,7 +73,7 @@
 <ul>
     @forelse($tratamientos_activos as $t)
         <li>
-            <strong>{{ $t->animal->codigo_interno }}</strong> — {{ $t->motivo }}  
+            <strong>{{ $t->animal?->codigo_interno }}</strong> — {{ $t->motivo }}  
             ({{ $t->medicamento }}, desde {{ \Carbon\Carbon::parse($t->fecha)->format('d/m/Y') }})
         </li>
     @empty
@@ -87,7 +87,7 @@
 <ul>
     @forelse($tratamientos_historico as $t)
         <li>
-            <strong>{{ $t->animal->codigo_interno }}</strong> — {{ $t->motivo }}  
+            <strong>{{ $t->animal?->codigo_interno }}</strong> — {{ $t->motivo }}  
             ({{ \Carbon\Carbon::parse($t->fecha_inicio)->format('d/m/Y') }} a {{ $t->fecha_fin ? \Carbon\Carbon::parse($t->fecha_fin)->format('d/m/Y') : 'En curso' }})
         </li>
     @empty
@@ -101,7 +101,7 @@
 <ul>
     @forelse($vacunas as $v)
         <li>
-            <strong>{{ $v->animal->codigo_interno }}</strong> — {{ $v->nombre }}  
+            <strong>{{ $v->animal?->codigo_interno }}</strong> — {{ $v->nombre }}  
             ({{ \Carbon\Carbon::parse($v->fecha)->format('d/m/Y') }})
         </li>
     @empty
@@ -115,7 +115,7 @@
 <ul>
     @forelse($genealogia as $g)
         <li>
-            <strong>{{ $g->animal->codigo_interno }}</strong>  
+            <strong>{{ $g->animal?->codigo_interno }}</strong>  
             Padre: {{ $g->padre ?? 'N/A' }} — Madre: {{ $g->madre ?? 'N/A' }}
         </li>
     @empty

@@ -13,43 +13,48 @@
                 </div>
                 <div class="card-body">
                     <div class="table-responsive">
-                    <table class="table table-striped">
-                        <tr>
-                            <th>Categoría:</th>
-                            <td>{{ ucfirst($animal->categoria) }}</td>
-                        </tr>
-                        <tr>
-                            <th>Raza:</th>
-                            <td>{{ $animal->raza }}</td>
-                        </tr>
-                        <tr>
-                            <th>Sexo:</th>
-                            <td>{{ $animal->sexo == 'M' ? 'Macho' : 'Hembra' }}</td>
-                        </tr>
-                        <tr>
-                            <th>Fecha Nacimiento:</th>
-                            <td>{{ \Carbon\Carbon::parse($animal->fecha_nacimiento)->format('d/m/Y') }}</td>
-                        </tr>
-                        <tr>
-                            <th>Edad:</th>
-                            <td>{{ \Carbon\Carbon::parse($animal->fecha_nacimiento)->age }} años</td>
-                        </tr>
-                        <tr>
-                            <th>Peso Entrada:</th>
-                            <td>{{ $animal->peso_entrada }} kg</td>
-                        </tr>
-                        <tr>
-                            <p><strong>Potrero actual:</strong> {{ $animal->animalPotreros->last()->potrero->nombre }}</p>
-                            {{-- <a href="{{ route('potreros.asignar', $animal->id) }}">Mover a potrero</a> --}}
-                        </tr>
-                            <th>QR:</th>
-                            <td>
-                                <a href="{{ route('animal.qr.show', $animal->id) }}" target="_blank">
-                                    {!! QrCode::size(100)->generate(route('animal.qr.show', $animal->id)) !!}
-                                </a>
-                            </td>
-                        </tr>
-                    </table>
+                        <table class="table table-striped">
+                            <tr>
+                                <th>Categoría:</th>
+                                <td>{{ ucfirst($animal->categoria) }}</td>
+                            </tr>
+                            <tr>
+                                <th>Raza:</th>
+                                <td>{{ $animal->raza }}</td>
+                            </tr>
+                            <tr>
+                                <th>Sexo:</th>
+                                <td>{{ $animal->sexo == 'M' ? 'Macho' : 'Hembra' }}</td>
+                            </tr>
+                            <tr>
+                                <th>Fecha Nacimiento:</th>
+                                <td>{{ \App\Support\Formato::fecha($animal->fecha_nacimiento) }}</td>
+                            </tr>
+                            <tr>
+                                <th>Edad:</th>
+                                <td>{{ \Carbon\Carbon::parse($animal->fecha_nacimiento)->age }} años</td>
+                            </tr>
+                            <tr>
+                                <th>Peso Entrada:</th>
+                                <td>{{ $animal->peso_entrada }} kg</td>
+                            </tr>
+                            {{-- El potrero actual lo resuelve el controlador: la vista
+                                 leia `$animal->animalPotreros->last()->potrero`, que
+                                 daba error 500 si el animal no habia estado nunca en
+                                 un potrero. --}}
+                            <tr>
+                                <th>Potrero actual:</th>
+                                <td>{{ $potreroActual?->nombre ?? 'Sin potrero asignado' }}</td>
+                            </tr>
+                            <tr>
+                                <th>QR:</th>
+                                <td>
+                                    <a href="{{ route('animal.qr.show', $animal->id) }}" target="_blank">
+                                        {!! QrCode::size(100)->generate(route('animal.qr.show', $animal->id)) !!}
+                                    </a>
+                                </td>
+                            </tr>
+                        </table>
                     </div>
                 </div>
                 <div class="card-footer d-flex justify-content-between">

@@ -88,8 +88,23 @@ class AnimalController extends Controller
             abort(403, 'No autorizado');
         }
 
-        return view('animales.show', compact('animal'));
+        // El potrero ACTUAL es la asignacion ABIERTA (sin fecha de salida).
+        //
+        // Antes lo resolvia la propia vista con
+        // `$animal->animalPotreros->last()->potrero`, y tenia dos problemas: si
+        // el animal no habia estado nunca en ningun potrero, `last()` es null y
+        // la ficha entera daba error 500 ("Attempt to read property potrero on
+        // null"); y si habia estado, cogia la ultima asignacion aunque ya
+        // estuviera cerrada, mostrando un potrero del que el animal ya se habia
+        // ido.
+        $potreroActual = $animal->animalPotreros()
+            ->whereNull('fecha_salida')
+            ->with('potrero')
+            ->latest('fecha_entrada')
+            ->first()
+            ?->potrero;
 
+        return view('animales.show', compact('animal', 'potreroActual'));
     }
 
     public function edit(Animal $animal)
