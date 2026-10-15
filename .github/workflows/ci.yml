@@ -79,11 +79,14 @@ jobs:
       - name: Estilo de codigo (Pint)
         run: vendor/bin/pint --test
 
+      - name: Analisis estatico (PHPStan/Larastan)
+        run: vendor/bin/phpstan analyse --no-progress
+
       - name: Esquema reproducible
         run: php artisan migrate:fresh --seed --force
 
       - name: Pruebas
         run: php artisan test
 
-      # PHPStan/Larastan se anadira aqui cuando se apruebe esa dependencia
-      # de desarrollo. Sin ella, el paso seria un falso verde.
+      # El analisis estatico esta en verde a nivel 5. Si se sube el nivel, hay
+      # que corregir lo que salga antes de subirlo aqui.

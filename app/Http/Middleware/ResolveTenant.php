@@ -26,7 +26,11 @@ class ResolveTenant
     {
         $user = Auth::user();
 
-        if ($user !== null && $user->inquilino_id !== null) {
+        // getAttribute() y no la propiedad: el esquema declara inquilino_id como
+        // NOT NULL, asi que la inferencia estatica da por hecho que nunca es
+        // null, pero un usuario mal creado si puede llegar sin ganaderia y ese
+        // caso hay que seguir cubriendolo.
+        if ($user !== null && $user->getAttribute('inquilino_id') !== null) {
             $this->context->set((int) $user->inquilino_id);
         }
 

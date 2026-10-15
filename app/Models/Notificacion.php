@@ -5,6 +5,7 @@ namespace App\Models;
 use App\Models\Concerns\BelongsToTenant;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class Notificacion extends Model
 {
@@ -29,17 +30,19 @@ class Notificacion extends Model
      * ESTA tabla. Estaba como 'id', con lo que la relacion unia users.id con
      * notificaciones.id en lugar de usar notificaciones.usuario_id.
      */
-    public function usuario()
+    /** @return BelongsTo<User, $this> */
+    public function usuario(): BelongsTo
     {
-        return $this->belongsTo(User::class, 'usuario_id');
+        return $this->belongsto(User::class, 'usuario_id');
     }
 
     /**
      * Relación: Una notificación pertenece a una ganadería (tenant).
      */
-    public function inquilino()
+    /** @return BelongsTo<Inquilino, $this> */
+    public function inquilino(): BelongsTo
     {
-        return $this->belongsTo(Inquilino::class, 'inquilino_id');
+        return $this->belongsto(Inquilino::class, 'inquilino_id');
     }
 
     /**

@@ -4,6 +4,8 @@ namespace App\Models;
 
 use App\Models\Concerns\BelongsToTenant;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 
@@ -50,14 +52,16 @@ class User extends Authenticatable
      *
      * Se elimino el global scope manual "fail-open" que habia aqui.
      */
-    public function inquilino()
+    /** @return BelongsTo<Inquilino, $this> */
+    public function inquilino(): BelongsTo
     {
-        return $this->belongsTo(Inquilino::class, 'inquilino_id');
+        return $this->belongsto(Inquilino::class, 'inquilino_id');
     }
 
-    public function notificaciones()
+    /** @return HasMany<Notificacion, $this> */
+    public function notificaciones(): HasMany
     {
-        return $this->hasMany(Notificacion::class, 'usuario_id');
+        return $this->hasmany(Notificacion::class, 'usuario_id');
     }
 
     /**

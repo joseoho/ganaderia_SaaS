@@ -5,6 +5,7 @@ namespace App\Models;
 use App\Models\Concerns\BelongsToTenant;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class ProduccionLeche extends Model
 {
@@ -24,14 +25,16 @@ class ProduccionLeche extends Model
         'observaciones',
     ];
 
-    public function animal()
+    /** @return BelongsTo<Animal, $this> */
+    public function animal(): BelongsTo
     {
-        return $this->belongsTo(Animal::class, 'animal_id');
+        return $this->belongsto(Animal::class, 'animal_id');
     }
 
-    public function inquilino()
+    /** @return BelongsTo<Inquilino, $this> */
+    public function inquilino(): BelongsTo
     {
-        return $this->belongsTo(Inquilino::class, 'inquilino_id');
+        return $this->belongsto(Inquilino::class, 'inquilino_id');
     }
 
     /**

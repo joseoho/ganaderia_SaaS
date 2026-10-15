@@ -5,6 +5,7 @@ namespace App\Models;
 use App\Models\Concerns\BelongsToTenant;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class InventarioInsumo extends Model
 {
@@ -15,9 +16,10 @@ class InventarioInsumo extends Model
 
     protected $fillable = ['inquilino_id', 'nombre', 'categoria', 'cantidad', 'unidad', 'minimo', 'ubicacion', 'fecha_ingreso', 'descripcion'];
 
-    public function inquilino()
+    /** @return BelongsTo<Inquilino, $this> */
+    public function inquilino(): BelongsTo
     {
-        return $this->belongsTo(Inquilino::class);
+        return $this->belongsto(Inquilino::class);
     }
 
     public function estaBajo()

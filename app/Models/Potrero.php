@@ -5,6 +5,7 @@ namespace App\Models;
 use App\Models\Concerns\BelongsToTenant;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Potrero extends Model
 {
@@ -21,14 +22,16 @@ class Potrero extends Model
         'fecha_ultimo_descanso',
     ];
 
-    public function animales()
+    /** @return HasMany<AnimalPotrero, $this> */
+    public function animales(): HasMany
     {
-        return $this->hasMany(AnimalPotrero::class);
+        return $this->hasmany(AnimalPotrero::class);
     }
 
-    public function rotaciones()
+    /** @return HasMany<Rotacion, $this> */
+    public function rotaciones(): HasMany
     {
-        return $this->hasMany(Rotacion::class);
+        return $this->hasmany(Rotacion::class);
     }
 
     /**

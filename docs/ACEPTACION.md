@@ -17,7 +17,7 @@ no está verificado se marca como pendiente**, no como hecho.
 | 1 | Instalación limpia (`composer install` + build) levanta la aplicación | ✅ Verificado |
 | 2 | `migrate:fresh --seed` reproduce el esquema desde cero | ✅ Verificado |
 | 3 | Suite de pruebas en verde | ✅ **86 pruebas, 0 fallos** |
-| 4 | Análisis estático sin errores | ⛔ **Pendiente: falta aprobar la dependencia** |
+| 4 | Análisis estático sin errores | ✅ **PHPStan nivel 5: 0 errores** |
 | 5 | Cero hallazgos P0/P1 abiertos | ✅ Los P0/P1 conocidos están corregidos |
 | 6 | Aislamiento multi-tenant verificado | ✅ Verificado (A vs B) |
 | 7 | Rutas responden sin errores con el build de producción | ✅ Verificado |
@@ -82,12 +82,27 @@ php artisan test → Tests: 280 passed (877 assertions) · Duration: 47.57s
 
 ## 4. Análisis estático
 
-**No realizado.** Requiere `larastan/larastan`, una dependencia de desarrollo que
-no se ha instalado porque el plan acordado prohíbe tocar dependencias sin
-justificarlo y sin aprobación. **No se declara como hecho.** El CI tiene el hueco
-reservado y comentado: sin la dependencia, ese paso sería un falso verde.
+```
+vendor/bin/phpstan analyse --no-progress   → [OK] No errors (nivel 5)
+vendor/bin/pint --test                     → 169 archivos, 0 problemas
+```
 
-Pint sí está aplicado: **148 archivos, 0 problemas de estilo**.
+Larastan está instalado como dependencia **de desarrollo** (no viaja a
+producción) y configurado en `phpstan.neon` a nivel 5. La primera pasada dio
+**75 errores**, resueltos por causas de raíz y no uno a uno:
+
+- **46 relaciones** de los 20 modelos no declaraban su tipo de retorno ni el
+  modelo relacionado, así que el analizador daba por hecho que no existían
+  (29 errores). Ahora llevan `HasMany<Modelo, $this>` y compañía.
+- `app/Http/Kernel.php` y `TenancyMiddleware` eran **código muerto** que nadie
+  referenciaba: 9 errores menos.
+- El esquema declara `inquilino_id` como NOT NULL, así que el analizador creía
+  inalcanzable la comprobación de nulo del filtro multi-tenant (21 errores). Se
+  lee con `getAttribute()`, que devuelve `mixed`, y la comprobación —necesaria
+  para un modelo que aún no se ha guardado— sigue en pie.
+
+El paso está **activo en el CI**: si alguien introduce un error, la integración
+falla.
 
 ## 5. Hallazgos abiertos
 
@@ -148,18 +163,22 @@ copias de seguridad, reversión, verificación posterior y checklist de segurida
 
 ## Conclusión
 
-La aplicación **no está lista para producción todavía**, y por dos motivos
-concretos, no por impresión general:
+La aplicación **está al borde de estar lista para producción**. Lo que queda no
+es código por escribir, sino dos cosas concretas:
 
-1. **El registro público está roto** y necesita una decisión de producto.
-2. **Falta el análisis estático** y la **ejecución del runbook en un servidor
-   real**, que dependen de una aprobación y de un destino de despliegue.
+1. **Ejecutar el runbook en un servidor real**, que necesita un destino de
+   despliegue.
+2. **Cerrar los avisos de seguridad de las dependencias**: `composer audit`
+   detectó 47 en paquetes de producción; ya se resolvieron los de guzzle y psr7
+   (13) y quedan **34 en 13 paquetes** (league/commonmark, phpspreadsheet,
+   laravel/framework, varios symfony/*, flysystem), que se abordan actualizando
+   de forma controlada y verificando la suite después de cada paso.
+
+Ya **no** queda ningún P0, ni el registro roto (ahora es auto-servicio, cerrado
+por defecto y con comandos de aprovisionamiento), ni la falta de roles
+(administrador y operario), ni el análisis estático (PHPStan nivel 5 en verde y
+activo en el CI).
 
 Todo lo demás —esquema versionado, aislamiento multi-tenant, suite de pruebas en
 verde, estilo, endurecimiento de la importación, páginas de error y CI— está
 hecho **y verificado con evidencia**.
-
-Las cinco cosas que desbloquean el cierre están listadas en el informe de cada
-ronda y resumidas aquí: decisión sobre el registro, sobre los roles, aprobación
-de Larastan, autorización para borrar el código muerto y reapertura de DSH en la
-carpeta del proyecto para poder usar el fan-out de agentes.

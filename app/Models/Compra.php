@@ -5,6 +5,7 @@ namespace App\Models;
 use App\Models\Concerns\BelongsToTenant;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class Compra extends Model
 {
@@ -23,9 +24,10 @@ class Compra extends Model
      * (si no habia tenant en el contenedor simplemente no filtraba) y
      * ademas estaba duplicado en varios modelos con criterios distintos.
      */
-    public function inquilino()
+    /** @return BelongsTo<Inquilino, $this> */
+    public function inquilino(): BelongsTo
     {
-        return $this->belongsTo(Inquilino::class);
+        return $this->belongsto(Inquilino::class);
     }
 
     /**

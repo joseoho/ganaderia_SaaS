@@ -5,6 +5,7 @@ namespace App\Models;
 use App\Models\Concerns\BelongsToTenant;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class Genealogia extends Model
 {
@@ -15,18 +16,21 @@ class Genealogia extends Model
 
     protected $fillable = ['animal_id', 'inquilino_id', 'padre_id', 'madre_id', 'observaciones'];
 
-    public function animal()
+    /** @return BelongsTo<Animal, $this> */
+    public function animal(): BelongsTo
     {
-        return $this->belongsTo(Animal::class, 'animal_id');
+        return $this->belongsto(Animal::class, 'animal_id');
     }
 
-    public function padre()
+    /** @return BelongsTo<Animal, $this> */
+    public function padre(): BelongsTo
     {
-        return $this->belongsTo(Animal::class, 'padre_id');
+        return $this->belongsto(Animal::class, 'padre_id');
     }
 
-    public function madre()
+    /** @return BelongsTo<Animal, $this> */
+    public function madre(): BelongsTo
     {
-        return $this->belongsTo(Animal::class, 'madre_id');
+        return $this->belongsto(Animal::class, 'madre_id');
     }
 }

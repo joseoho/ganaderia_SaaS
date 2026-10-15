@@ -33,7 +33,10 @@ trait BelongsToTenant
         static::addGlobalScope(new TenantScope);
 
         static::creating(function (self $model): void {
-            if ($model->inquilino_id !== null) {
+            // getAttribute() devuelve mixed a proposito: la inferencia desde el
+            // esquema cree que inquilino_id nunca es null (la columna es NOT NULL),
+            // pero en un modelo que aun no se ha guardado si lo esta.
+            if ($model->getAttribute('inquilino_id') !== null) {
                 return;
             }
 
@@ -47,9 +50,17 @@ trait BelongsToTenant
 
     /**
      * Consulta sin el filtro de ganaderia. Uso deliberado y excepcional.
+     *
+     * Se anota `Builder<static>` para que quien la use siga viendo el modelo
+     * concreto (User, Animal...) y no un Model generico.
+     *
+     * @return Builder<static>
      */
     public static function withoutTenantScope(): Builder
     {
-        return static::withoutGlobalScope(TenantScope::class);
+        /** @var Builder<static> $consulta */
+        $consulta = static::withoutGlobalScope(TenantScope::class);
+
+        return $consulta;
     }
 }

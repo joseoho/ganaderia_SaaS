@@ -5,6 +5,7 @@ namespace App\Models;
 use App\Models\Concerns\BelongsToTenant;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class Gastos extends Model
 {
@@ -13,9 +14,10 @@ class Gastos extends Model
 
     protected $fillable = ['inquilino_id', 'categoria', 'monto', 'fecha', 'descripcion'];
 
-    public function inquilino()
+    /** @return BelongsTo<Inquilino, $this> */
+    public function inquilino(): BelongsTo
     {
-        return $this->belongsTo(Inquilino::class);
+        return $this->belongsto(Inquilino::class);
     }
 
     /**

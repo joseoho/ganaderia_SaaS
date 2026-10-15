@@ -29,11 +29,19 @@ class ImportService
         }
 
         try {
+            // La libreria no tipa $import en el codigo (solo en su docblock) y lo
+            // comprueba con instanceof, asi que null es valido: significa "sin
+            // clase de importacion", que es justo lo que se quiere para leer las
+            // filas en crudo.
+            // @phpstan-ignore argument.type (el docblock de la libreria es mas estricto que su implementacion)
             $coleccion = Excel::toCollection(null, $file);
-        } catch (ValidationException $e) {
-            // Un error de validacion nunca debe silenciarse.
-            throw $e;
         } catch (\Throwable $e) {
+            // Un error de validacion no se reescribe: se propaga tal cual para
+            // que el usuario vea el motivo real.
+            if ($e instanceof ValidationException) {
+                throw $e;
+            }
+
             Log::error('Error ImportService@leerArchivo: '.$e->getMessage());
 
             // Antes se devolvia una coleccion vacia y el usuario solo veia

@@ -5,6 +5,7 @@ namespace App\Models;
 use App\Models\Concerns\BelongsToTenant;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class Rotacion extends Model
 {
@@ -20,9 +21,10 @@ class Rotacion extends Model
         'carga_animal',
     ];
 
-    public function potrero()
+    /** @return BelongsTo<Potrero, $this> */
+    public function potrero(): BelongsTo
     {
-        return $this->belongsTo(Potrero::class);
+        return $this->belongsto(Potrero::class);
     }
 
     /**

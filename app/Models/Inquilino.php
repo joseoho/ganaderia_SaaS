@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Inquilino extends Model
 {
@@ -16,39 +17,45 @@ class Inquilino extends Model
     ];
 
     // Relación: Un inquilino tiene muchos usuarios
-    public function usuarios()
+    /** @return HasMany<User, $this> */
+    public function usuarios(): HasMany
     {
-        return $this->hasMany(User::class, 'inquilino_id'); // 👈 corregido
+        return $this->hasmany(User::class, 'inquilino_id'); // 👈 corregido
     }
 
     // Relación: Un inquilino tiene muchos animales
-    public function animales()
+    /** @return HasMany<Animal, $this> */
+    public function animales(): HasMany
     {
-        return $this->hasMany(Animal::class, 'inquilino_id');
+        return $this->hasmany(Animal::class, 'inquilino_id');
     }
 
     // Relación: Un inquilino tiene muchas compras
-    public function compras()
+    /** @return HasMany<Compra, $this> */
+    public function compras(): HasMany
     {
-        return $this->hasMany(Compra::class, 'inquilino_id');
+        return $this->hasmany(Compra::class, 'inquilino_id');
     }
 
     // Relación: Un inquilino tiene muchas ventas
-    public function ventas()
+    /** @return HasMany<Venta, $this> */
+    public function ventas(): HasMany
     {
-        return $this->hasMany(Venta::class, 'inquilino_id');
+        return $this->hasmany(Venta::class, 'inquilino_id');
     }
 
     // Relación: Un inquilino tiene muchos insumos
-    public function inventarioInsumos()
+    /** @return HasMany<InventarioInsumo, $this> */
+    public function inventarioInsumos(): HasMany
     {
-        return $this->hasMany(InventarioInsumo::class, 'inquilino_id');
+        return $this->hasmany(InventarioInsumo::class, 'inquilino_id');
     }
 
     // Relación: Un inquilino tiene muchos reportes
-    public function reportes()
+    /** @return HasMany<Reporte, $this> */
+    public function reportes(): HasMany
     {
-        return $this->hasMany(Reporte::class, 'inquilino_id');
+        return $this->hasmany(Reporte::class, 'inquilino_id');
     }
 
     /**

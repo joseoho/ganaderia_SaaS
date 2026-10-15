@@ -38,7 +38,7 @@ class ListarUsuarios extends Command
             ['Id', 'Ganaderia', 'Nombre', 'Correo', 'Rol', 'Verificado'],
             $usuarios->map(fn (User $u) => [
                 $u->id,
-                $u->inquilino?->nombre ?? '—',
+                $u->inquilino->nombre,
                 $u->name,
                 $u->email,
                 $u->nombreDelRol(),

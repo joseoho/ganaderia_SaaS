@@ -5,6 +5,9 @@ namespace App\Models;
 use App\Models\Concerns\BelongsToTenant;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class Animal extends Model
 {
@@ -15,49 +18,58 @@ class Animal extends Model
 
     protected $fillable = ['inquilino_id', 'codigo_interno', 'categoria', 'raza', 'tipo', 'fecha_nacimiento', 'sexo', 'peso_entrada', 'estado'];
 
-    public function inquilino()
+    /** @return BelongsTo<Inquilino, $this> */
+    public function inquilino(): BelongsTo
     {
-        return $this->belongsTo(Inquilino::class);
+        return $this->belongsto(Inquilino::class);
     }
 
-    public function genealogia()
+    /** @return HasOne<Genealogia, $this> */
+    public function genealogia(): HasOne
     {
-        return $this->hasOne(Genealogia::class);
+        return $this->hasone(Genealogia::class);
     }
 
-    public function movilizaciones()
+    /** @return HasMany<Movilizacion, $this> */
+    public function movilizaciones(): HasMany
     {
-        return $this->hasMany(Movilizacion::class);
+        return $this->hasmany(Movilizacion::class);
     }
 
-    public function reproducciones()
+    /** @return HasMany<Reproduccion, $this> */
+    public function reproducciones(): HasMany
     {
-        return $this->hasMany(Reproduccion::class);
+        return $this->hasmany(Reproduccion::class);
     }
 
-    public function produccionLeche()
+    /** @return HasMany<ProduccionLeche, $this> */
+    public function produccionLeche(): HasMany
     {
-        return $this->hasMany(ProduccionLeche::class);
+        return $this->hasmany(ProduccionLeche::class);
     }
 
-    public function produccionCarne()
+    /** @return HasMany<ProduccionCarne, $this> */
+    public function produccionCarne(): HasMany
     {
-        return $this->hasMany(ProduccionCarne::class);
+        return $this->hasmany(ProduccionCarne::class);
     }
 
-    public function tratamientos()
+    /** @return HasMany<Tratamiento, $this> */
+    public function tratamientos(): HasMany
     {
-        return $this->hasMany(Tratamiento::class);
+        return $this->hasmany(Tratamiento::class);
     }
 
-    public function registrosVacunas()
+    /** @return HasMany<RegistroVacuna, $this> */
+    public function registrosVacunas(): HasMany
     {
-        return $this->hasMany(RegistroVacuna::class);
+        return $this->hasmany(RegistroVacuna::class);
     }
 
-    public function animalPotreros()
+    /** @return HasMany<AnimalPotrero, $this> */
+    public function animalPotreros(): HasMany
     {
-        return $this->hasMany(AnimalPotrero::class);
+        return $this->hasmany(AnimalPotrero::class);
     }
 
     /**
