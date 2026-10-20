@@ -205,7 +205,7 @@ class ImportacionFormatoEspanolTest extends TestCase
         // Tiene que decir la FILA (la 3: cabecera + 1 buena + esta) y el MOTIVO.
         $respuesta->assertSee('Filas omitidas: 1');
         $respuesta->assertSee('Fila 3');
-        $respuesta->assertSee('le falta fecha');
+        $respuesta->assertSee('la celda esta vacia en fecha');
     }
 
     public function test_una_fila_sin_importe_dice_que_falta_el_importe(): void
@@ -222,5 +222,56 @@ class ImportacionFormatoEspanolTest extends TestCase
 
         $respuesta->assertSee('Filas omitidas: 1');
         $respuesta->assertSee('monto_total');
+    }
+
+    public function test_si_no_se_mapeo_el_importe_lo_dice_y_nombra_la_columna_del_archivo(): void
+    {
+        // El caso del usuario: el archivo trae "Total" y el campo monto_total se
+        // quedo sin asignar. Antes decia "le falta monto_total" y no habia forma
+        // de saber que habia que volver al paso de mapeo.
+        $csv = "fecha;proveedor;descripcion;Total\n"
+            ."2026-02-01;AgroSur;Compra uno;150000\n";
+
+        $respuesta = $this->importar('compras', $csv, [
+            'fecha' => 'fecha',
+            'proveedor' => 'proveedor',
+            'descripcion' => 'descripcion',
+        ]);
+
+        $respuesta->assertSee('falta asignar monto_total');
+        $respuesta->assertSee('Total');
+        $respuesta->assertSee('Columnas que tiene tu archivo');
+    }
+
+    public function test_un_importe_ilegible_dice_el_valor_concreto(): void
+    {
+        $csv = "fecha;proveedor;descripcion;monto_total\n"
+            ."2026-02-01;AgroSur;Compra rara;sin dato\n";
+
+        $respuesta = $this->importar('compras', $csv, [
+            'fecha' => 'fecha',
+            'proveedor' => 'proveedor',
+            'descripcion' => 'descripcion',
+            'monto_total' => 'monto_total',
+        ]);
+
+        $respuesta->assertSee('no es un numero');
+        $respuesta->assertSee('sin dato');
+    }
+
+    public function test_una_fecha_ilegible_dice_el_valor_concreto(): void
+    {
+        $csv = "cliente;fecha;descripcion;monto_total\n"
+            ."Finca El Roble;ayer;Venta rara;1000\n";
+
+        $respuesta = $this->importar('ventas', $csv, [
+            'cliente' => 'cliente',
+            'fecha' => 'fecha',
+            'descripcion' => 'descripcion',
+            'monto_total' => 'monto_total',
+        ]);
+
+        $respuesta->assertSee('no se entiende');
+        $respuesta->assertSee('ayer');
     }
 }

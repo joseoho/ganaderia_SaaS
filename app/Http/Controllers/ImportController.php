@@ -26,6 +26,30 @@ class ImportController extends Controller
     /** Campos numericos: se normaliza el separador decimal (1.500,50 -> 1500.50). */
     private const CAMPOS_NUMERO = ['monto_total', 'monto', 'peso', 'peso_entrada', 'peso_anterior', 'ganancia_diaria', 'litros', 'litros_anteriores', 'cantidad', 'minimo', 'dosis', 'tamano', 'carga_animal'];
 
+    /** Columnas que la tabla de cada modulo exige para poder guardar la fila. */
+    private const OBLIGATORIOS = [
+        'animales' => ['codigo_interno', 'categoria', 'raza', 'fecha_nacimiento', 'sexo', 'estado'],
+        'produccion' => ['animal_id', 'fecha'],
+        'compras' => ['fecha', 'proveedor', 'descripcion', 'monto_total'],
+        'ventas' => ['fecha', 'cliente', 'descripcion', 'monto_total'],
+    ];
+
+    /** Otros titulos con los que la gente suele nombrar esas columnas en Excel. */
+    private const SINONIMOS = [
+        'monto_total' => ['monto', 'total', 'valor', 'importe', 'precio', 'monto total', 'valor total', 'total compra', 'total venta'],
+        'proveedor' => ['proveedor', 'nombre proveedor', 'suministra', 'vendedor'],
+        'cliente' => ['cliente', 'nombre cliente', 'comprador'],
+        'descripcion' => ['descripcion', 'detalle', 'concepto', 'observacion', 'observaciones'],
+        'fecha' => ['fecha', 'dia', 'fecha compra', 'fecha venta'],
+        'animal_id' => ['animal_id', 'id animal', 'id_animal', 'animal', 'codigo animal'],
+        'codigo_interno' => ['codigo_interno', 'codigo', 'arete', 'numero', 'chapeta'],
+        'categoria' => ['categoria', 'tipo'],
+        'raza' => ['raza'],
+        'fecha_nacimiento' => ['fecha_nacimiento', 'nacimiento', 'fecha nacimiento'],
+        'sexo' => ['sexo', 'genero'],
+        'estado' => ['estado', 'situacion'],
+    ];
+
     /** Minutos que se conservan las filas de una importacion a medio hacer. */
     private const MINUTOS_FILAS = 30;
 
@@ -66,18 +90,45 @@ class ImportController extends Controller
     /**
      * Ejecuta la importacion fila a fila, contando lo que entra y lo que no.
      *
-     * Cada fila va en su propia transaccion y con su propio control: una fila
-     * invalida se cuenta como omitida CON SU MOTIVO y el resto del archivo sigue
-     * entrando. Antes, una sola fila mala tumbaba la importacion entera con un
-     * error 500 y dejaba dentro lo que ya se hubiera guardado.
+     * El motivo de cada fila omitida se calcula aqui y se dice EN QUE se falla:
+     * si falta una columna por mapear, si la celda esta vacia, o si el valor no
+     * se puede leer (con el valor entre comillas). Un "le falta monto_total"
+     * generico no sirve para nada: puede significar tres cosas distintas.
      *
      * @param  Collection<int, mixed>  $rows
      * @param  array<string, string>  $map
      * @param  callable(array<string, mixed>): ?string  $guardar  null si se guardo; si no, el motivo.
      * @return array{0: int, 1: int} [importados, omitidos]
      */
-    private function importarFilas(Collection $rows, array $map, callable $guardar): array
+    private function importarFilas(string $tipo, Collection $rows, array $map, callable $guardar): array
     {
+        $columnas = array_keys((array) ($rows->first()?->toArray() ?? []));
+        $obligatorios = self::OBLIGATORIOS[$tipo] ?? [];
+
+        // Si falta la columna de un campo obligatorio no se puede importar nada:
+        // se dice que campo falta, que columnas trae el archivo y, si hay una con
+        // nombre parecido, cual es.
+        $sinMapear = array_values(array_filter(
+            $obligatorios,
+            fn (string $campo): bool => ! isset($map[$campo]) || $map[$campo] === ''
+        ));
+
+        if ($sinMapear !== []) {
+            $detalle = [];
+
+            foreach ($sinMapear as $campo) {
+                $parecida = $this->columnaParecida($campo, $columnas);
+                $detalle[] = $campo.($parecida !== null ? " (en tu archivo parece «{$parecida}»)" : '');
+            }
+
+            session(['import_motivos' => [
+                'No se pudo importar: falta asignar '.implode(', ', $detalle).'. Vuelve al paso de mapeo y elige esa columna.',
+                'Columnas que tiene tu archivo: '.implode(', ', $columnas),
+            ]]);
+
+            return [0, $rows->count()];
+        }
+
         $importados = 0;
         $omitidos = 0;
         $motivos = [];
@@ -90,33 +141,57 @@ class ImportController extends Controller
             }
 
             // Una celda vacia de una hoja de calculo llega como cadena vacia, no
-            // como null: sin normalizarla, ese "" acaba en una columna decimal o
-            // en una NOT NULL y revienta. Un 0 de verdad se respeta.
+            // como null. Un 0 de verdad se respeta.
             foreach ($data as $campo => $valor) {
                 if (is_string($valor) && trim($valor) === '') {
                     $data[$campo] = null;
                 }
             }
 
-            // Fechas e importes se traducen AQUI, en el codigo: asi da igual el
-            // formato con el que los escriba el usuario y no depende del motor.
+            $motivo = null;
+
+            // Fechas e importes: si un valor no se puede leer, se dice cual.
             foreach ($data as $campo => $valor) {
-                if ($valor === null) {
+                if ($valor === null || $motivo !== null) {
                     continue;
                 }
 
                 if (in_array($campo, self::CAMPOS_FECHA, true)) {
                     $data[$campo] = $this->normalizarFecha((string) $valor);
+
+                    if ($data[$campo] === null) {
+                        $motivo = "la fecha «{$valor}» de {$campo} no se entiende (vale 2026-02-01 o 01/02/2026)";
+                    }
                 } elseif (in_array($campo, self::CAMPOS_NUMERO, true)) {
                     $data[$campo] = $this->normalizarNumero($valor);
+
+                    if ($data[$campo] === null) {
+                        $motivo = "el valor «{$valor}» de {$campo} no es un numero";
+                    }
                 }
             }
 
-            try {
-                $motivo = DB::transaction(fn (): ?string => $guardar($data));
-            } catch (Throwable $e) {
-                Log::error('Importacion: fila omitida', ['error' => $e->getMessage(), 'datos' => $data]);
-                $motivo = 'no se pudo guardar (revisa los valores de la fila)';
+            if ($motivo === null) {
+                $vacias = [];
+
+                foreach ($obligatorios as $campo) {
+                    if (! isset($data[$campo]) || $data[$campo] === '') {
+                        $vacias[] = $campo;
+                    }
+                }
+
+                if ($vacias !== []) {
+                    $motivo = 'la celda esta vacia en '.implode(', ', $vacias);
+                }
+            }
+
+            if ($motivo === null) {
+                try {
+                    $motivo = DB::transaction(fn (): ?string => $guardar($data));
+                } catch (Throwable $e) {
+                    Log::error('Importacion: fila omitida', ['error' => $e->getMessage(), 'datos' => $data]);
+                    $motivo = 'no se pudo guardar (revisa los valores de la fila)';
+                }
             }
 
             if ($motivo === null) {
@@ -127,8 +202,6 @@ class ImportController extends Controller
 
             $omitidos++;
 
-            // Se guardan los primeros motivos para poder decir en pantalla QUE
-            // falla, en vez de un aviso generico que no ayuda a nadie.
             if (count($motivos) < 10) {
                 $motivos[] = 'Fila '.($numero + 2).': '.$motivo;
             }
@@ -137,6 +210,37 @@ class ImportController extends Controller
         session(['import_motivos' => $motivos]);
 
         return [$importados, $omitidos];
+    }
+
+    /**
+     * Busca en las columnas del archivo una que se llame como el campo, como
+     * alguno de sus sinonimos habituales o que lo contenga.
+     *
+     * @param  array<int, string>  $columnas
+     */
+    private function columnaParecida(string $campo, array $columnas): ?string
+    {
+        $candidatos = array_merge([$campo], self::SINONIMOS[$campo] ?? []);
+
+        foreach ($columnas as $columna) {
+            $normalizada = mb_strtolower(trim((string) $columna));
+
+            if (in_array($normalizada, $candidatos, true)) {
+                return (string) $columna;
+            }
+        }
+
+        foreach ($columnas as $columna) {
+            $normalizada = mb_strtolower(trim((string) $columna));
+
+            foreach ($candidatos as $candidato) {
+                if ($normalizada !== '' && str_contains($normalizada, $candidato)) {
+                    return (string) $columna;
+                }
+            }
+        }
+
+        return null;
     }
 
     /**
@@ -201,21 +305,6 @@ class ImportController extends Controller
         }
 
         return str_replace([',', '.'], '', $texto);
-    }
-
-    /**
-     * Columnas obligatorias que le faltan a la fila (vacio si estan todas).
-     *
-     * @param  array<string, mixed>  $data
-     * @param  array<int, string>  $obligatorios
-     * @return array<int, string>
-     */
-    private function faltantes(array $data, array $obligatorios): array
-    {
-        return array_values(array_filter(
-            $obligatorios,
-            fn (string $campo): bool => ! isset($data[$campo]) || $data[$campo] === ''
-        ));
     }
 
     public function index()
@@ -327,19 +416,12 @@ class ImportController extends Controller
         $inquilino = Auth::user()->inquilino_id;
 
         [$importados, $omitidos] = $this->importarFilas(
+            'animales',
             $this->leerFilas('animales'),
             session('map_animales') ?? [],
             function (array $data) use ($inquilino): ?string {
-                if (empty($data['codigo_interno'])) {
-                    return 'no tiene codigo_interno';
-                }
-
-                $faltan = $this->faltantes($data, ['categoria', 'raza', 'fecha_nacimiento', 'sexo', 'estado']);
-
-                if ($faltan !== []) {
-                    return 'le falta '.implode(', ', $faltan);
-                }
-
+                // updateOrCreate por (ganaderia, codigo): reimportar el mismo
+                // archivo ACTUALIZA los animales en vez de duplicarlos.
                 Animal::updateOrCreate(
                     [
                         'inquilino_id' => $inquilino,
@@ -457,15 +539,10 @@ class ImportController extends Controller
         $inquilino = Auth::user()->inquilino_id;
 
         [$importados, $omitidos] = $this->importarFilas(
+            'produccion',
             $this->leerFilas('produccion'),
             session('map_produccion') ?? [],
             function (array $data) use ($inquilino): ?string {
-                $faltan = $this->faltantes($data, ['animal_id', 'fecha']);
-
-                if ($faltan !== []) {
-                    return 'le falta '.implode(', ', $faltan);
-                }
-
                 $guardado = false;
 
                 if (($data['litros'] ?? null) !== null) {
@@ -584,15 +661,10 @@ class ImportController extends Controller
         $inquilino = Auth::user()->inquilino_id;
 
         [$importados, $omitidos] = $this->importarFilas(
+            'compras',
             $this->leerFilas('compras'),
             session('map_compras') ?? [],
             function (array $data) use ($inquilino): ?string {
-                $faltan = $this->faltantes($data, ['fecha', 'proveedor', 'descripcion', 'monto_total']);
-
-                if ($faltan !== []) {
-                    return 'le falta '.implode(', ', $faltan);
-                }
-
                 Compra::create($data + ['inquilino_id' => $inquilino]);
 
                 return null;
@@ -701,15 +773,10 @@ class ImportController extends Controller
         $inquilino = Auth::user()->inquilino_id;
 
         [$importados, $omitidos] = $this->importarFilas(
+            'ventas',
             $this->leerFilas('ventas'),
             session('map_ventas') ?? [],
             function (array $data) use ($inquilino): ?string {
-                $faltan = $this->faltantes($data, ['fecha', 'cliente', 'descripcion', 'monto_total']);
-
-                if ($faltan !== []) {
-                    return 'le falta '.implode(', ', $faltan);
-                }
-
                 Venta::create($data + ['inquilino_id' => $inquilino]);
 
                 return null;

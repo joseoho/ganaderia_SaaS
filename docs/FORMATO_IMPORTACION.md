@@ -118,6 +118,12 @@ de ejemplo por los reales y subirlos:
 ## Si algo no entra
 
 El informe final dice cuántos registros entraron y cuántas filas se omitieron, y
-**enumera el motivo de cada fila omitida** (por ejemplo: «Fila 4: le falta
-fecha»). Así se corrige el archivo sin adivinar. El detalle completo queda
-además en `storage/logs/laravel.log`.
+**enumera el motivo de cada fila omitida**. El mensaje distingue los tres casos:
+
+| Mensaje | Qué significa | Qué hacer |
+|---|---|---|
+| «No se pudo importar: falta asignar monto_total (en tu archivo parece «Total»)» | Esa columna no está asignada en el paso de mapeo | Volver al mapeo y elegirla |
+| «Fila 3: la celda está vacía en monto_total» | La fila existe pero esa celda está en blanco | Rellenarla en el archivo |
+| «Fila 3: el valor «sin dato» de monto_total no es un número» | El valor está, pero no se puede leer | Corregirlo en el archivo |
+
+El detalle completo queda además en `storage/logs/laravel.log`.
