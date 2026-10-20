@@ -28,6 +28,15 @@ class ImportService
             return collect([]);
         }
 
+        // El separador se detecta en el propio archivo.
+        //
+        // Excel, cuando el sistema esta en español, guarda los CSV con PUNTO Y
+        // COMA, no con coma. Leidos con el separador equivocado, el archivo
+        // entero se convierte en UNA sola columna: el usuario mapea, y todas las
+        // filas se omiten porque no encuentra los campos. Es exactamente el
+        // sintoma que reporto el usuario.
+        config(['excel.imports.csv.delimiter' => $this->detectarSeparador($file)]);
+
         try {
             // La libreria no tipa $import en el codigo (solo en su docblock) y lo
             // comprueba con instanceof, asi que null es valido: significa "sin
@@ -159,5 +168,33 @@ class ImportService
         }
 
         return $filas->values();
+    }
+
+    /**
+     * Adivina el separador del archivo mirando su primera linea.
+     *
+     * Gana el que mas veces aparezca. Sirve para los dos casos reales: la coma
+     * (formato internacional) y el punto y coma (Excel en español). Sin esto, un
+     * CSV guardado con punto y coma se lee como UNA sola columna: el usuario
+     * mapea, y todas las filas se omiten porque no encuentra los campos.
+     */
+    private function detectarSeparador($archivo): string
+    {
+        $ruta = $archivo?->getRealPath();
+
+        if (! is_string($ruta) || ! is_readable($ruta)) {
+            return ',';
+        }
+
+        $manejador = fopen($ruta, 'r');
+
+        if ($manejador === false) {
+            return ',';
+        }
+
+        $primera = (string) fgets($manejador);
+        fclose($manejador);
+
+        return substr_count($primera, ';') > substr_count($primera, ',') ? ';' : ',';
     }
 }

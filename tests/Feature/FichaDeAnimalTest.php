@@ -130,4 +130,58 @@ class FichaDeAnimalTest extends TestCase
 
         $this->actingAs($this->usuario)->get("/animales/{$ajeno->id}")->assertNotFound();
     }
+
+    public function test_no_se_borra_un_animal_con_historial(): void
+    {
+        // Borrarlo dejaba sus producciones, tratamientos y vacunas sin animal
+        // (la clave foranea es ON DELETE SET NULL): datos huerfanos que ya no se
+        // pueden atribuir a nadie.
+        $animal = $this->animalSinPotrero();
+
+        \App\Models\ProduccionLeche::factory()->create([
+            'inquilino_id' => $this->usuario->inquilino_id,
+            'animal_id' => $animal->id,
+        ]);
+
+        $respuesta = $this->actingAs($this->usuario)->delete("/animales/{$animal->id}");
+
+        $respuesta->assertRedirect();
+        $respuesta->assertSessionHas('error');
+
+        $this->assertNotNull(
+            Animal::withoutTenantScope()->find($animal->id),
+            'El animal no debia borrarse: tiene historial.'
+        );
+    }
+
+    public function test_el_aviso_dice_que_historial_lo_impide(): void
+    {
+        $animal = $this->animalSinPotrero();
+
+        \App\Models\Tratamiento::factory()->create([
+            'inquilino_id' => $this->usuario->inquilino_id,
+            'animal_id' => $animal->id,
+        ]);
+
+        $this->actingAs($this->usuario)->delete("/animales/{$animal->id}");
+
+        $mensaje = (string) session('error');
+
+        $this->assertStringContainsString('historial', $mensaje);
+        $this->assertStringContainsString('tratamientos', $mensaje, 'El aviso debe decir que historial lo impide.');
+    }
+
+    public function test_un_animal_sin_historial_si_se_borra(): void
+    {
+        $animal = $this->animalSinPotrero();
+
+        $this->actingAs($this->usuario)
+            ->delete("/animales/{$animal->id}")
+            ->assertRedirect(route('animales.index'));
+
+        $this->assertNull(
+            Animal::withoutTenantScope()->find($animal->id),
+            'Un animal sin historial deberia poder borrarse.'
+        );
+    }
 }

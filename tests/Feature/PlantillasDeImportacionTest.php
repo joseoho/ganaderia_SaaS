@@ -129,10 +129,21 @@ class PlantillasDeImportacionTest extends TestCase
             $this->markTestSkipped('Hacen falta dos animales para la plantilla de produccion.');
         }
 
+        // Las plantillas usan punto y coma (lo que Excel espera en español).
+        // Se comprueba el separador, no que el reemplazo cambie el texto: si el
+        // primer animal ya tiene id 1, el reemplazo es el mismo texto.
+        $plantilla = $this->plantilla('plantilla_produccion.csv');
+
+        $this->assertStringContainsString(
+            'animal_id;fecha',
+            $plantilla,
+            'La plantilla de produccion cambio de separador: actualiza esta prueba.'
+        );
+
         $csv = str_replace(
-            ['1,2026-02-01', '1,2026-02-02'],
-            [$animales[0].',2026-02-01', $animales[0].',2026-02-02'],
-            $this->plantilla('plantilla_produccion.csv')
+            ['1;2026-02-01', '1;2026-02-02'],
+            [$animales[0].';2026-02-01', $animales[0].';2026-02-02'],
+            $plantilla
         );
 
         $antesLeche = ProduccionLeche::where('animal_id', $animales[0])->count();

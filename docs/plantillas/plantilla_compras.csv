@@ -1,3 +1,3 @@
-fecha,proveedor,descripcion,monto_total
-2026-02-01,AgroSur,Compra de sal mineral,150000.50
-2026-02-05,Distribuidora El Campo,Concentrado para levante,890000
+fecha;proveedor;descripcion;monto_total
+2026-02-01;AgroSur;Compra de sal mineral;150000.50
+2026-02-05;Distribuidora El Campo;Concentrado para levante;890000

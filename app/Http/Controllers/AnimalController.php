@@ -135,16 +135,40 @@ class AnimalController extends Controller
 
     public function destroy(Animal $animal)
     {
-        // $animal->delete();
-        // return redirect()->route('animales.index')->with('success', 'Animal eliminado correctamente');
         if ($animal->inquilino_id !== Auth::user()->inquilino_id) {
             abort(403, 'No autorizado');
+        }
+
+        // Un animal con historial NO se borra.
+        //
+        // Las claves foraneas de produccion, tratamientos y demas apuntan al
+        // animal con ON DELETE SET NULL: borrarlo dejaba esas fichas sin animal,
+        // es decir, datos huerfanos que ya no se pueden atribuir a nadie. Mismo
+        // criterio que en potreros: se avisa en vez de arrastrar el historial.
+        $historial = [
+            'producción de leche' => $animal->produccionLeche()->exists(),
+            'producción de carne' => $animal->produccionCarne()->exists(),
+            'tratamientos' => $animal->tratamientos()->exists(),
+            'vacunas' => $animal->registrosVacunas()->exists(),
+            'reproducciones' => $animal->reproducciones()->exists(),
+            'movilizaciones' => $animal->movilizaciones()->exists(),
+            'pasos por potreros' => $animal->animalPotreros()->exists(),
+            'genealogía' => $animal->genealogia()->exists(),
+        ];
+
+        $conHistorial = array_keys(array_filter($historial));
+
+        if ($conHistorial !== []) {
+            return back()->with(
+                'error',
+                'No se puede eliminar: el animal tiene historial ('.implode(', ', $conHistorial).'). '
+                .'Bórralo primero por módulos si de verdad quieres deshacerte de esos datos.'
+            );
         }
 
         $animal->delete();
 
         return redirect()->route('animales.index')->with('success', 'Animal eliminado');
-
     }
 
     public function qr(Animal $animal)

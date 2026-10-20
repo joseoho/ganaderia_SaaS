@@ -1,3 +1,4 @@
-codigo_interno,categoria,raza,tipo,fecha_nacimiento,sexo,peso_entrada,estado
-VACA-001,bovino,Holstein,leche,2023-04-15,H,480.50,activo
-VACA-002,bovino,Brahman,carne,2024-01-20,M,520.00,activo
+codigo_interno;categoria;raza;tipo;fecha_nacimiento;sexo;peso_entrada;estado
+VACA-001;bovino;Holstein;leche;2023-04-15;H;480.50;activo
+VACA-002;bovino;Brahman;carne;2024-01-20;M;520.00;activo
+VACA-004;bovino;Brahman;doble proposito;2025-01-20;M;4200.00;activo

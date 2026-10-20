@@ -21,6 +21,10 @@ La aplicación importa cuatro tipos de datos, cada uno con su propia pantalla:
 ## Formatos aceptados
 
 - **CSV**, TXT, **XLSX** (Excel) y **XLS** (Excel antiguo).
+- En los CSV se acepta tanto la **coma** como el **punto y coma** como separador
+  de columnas: la aplicación lo detecta solo. Esto importa porque Excel, con el
+  sistema en español, guarda los CSV con **punto y coma**. Si tu archivo se
+  abriera entero en una sola columna, era por esto.
 - La **primera fila** deben ser los **nombres de las columnas**. No se importa
   como dato.
 - Máximo **5.000 filas** por archivo.
@@ -33,11 +37,13 @@ La aplicación importa cuatro tipos de datos, cada uno con su propia pantalla:
 
 ## Reglas de los datos
 
-- **Fechas: `AAAA-MM-DD`** (por ejemplo `2026-02-01`). Es la única forma
-  inequívoca. Cuidado: `01/02/2026` lo acepta el motor de base de datos pero lo
-  interpreta **como el 2 de enero**, no como el 1 de febrero.
-- **Decimales con punto**, no con coma: `1500.50`. La coma rompe el valor.
-- **Sin símbolos de moneda** ni separadores de miles: `2500000`, no `$2.500.000`.
+- **Fechas**: se aceptan `AAAA-MM-DD` (`2026-02-01`) y **`DD/MM/AAAA`**
+  (`01/02/2026`), que se interpreta **como el 1 de febrero**, al estilo de toda
+  la vida en español. También se admiten las fechas que Excel guarda como número.
+  Si puedes, usa `AAAA-MM-DD`: no deja lugar a dudas.
+- **Importes**: se aceptan las dos formas. `1500.50` (punto decimal) y
+  **`1.500,50`** (punto de miles y coma decimal, lo normal en español), incluso
+  con el símbolo de moneda: `$ 2.500.000` se entiende como 2500000.
 - Se admiten **celdas vacías**. Una fila a la que le falte un campo obligatorio
   **se omite y se cuenta**; no se inventa nada y no se detiene la importación.
 
@@ -111,7 +117,7 @@ de ejemplo por los reales y subirlos:
 
 ## Si algo no entra
 
-El informe final dice cuántos registros entraron y cuántas filas se omitieron.
-Las filas omitidas quedan registradas con su motivo en el registro de la
-aplicación (`storage/logs/laravel.log`). Las causas habituales son: una fecha
-mal escrita, un importe con coma decimal, o un campo obligatorio vacío.
+El informe final dice cuántos registros entraron y cuántas filas se omitieron, y
+**enumera el motivo de cada fila omitida** (por ejemplo: «Fila 4: le falta
+fecha»). Así se corrige el archivo sin adivinar. El detalle completo queda
+además en `storage/logs/laravel.log`.
