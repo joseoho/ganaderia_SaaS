@@ -1,11 +1,12 @@
 # Formato de los archivos de importación
 
-La aplicación importa cuatro tipos de datos, cada uno con su propia pantalla:
+La aplicación importa cinco tipos de datos, cada uno con su propia pantalla:
 
 | Módulo | Dónde | Qué crea |
 |---|---|---|
 | **Animales** | Importar → Animales | Fichas de animal |
-| **Producción** | Importar → Producción | Producción de leche y/o de carne |
+| **Producción de leche** | Importar → Producción de leche | Litros por turno |
+| **Producción de carne** | Importar → Producción de carne | Pesajes y ganancia diaria |
 | **Compras** | Importar → Compras | Compras |
 | **Ventas** | Importar → Ventas | Ventas |
 
@@ -66,21 +67,38 @@ La aplicación importa cuatro tipos de datos, cada uno con su propia pantalla:
 su `codigo_interno` y, si ya existe, **se actualiza**. Es la forma de corregir
 datos en bloque.
 
-### Producción
+### Producción de leche
 
 | Columna | ¿Obligatoria? | Ejemplo |
 |---|---|---|
 | `animal_id` | **Sí** — el id del animal en la aplicación | `1` |
-| `fecha` | Sí | `2026-02-01` |
-| `litros` | No | `12.5` |
+| `fecha` | **Sí** | `2026-02-01` |
+| `litros` | **Sí** | `12.5` |
 | `turno` | No | `manana` |
-| `ganancia_diaria` | No | `0.750` |
-| `peso` | No | `485.20` |
 | `observaciones` | No | `Producción de la mañana` |
 
-**Una misma fila puede crear dos registros**: si trae `litros`, crea producción
-de leche; si trae `ganancia_diaria` o `peso`, crea producción de carne. Si no
-trae ninguno de los dos, la fila se omite.
+Cada fila crea **un ordeño**. Si el mismo día se ordeña dos veces, van dos filas
+con su turno. Si un archivo trae una fila sin `litros`, esa fila se omite y se
+cuenta: no se guarda un ordeño de 0 litros.
+
+### Producción de carne
+
+| Columna | ¿Obligatoria? | Ejemplo |
+|---|---|---|
+| `animal_id` | **Sí** — el id del animal en la aplicación | `1` |
+| `fecha` | **Sí** | `2026-02-01` |
+| `peso` | **Sí** | `420.50` |
+| `ganancia_diaria` | No | `0.750` |
+| `observaciones` | No | `Pesaje de febrero` |
+
+Cada fila es **un pesaje**. `ganancia_diaria` es la ganancia media diaria desde el
+pesaje anterior; si no la traes, se deja vacía y los informes la calculan cuando
+hay dos pesajes del mismo animal.
+
+> Las dos pantallas de producción son **independientes**: un archivo de leche no
+> crea carne aunque traiga una columna de peso, y al revés. Es a propósito: cada
+> tabla tiene sus columnas obligatorias y así una plantilla no obliga a rellenar
+> la mitad de las celdas en blanco.
 
 > `animal_id` es el **id interno**, no el `codigo_interno`. Para saberlo, mira la
 > dirección al abrir la ficha de un animal (`/animales/12` → id 12) o expórtalo
@@ -111,7 +129,8 @@ exactas que la aplicación espera. Se pueden abrir en Excel, sustituir los datos
 de ejemplo por los reales y subirlos:
 
 - `plantilla_animales.csv`
-- `plantilla_produccion.csv`
+- `plantilla_leche.csv`
+- `plantilla_carne.csv`
 - `plantilla_compras.csv`
 - `plantilla_ventas.csv`
 

@@ -4,6 +4,7 @@ namespace Tests\Feature;
 
 use App\Models\Animal;
 use App\Models\Compra;
+use App\Models\ProduccionCarne;
 use App\Models\ProduccionLeche;
 use App\Models\User;
 use App\Models\Venta;
@@ -41,18 +42,29 @@ class ImportacionOtrosModulosTest extends TestCase
      * tipo, modelo, csv (con {ANIMAL} donde va el id del animal), mapa, campo a
      * comprobar y valor esperado.
      *
+     * En produccion el tipo es la RUTA («produccion/leche»), porque cada tipo
+     * tiene su propia pantalla y sus propias columnas obligatorias.
+     *
      * @return array<string, array{0: string, 1: class-string, 2: string, 3: array<string, string>, 4: string, 5: string}>
      */
     public static function flujos(): array
     {
         return [
-            'produccion' => [
-                'produccion',
+            'produccion de leche' => [
+                'produccion/leche',
                 ProduccionLeche::class,
                 "animal_id,fecha,litros\n{ANIMAL},2026-02-01,12.5\n",
                 ['animal_id' => 'animal_id', 'fecha' => 'fecha', 'litros' => 'litros'],
                 'litros',
                 '12.50',
+            ],
+            'produccion de carne' => [
+                'produccion/carne',
+                ProduccionCarne::class,
+                "animal_id,fecha,peso\n{ANIMAL},2026-02-01,420.5\n",
+                ['animal_id' => 'animal_id', 'fecha' => 'fecha', 'peso' => 'peso'],
+                'peso',
+                '420.50',
             ],
             'compras' => [
                 'compras',
@@ -95,7 +107,7 @@ class ImportacionOtrosModulosTest extends TestCase
 
         // Paso 1: subir el archivo.
         $subida = $this->actingAs($this->usuario)->post("/importar/{$tipo}/upload", [
-            'archivo' => UploadedFile::fake()->createWithContent($tipo.'.csv', $csv),
+            'archivo' => UploadedFile::fake()->createWithContent(str_replace('/', '_', $tipo).'.csv', $csv),
         ]);
         $subida->assertSessionHasNoErrors();
         $subida->assertOk();
@@ -152,7 +164,7 @@ class ImportacionOtrosModulosTest extends TestCase
         $csv = str_replace('{ANIMAL}', (string) $animal->id, $csv);
 
         $respuesta = $this->actingAs($this->usuario)->post("/importar/{$tipo}/upload", [
-            'archivo' => UploadedFile::fake()->createWithContent($tipo.'.csv', $csv),
+            'archivo' => UploadedFile::fake()->createWithContent(str_replace('/', '_', $tipo).'.csv', $csv),
         ]);
 
         $respuesta->assertOk();

@@ -215,9 +215,17 @@
             </a>
         </li>
 
+        {{-- Producción son dos pantallas: la leche y la carne no comparten
+             columnas, así que tampoco comparten menú. --}}
         <li>
-            <a class="dropdown-item" href="{{ route('import.produccion.form') }}">
-                Importar Producción
+            <a class="dropdown-item" href="{{ route('import.produccion.form', ['tipo' => 'leche']) }}">
+                Importar Producción de leche
+            </a>
+        </li>
+
+        <li>
+            <a class="dropdown-item" href="{{ route('import.produccion.form', ['tipo' => 'carne']) }}">
+                Importar Producción de carne
             </a>
         </li>
 

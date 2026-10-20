@@ -4,8 +4,6 @@ namespace Tests\Feature;
 
 use App\Models\Animal;
 use App\Models\Compra;
-use App\Models\ProduccionCarne;
-use App\Models\ProduccionLeche;
 use App\Models\User;
 use App\Models\Venta;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -118,49 +116,6 @@ class PlantillasDeImportacionTest extends TestCase
             Animal::where('inquilino_id', $this->usuario->inquilino_id)->where('codigo_interno', 'VACA-001')->count(),
             'Reimportar duplico el animal en vez de actualizarlo.'
         );
-    }
-
-    public function test_la_plantilla_de_produccion_crea_leche_y_carne(): void
-    {
-        // La plantilla usa animal_id 1 y 2: se comprueba que existan.
-        $animales = Animal::where('inquilino_id', $this->usuario->inquilino_id)->limit(2)->pluck('id');
-
-        if ($animales->count() < 2) {
-            $this->markTestSkipped('Hacen falta dos animales para la plantilla de produccion.');
-        }
-
-        // Las plantillas usan punto y coma (lo que Excel espera en español).
-        // Se comprueba el separador, no que el reemplazo cambie el texto: si el
-        // primer animal ya tiene id 1, el reemplazo es el mismo texto.
-        $plantilla = $this->plantilla('plantilla_produccion.csv');
-
-        $this->assertStringContainsString(
-            'animal_id;fecha',
-            $plantilla,
-            'La plantilla de produccion cambio de separador: actualiza esta prueba.'
-        );
-
-        $csv = str_replace(
-            ['1;2026-02-01', '1;2026-02-02'],
-            [$animales[0].';2026-02-01', $animales[0].';2026-02-02'],
-            $plantilla
-        );
-
-        $antesLeche = ProduccionLeche::where('animal_id', $animales[0])->count();
-        $antesCarne = ProduccionCarne::where('animal_id', $animales[0])->count();
-
-        $this->importar('produccion', $csv, [
-            'animal_id' => 'animal_id',
-            'fecha' => 'fecha',
-            'litros' => 'litros',
-            'turno' => 'turno',
-            'ganancia_diaria' => 'ganancia_diaria',
-            'peso' => 'peso',
-            'observaciones' => 'observaciones',
-        ]);
-
-        $this->assertSame($antesLeche + 1, ProduccionLeche::where('animal_id', $animales[0])->count(), 'No entro la leche.');
-        $this->assertSame($antesCarne + 1, ProduccionCarne::where('animal_id', $animales[0])->count(), 'No entro la carne.');
     }
 
     public function test_la_plantilla_de_compras_importa_los_dos_ejemplos(): void

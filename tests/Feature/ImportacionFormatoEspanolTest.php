@@ -46,7 +46,7 @@ class ImportacionFormatoEspanolTest extends TestCase
     {
         $this->actingAs($this->usuario)
             ->post("/importar/{$tipo}/upload", [
-                'archivo' => UploadedFile::fake()->createWithContent($tipo.'.csv', $csv),
+                'archivo' => UploadedFile::fake()->createWithContent(str_replace('/', '_', $tipo).'.csv', $csv),
             ])
             ->assertOk();
 
@@ -176,7 +176,7 @@ class ImportacionFormatoEspanolTest extends TestCase
 
         $antes = ProduccionLeche::where('animal_id', $animal->id)->count();
 
-        $this->importar('produccion', $csv, [
+        $this->importar('produccion/leche', $csv, [
             'animal_id' => 'animal_id',
             'fecha' => 'fecha',
             'litros' => 'litros',

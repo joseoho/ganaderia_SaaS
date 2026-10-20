@@ -16,10 +16,10 @@ use Tests\TestCase;
 /**
  * Importacion de archivos REALES: con celdas vacias y filas incompletas.
  *
- * Los datos de una hoja de calculo nunca vienen completos: unas filas traen la
- * produccion de leche y otras no, una compra puede quedarse sin monto, una fecha
- * puede venir escrita a mano mal. Estas pruebas comprueban que esos huecos no
- * tumban la importacion ni dejan dentro la mitad de los datos.
+ * Los datos de una hoja de calculo nunca vienen completos: a un ordeño le falta
+ * la fila de la tarde, una compra puede quedarse sin monto, una fecha puede venir
+ * escrita a mano mal. Estas pruebas comprueban que esos huecos no tumban la
+ * importacion ni dejan dentro la mitad de los datos.
  *
  * Antes de este trabajo: una compra sin monto daba un error 500 ("Column
  * 'monto_total' cannot be null") y una venta sin cliente, lo mismo. Con un
@@ -49,7 +49,7 @@ class ImportacionDatosRealesTest extends TestCase
     {
         $this->actingAs($this->usuario)
             ->post("/importar/{$tipo}/upload", [
-                'archivo' => UploadedFile::fake()->createWithContent($tipo.'.csv', $csv),
+                'archivo' => UploadedFile::fake()->createWithContent(str_replace('/', '_', $tipo).'.csv', $csv),
             ])
             ->assertOk();
 
@@ -60,29 +60,75 @@ class ImportacionDatosRealesTest extends TestCase
         return $this->actingAs($this->usuario)->post("/importar/{$tipo}/import");
     }
 
-    public function test_produccion_con_celdas_vacias_guarda_solo_lo_que_trae_datos(): void
+    public function test_leche_con_una_celda_vacia_omite_solo_esa_fila(): void
     {
         // Animal recien creado: sin produccion previa, para poder contar.
         $animal = Animal::factory()->create(['inquilino_id' => $this->usuario->inquilino_id]);
 
-        $csv = "animal_id,fecha,litros,peso\n"
-            ."{$animal->id},2026-02-01,12.5,\n"
-            ."{$animal->id},2026-02-02,,420.5\n"
-            ."{$animal->id},2026-02-03,,\n";
+        $csv = "animal_id,fecha,litros\n"
+            ."{$animal->id},2026-02-01,12.5\n"
+            ."{$animal->id},2026-02-02,\n"
+            ."{$animal->id},2026-02-03,11.0\n";
 
-        $respuesta = $this->importar('produccion', $csv, [
+        $respuesta = $this->importar('produccion/leche', $csv, [
             'animal_id' => 'animal_id',
             'fecha' => 'fecha',
             'litros' => 'litros',
-            'peso' => 'peso',
         ]);
 
         $this->assertNotSame(500, $respuesta->getStatusCode(), 'Una celda vacia tumbo la importacion.');
 
-        // Fila 1: leche. Fila 2: carne. Fila 3: vacia, no debe crear nada.
-        $this->assertSame(1, ProduccionLeche::where('animal_id', $animal->id)->count(), 'Produccion de leche incorrecta.');
-        $this->assertSame(1, ProduccionCarne::where('animal_id', $animal->id)->count(), 'Produccion de carne incorrecta.');
-        $this->assertSame('12.50', number_format((float) ProduccionLeche::where('animal_id', $animal->id)->value('litros'), 2, '.', ''));
+        // Entran las dos filas con litros; la del medio se omite y se dice por que.
+        $this->assertSame(
+            2,
+            ProduccionLeche::where('animal_id', $animal->id)->count(),
+            'No entraron exactamente los dos ordeños con litros.'
+        );
+
+        $this->assertSame(
+            '12.50',
+            number_format((float) ProduccionLeche::where('animal_id', $animal->id)
+                ->whereDate('fecha', '2026-02-01')
+                ->value('litros'), 2, '.', '')
+        );
+
+        $respuesta->assertSee('Filas omitidas: 1');
+        $respuesta->assertSee('la celda esta vacia en litros');
+    }
+
+    public function test_carne_con_una_celda_vacia_omite_solo_esa_fila(): void
+    {
+        $animal = Animal::factory()->create(['inquilino_id' => $this->usuario->inquilino_id]);
+
+        $csv = "animal_id,fecha,peso,ganancia_diaria\n"
+            ."{$animal->id},2026-02-01,420.5,0.750\n"
+            ."{$animal->id},2026-02-02,,\n"
+            ."{$animal->id},2026-02-03,431.75,\n";
+
+        $respuesta = $this->importar('produccion/carne', $csv, [
+            'animal_id' => 'animal_id',
+            'fecha' => 'fecha',
+            'peso' => 'peso',
+            'ganancia_diaria' => 'ganancia_diaria',
+        ]);
+
+        $this->assertNotSame(500, $respuesta->getStatusCode(), 'Una celda vacia tumbo la importacion.');
+
+        $this->assertSame(
+            2,
+            ProduccionCarne::where('animal_id', $animal->id)->count(),
+            'No entraron exactamente los dos pesajes con peso.'
+        );
+
+        $this->assertSame(
+            '420.50',
+            number_format((float) ProduccionCarne::where('animal_id', $animal->id)
+                ->whereDate('fecha', '2026-02-01')
+                ->value('peso'), 2, '.', '')
+        );
+
+        $respuesta->assertSee('Filas omitidas: 1');
+        $respuesta->assertSee('la celda esta vacia en peso');
     }
 
     public function test_una_compra_incompleta_se_omite_en_vez_de_reventar(): void

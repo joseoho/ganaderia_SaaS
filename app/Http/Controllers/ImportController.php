@@ -29,9 +29,49 @@ class ImportController extends Controller
     /** Columnas que la tabla de cada modulo exige para poder guardar la fila. */
     private const OBLIGATORIOS = [
         'animales' => ['codigo_interno', 'categoria', 'raza', 'fecha_nacimiento', 'sexo', 'estado'],
-        'produccion' => ['animal_id', 'fecha'],
+        // Produccion son dos tablas distintas y cada una exige lo suyo: la leche
+        // se mide en litros y la carne en kilos. Son las mismas columnas que
+        // piden las pantallas de alta (StoreProduccionLecheRequest y
+        // StoreProduccionCarneRequest), para que importar y escribir a mano no
+        // pidan cosas distintas.
+        'produccion_leche' => ['animal_id', 'fecha', 'litros'],
+        'produccion_carne' => ['animal_id', 'fecha', 'peso'],
         'compras' => ['fecha', 'proveedor', 'descripcion', 'monto_total'],
         'ventas' => ['fecha', 'cliente', 'descripcion', 'monto_total'],
+    ];
+
+    /** Titulo de cada pantalla de produccion. */
+    private const PRODUCCION_TITULOS = [
+        'leche' => 'Producción de leche',
+        'carne' => 'Producción de carne',
+    ];
+
+    /**
+     * Columnas que ofrece cada pantalla de produccion, con la etiqueta que ve el
+     * usuario.
+     *
+     * No comparten flujo porque no comparten datos. Antes habia una sola
+     * pantalla con las columnas de las dos tablas, y el resultado era una
+     * plantilla con la mitad de las celdas vacias y un "obligatorio" que
+     * significaba una cosa distinta segun la fila.
+     *
+     * @var array<string, array<string, string>>
+     */
+    private const PRODUCCION_CAMPOS = [
+        'leche' => [
+            'animal_id' => 'ID del Animal',
+            'fecha' => 'Fecha',
+            'litros' => 'Litros',
+            'turno' => 'Turno',
+            'observaciones' => 'Observaciones',
+        ],
+        'carne' => [
+            'animal_id' => 'ID del Animal',
+            'fecha' => 'Fecha',
+            'peso' => 'Peso (kg)',
+            'ganancia_diaria' => 'Ganancia diaria (kg/día)',
+            'observaciones' => 'Observaciones',
+        ],
     ];
 
     /** Otros titulos con los que la gente suele nombrar esas columnas en Excel. */
@@ -440,15 +480,47 @@ class ImportController extends Controller
     }
 
     // ============================
-    // PRODUCCIÓN
+    // PRODUCCIÓN (leche y carne)
     // ============================
-    public function produccionForm()
+    /**
+     * Lo que necesita cualquiera de las dos pantallas: su titulo, sus columnas y
+     * cules son obligatorias.
+     *
+     * El tipo llega validado por la ruta ({tipo} solo admite leche o carne),
+     * pero se comprueba igualmente: si manana se anade otra ruta y se olvida
+     * esta comprobacion, es mejor un 404 que un error de indice sin definir.
+     *
+     * @return array{tipo: string, titulo: string, campos: array<string, string>, obligatorios: array<int, string>}
+     */
+    private function datosProduccion(string $tipo): array
     {
-        return view('import.produccion.form');
+        if (! isset(self::PRODUCCION_TITULOS[$tipo], self::PRODUCCION_CAMPOS[$tipo])) {
+            abort(404, 'Tipo de producción desconocido: '.$tipo);
+        }
+
+        return [
+            'tipo' => $tipo,
+            'titulo' => self::PRODUCCION_TITULOS[$tipo],
+            'campos' => self::PRODUCCION_CAMPOS[$tipo],
+            // Aqui no hay ?? [] a proposito: cada tipo de produccion TIENE que
+            // estar en OBLIGATORIOS, y PHPStan lo comprueba por el tipo. Si
+            // manana se anade un tipo nuevo, esto avisa en vez de dejar una
+            // importacion que acepta filas sin sus columnas obligatorias.
+            'obligatorios' => self::OBLIGATORIOS['produccion_'.$tipo],
+        ];
     }
 
-    public function produccionUpload(Request $request)
+    public function produccionForm(string $tipo)
     {
+        return view('import.produccion.form', $this->datosProduccion($tipo));
+    }
+
+    public function produccionUpload(Request $request, string $tipo)
+    {
+        // Se resuelve antes de tocar el archivo: un tipo desconocido no debe
+        // llegar a procesar nada.
+        $datos = $this->datosProduccion($tipo);
+
         $request->validate([
             'archivo' => 'required|file|max:10240|mimes:csv,txt,xlsx,xls',
         ], [
@@ -488,37 +560,28 @@ class ImportController extends Controller
                 return back()->with('error', 'No se detectaron encabezados en el archivo.');
             }
 
-            // Definir campos del sistema para producción
-            $camposSistema = [
-                'animal_id' => 'ID del Animal',
-                'fecha' => 'Fecha',
-                'litros' => 'Litros (Leche)',
-                'turno' => 'Turno',
-                'ganancia_diaria' => 'Ganancia Diaria (Carne)',
-                'peso' => 'Peso (Carne)',
-                'observaciones' => 'Observaciones',
-            ];
+            $sugerencias = $this->sugerirMapeo($headers, array_keys($datos['campos']));
 
-            $sugerencias = $this->sugerirMapeo($headers, array_keys($camposSistema));
+            // La clave de cache lleva el tipo: un archivo de leche a medio mapear
+            // no debe pisar uno de carne abierto en otra pestana.
+            $this->guardarFilas('produccion_'.$tipo, $rows);
 
-            $this->guardarFilas('produccion', $rows);
-            session(['headers_produccion' => $headers]);
-
-            return view('import.produccion.map', compact('headers', 'camposSistema', 'sugerencias'));
+            return view('import.produccion.map', array_merge($datos, compact('headers', 'sugerencias')));
 
         } catch (ValidationException $e) {
             throw $e;
         } catch (\Exception $e) {
-            Log::error('Error en produccionUpload: '.$e->getMessage());
+            Log::error('Error en produccionUpload ('.$tipo.'): '.$e->getMessage());
 
             return back()->with('error', 'Error al procesar el archivo: '.$e->getMessage());
         }
     }
 
-    public function produccionPreview(Request $request)
+    public function produccionPreview(Request $request, string $tipo)
     {
+        $datos = $this->datosProduccion($tipo);
         $map = $request->map;
-        $rows = $this->leerFilas('produccion');
+        $rows = $this->leerFilas('produccion_'.$tipo);
 
         $preview = $rows->take(20)->map(function ($row) use ($map) {
             $data = [];
@@ -529,39 +592,52 @@ class ImportController extends Controller
             return $data;
         });
 
-        session(['map_produccion' => $map]);
+        session(['map_produccion_'.$tipo => $map]);
 
-        return view('import.produccion.preview', compact('preview'));
+        return view('import.produccion.preview', array_merge($datos, compact('preview')));
     }
 
-    public function produccionImport()
+    public function produccionImport(string $tipo)
     {
-        $inquilino = Auth::user()->inquilino_id;
+        $datos = $this->datosProduccion($tipo);
+        $inquilino = (int) Auth::user()->inquilino_id;
 
         [$importados, $omitidos] = $this->importarFilas(
-            'produccion',
-            $this->leerFilas('produccion'),
-            session('map_produccion') ?? [],
-            function (array $data) use ($inquilino): ?string {
-                $guardado = false;
+            'produccion_'.$tipo,
+            $this->leerFilas('produccion_'.$tipo),
+            session('map_produccion_'.$tipo) ?? [],
+            function (array $fila) use ($tipo, $inquilino): ?string {
+                $this->guardarProduccion($tipo, $fila, $inquilino);
 
-                if (($data['litros'] ?? null) !== null) {
-                    ProduccionLeche::create($data + ['inquilino_id' => $inquilino]);
-                    $guardado = true;
-                }
-
-                if (($data['ganancia_diaria'] ?? null) !== null || ($data['peso'] ?? null) !== null) {
-                    ProduccionCarne::create($data + ['inquilino_id' => $inquilino]);
-                    $guardado = true;
-                }
-
-                return $guardado ? null : 'no trae litros, ni peso, ni ganancia';
+                // Si el guardado falla, importarFilas lo captura y escribe el
+                // motivo de la fila; llegar hasta aqui ya es un exito.
+                return null;
             }
         );
 
         session(['ultimo_importado' => $importados]);
 
-        return view('import.resultado', compact('importados', 'omitidos'));
+        return view('import.resultado', array_merge($datos, compact('importados', 'omitidos')));
+    }
+
+    /**
+     * Guarda una fila en la tabla que toca: produccion_leche o produccion_carne.
+     *
+     * Aqui esta la unica diferencia entre los dos tipos, y por eso se decide con
+     * un match en vez de guardar el nombre del modelo en una constante: si
+     * manana aparece otro tipo, PHPStan lo senala en vez de fallar en silencio.
+     *
+     * @param  array<string, mixed>  $fila
+     */
+    private function guardarProduccion(string $tipo, array $fila, int $inquilino): void
+    {
+        $datos = array_merge($fila, ['inquilino_id' => $inquilino]);
+
+        match ($tipo) {
+            'leche' => ProduccionLeche::create($datos),
+            'carne' => ProduccionCarne::create($datos),
+            default => throw new \InvalidArgumentException('Tipo de producción desconocido: '.$tipo),
+        };
     }
 
     // ============================

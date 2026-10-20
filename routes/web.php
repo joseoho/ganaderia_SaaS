@@ -197,11 +197,19 @@ Route::middleware(['auth', 'verified', 'tenant', 'solo-admin'])->group(function 
         Route::post('/animales/preview', [ImportController::class, 'animalesPreview'])->name('import.animales.preview');
         Route::post('/animales/import', [ImportController::class, 'animalesImport'])->name('import.animales.import');
 
-        // Producción
-        Route::get('/produccion', [ImportController::class, 'produccionForm'])->name('import.produccion.form');
-        Route::post('/produccion/upload', [ImportController::class, 'produccionUpload'])->name('import.produccion.upload');
-        Route::post('/produccion/preview', [ImportController::class, 'produccionPreview'])->name('import.produccion.preview');
-        Route::post('/produccion/import', [ImportController::class, 'produccionImport'])->name('import.produccion.import');
+        // Producción: DOS pantallas, una por tipo.
+        //
+        // Antes era una sola que adivinaba por fila si aquello era leche o carne.
+        // Al separarlas, cada tabla tiene sus propias columnas obligatorias y ya
+        // no hay que rellenar media plantilla con celdas vacías.
+        Route::prefix('produccion/{tipo}')
+            ->whereIn('tipo', ['leche', 'carne'])
+            ->group(function () {
+                Route::get('/', [ImportController::class, 'produccionForm'])->name('import.produccion.form');
+                Route::post('/upload', [ImportController::class, 'produccionUpload'])->name('import.produccion.upload');
+                Route::post('/preview', [ImportController::class, 'produccionPreview'])->name('import.produccion.preview');
+                Route::post('/import', [ImportController::class, 'produccionImport'])->name('import.produccion.import');
+            });
 
         // Compras
         Route::get('/compras', [ImportController::class, 'comprasForm'])->name('import.compras.form');
