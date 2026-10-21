@@ -45,7 +45,7 @@ class ReporteController extends Controller
             ->when($hasta, fn ($q) => $q->whereDate('fecha', '<=', $hasta))
             ->sum('ganancia_diaria');
 
-        $compras = Gastos::where('inquilino_id', $inquilino)->count();
+        $compras = Compra::where('inquilino_id', $inquilino)->count();
         $ventas = Venta::where('inquilino_id', $inquilino)->count();
 
         $total_gastos_operativos = Gastos::where('inquilino_id', $inquilino)
@@ -169,12 +169,17 @@ class ReporteController extends Controller
             'hasta' => 'required|date',
         ]);
 
-        $compras = Gastos::where('inquilino_id', Auth::user()->inquilino_id)
+        // Las compras a proveedores viven en `compras`, no en `gastos`. Esta
+        // consulta leia Gastos, asi que el "reporte de compras" mostraba la
+        // nomina y el mantenimiento, con una columna "Categoria" que una compra
+        // no tiene.
+        $compras = Compra::where('inquilino_id', Auth::user()->inquilino_id)
             ->whereBetween('fecha', [$request->desde, $request->hasta])
+            ->orderBy('fecha')
             ->get();
 
         $totalCompras = $compras->count();
-        $montoTotal = $compras->sum('monto');
+        $montoTotal = $compras->sum('monto_total');
 
         return view('reportes.compras.reporte', compact('compras', 'totalCompras', 'montoTotal'));
     }

@@ -16,27 +16,33 @@
 
 <div id="area-imprimir">
 
-    <h2 class="mb-4">Reporte de Gastos por Fecha</h2>
+    <h2 class="mb-4">Reporte de Compras por Fecha</h2>
 
     <div class="table-responsive">
     <table class="table table-bordered">
         <thead>
             <tr>
-                <th>Categoria</th>
+                <th>Proveedor</th>
                 <th>Descripcion</th>
                 <th>Fecha</th>
                 <th>Monto</th>
             </tr>
         </thead>
         <tbody>
-            @foreach($compras as $c)
+            @forelse($compras as $compra)
             <tr>
-                <td>{{ $c->categoria }}</td>
-                <td>{{ $c->descripcion }}</td>
-                <td>{{ \App\Support\Formato::fecha($c->fecha) }}</td>
-                <td>${{ number_format($c->monto, 2) }}</td>
+                <td>{{ $compra->proveedor }}</td>
+                <td>{{ $compra->descripcion }}</td>
+                <td>{{ \App\Support\Formato::fecha($compra->fecha) }}</td>
+                <td>${{ number_format((float) $compra->monto_total, 2) }}</td>
             </tr>
-            @endforeach
+            @empty
+            <tr>
+                <td colspan="4" class="text-center text-muted">
+                    No hay compras registradas en ese rango de fechas.
+                </td>
+            </tr>
+            @endforelse
         </tbody>
     </table>
     </div>
@@ -45,7 +51,7 @@
 
     <h4>Totales</h4>
     <p><strong>Total de compras:</strong> {{ $totalCompras }}</p>
-    <p><strong>Monto total:</strong> ${{ number_format($montoTotal, 2) }}</p>
+    <p><strong>Monto total:</strong> ${{ number_format((float) $montoTotal, 2) }}</p>
 
 </div>
 

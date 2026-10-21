@@ -83,14 +83,18 @@
                         
                         <!-- Solo Admin -->
                        {{-- @if(Auth::user()->rol === 'Administrador') --}}
-                            {{-- <li class="nav-item">
+                            {{-- Compras y gastos son dos cosas distintas: una compra
+                                 tiene proveedor y un gasto tiene categoria. Estaban
+                                 mezclados: Compras estaba oculta del menu y el
+                                 reporte de compras leia la tabla de gastos. --}}
+                            <li class="nav-item">
                                 <a class="nav-link" href="/compras">
                                     <i class="fas fa-shopping-cart"></i> Compras
                                 </a>
-                            </li> --}}
+                            </li>
                             <li class="nav-item">
                                 <a class="nav-link" href="/gastos">
-                                    <i class="fas fa-shopping-cart"></i> Gastos
+                                    <i class="fas fa-wallet"></i> Gastos
                                 </a>
                             </li>
                             <li class="nav-item">

@@ -3,6 +3,8 @@
 namespace Tests\Feature;
 
 use App\Models\Animal;
+use App\Models\Compra;
+use App\Models\Gastos;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use PHPUnit\Framework\Attributes\DataProvider;
@@ -100,5 +102,79 @@ class ReportesTest extends TestCase
     {
         $this->get('/reportes')->assertRedirect('/login');
         $this->get('/reportes/ventas/generar')->assertRedirect('/login');
+    }
+
+    /**
+     * El informe de compras lee la tabla `compras`, no la de `gastos`.
+     *
+     * Estaba al reves: "Reporte de Compras" consultaba Gastos y mostraba una
+     * columna "Categoria" (nominas, mantenimiento) con el importe en `monto`.
+     * Por eso el usuario veia el mismo dinero en las dos pantallas y pensaba que
+     * compras y gastos eran lo mismo.
+     */
+    public function test_el_informe_de_compras_lee_compras_y_no_gastos(): void
+    {
+        $proveedor = 'ProveedorDistintivo'.uniqid();
+        $categoria = 'CategoriaDistintiva'.uniqid();
+
+        Compra::create([
+            'inquilino_id' => $this->usuario->inquilino_id,
+            'fecha' => '2026-03-01',
+            'proveedor' => $proveedor,
+            'descripcion' => 'Compra de prueba del informe',
+            'monto_total' => 12345.67,
+        ]);
+
+        Gastos::create([
+            'inquilino_id' => $this->usuario->inquilino_id,
+            'categoria' => $categoria,
+            'monto' => 999.99,
+            'fecha' => '2026-03-02',
+            'descripcion' => 'Gasto de prueba del informe',
+        ]);
+
+        $respuesta = $this->actingAs($this->usuario)
+            ->get('/reportes/compras/generar?desde=2026-03-01&hasta=2026-03-31');
+
+        $respuesta->assertOk();
+
+        // La compra aparece con su proveedor y su importe.
+        $respuesta->assertSee($proveedor);
+        $respuesta->assertSee('12,345.67');
+
+        // Y el gasto NO se cuela en un informe de compras.
+        $respuesta->assertDontSee($categoria);
+        $respuesta->assertDontSee('Gasto de prueba del informe');
+    }
+
+    /**
+     * El menu ofrece las dos pantallas, cada una con su nombre.
+     *
+     * "Compras" estaba comentada en la plantilla del menu: el modulo existia,
+     * con su importacion, pero solo se llegaba escribiendo la URL.
+     */
+    public function test_el_menu_ofrece_compras_y_gastos_por_separado(): void
+    {
+        $respuesta = $this->actingAs($this->usuario)->get('/dashboard');
+
+        $respuesta->assertOk();
+        $respuesta->assertSee('href="/compras"', false);
+        $respuesta->assertSee('href="/gastos"', false);
+    }
+
+    /**
+     * El balance resta compras y gastos, asi que las dos cifras tienen que verse.
+     *
+     * La tarjeta de compras no existia: el balance descontaba un dinero que no
+     * aparecia en ninguna parte de la pantalla.
+     */
+    public function test_el_dashboard_muestra_compras_y_gastos_operativos(): void
+    {
+        $respuesta = $this->actingAs($this->usuario)->get('/dashboard');
+
+        $respuesta->assertOk();
+        $respuesta->assertSee('Compras');
+        $respuesta->assertSee('Gastos operativos');
+        $respuesta->assertSee('Ventas − (compras + gastos)');
     }
 }
