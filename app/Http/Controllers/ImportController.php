@@ -197,16 +197,16 @@ class ImportController extends Controller
                 }
 
                 if (in_array($campo, self::CAMPOS_FECHA, true)) {
-                    $data[$campo] = $this->normalizarFecha((string) $valor);
+                    $data[$campo] = $this->normalizarFecha($valor);
 
                     if ($data[$campo] === null) {
-                        $motivo = "la fecha «{$valor}» de {$campo} no se entiende (vale 2026-02-01 o 01/02/2026)";
+                        $motivo = 'la fecha «'.$this->imprimible($valor).'» de '.$campo.' no se entiende (vale 2026-02-01 o 01/02/2026)';
                     }
                 } elseif (in_array($campo, self::CAMPOS_NUMERO, true)) {
                     $data[$campo] = $this->normalizarNumero($valor);
 
                     if ($data[$campo] === null) {
-                        $motivo = "el valor «{$valor}» de {$campo} no es un numero";
+                        $motivo = 'el valor «'.$this->imprimible($valor).'» de '.$campo.' no es un numero';
                     }
                 }
             }
@@ -291,13 +291,37 @@ class ImportController extends Controller
      * de datos, por su cuenta, interpreta "01/02/2026" como el 2 de enero
      * (estilo estadounidense), asi que sin normalizarlo aqui el dato entraria con
      * el dia y el mes cambiados y sin ningun aviso.
+     *
+     * Se aceptan tres cosas que antes se rechazaban y que Excel produce de
+     * verdad: la fecha con hora ("2026-02-01 00:00:00", "01/02/2026 0:00", ISO
+     * con T), una celda que la libreria ya entrego como objeto de fecha, y el
+     * año de dos cifras ("1/2/26"). Ojo con este ultimo: interpretado tal cual,
+     * "01/02/26" se guardaba en el año 26 sin avisar de nada.
      */
-    private function normalizarFecha(string $valor): ?string
+    private function normalizarFecha(mixed $valor): ?string
     {
-        $valor = trim($valor);
+        if ($valor instanceof \DateTimeInterface) {
+            return $valor->format('Y-m-d');
+        }
 
-        foreach (['d/m/Y', 'd-m-Y', 'Y-m-d', 'Y/m/d', 'd.m.Y', 'd/m/y'] as $formato) {
-            $fecha = DateTimeImmutable::createFromFormat('!'.$formato, $valor);
+        $texto = trim((string) $valor);
+
+        if ($texto === '') {
+            return null;
+        }
+
+        // La hora no cambia el dia: se corta antes de interpretar ("01/02/2026 0:00").
+        $texto = preg_split('/[ T]/', $texto)[0] ?? $texto;
+
+        // Año de dos cifras -> cuatro, para no caer en el año 26.
+        $texto = preg_replace_callback(
+            '/^(\d{1,2}[\/\-.]\d{1,2}[\/\-.])(\d{2})$/',
+            fn (array $partes): string => $partes[1].((int) $partes[2] < 70 ? '20' : '19').$partes[2],
+            $texto
+        ) ?? $texto;
+
+        foreach (['d/m/Y', 'd-m-Y', 'Y-m-d', 'Y/m/d', 'd.m.Y'] as $formato) {
+            $fecha = DateTimeImmutable::createFromFormat('!'.$formato, $texto);
             $errores = DateTimeImmutable::getLastErrors();
 
             if ($fecha !== false && ($errores === false || ($errores['warning_count'] === 0 && $errores['error_count'] === 0))) {
@@ -306,8 +330,8 @@ class ImportController extends Controller
         }
 
         // Excel guarda las fechas como numero de serie: dias desde 1899-12-30.
-        if (is_numeric($valor)) {
-            $serie = (float) $valor;
+        if (is_numeric($texto)) {
+            $serie = (float) $texto;
 
             if ($serie > 20000 && $serie < 80000) {
                 return (new DateTimeImmutable('1899-12-30'))->modify('+'.(int) $serie.' days')->format('Y-m-d');
@@ -315,6 +339,26 @@ class ImportController extends Controller
         }
 
         return null;
+    }
+
+    /**
+     * Texto del valor para los mensajes de error.
+     *
+     * (string) sobre un objeto de fecha lanza un Error fatal en PHP 8: un solo
+     * DateTime en una celda tumbaba la importacion con un 500 en vez de contar
+     * la fila como omitida y decir por que.
+     */
+    private function imprimible(mixed $valor): string
+    {
+        if ($valor instanceof \DateTimeInterface) {
+            return $valor->format('Y-m-d H:i:s');
+        }
+
+        if (is_scalar($valor)) {
+            return (string) $valor;
+        }
+
+        return get_debug_type($valor);
     }
 
     /**
@@ -326,6 +370,12 @@ class ImportController extends Controller
      */
     private function normalizarNumero(mixed $valor): ?string
     {
+        // Un objeto (una fecha, por ejemplo) no es un importe: se trata como
+        // ilegible en vez de reventar al convertir.
+        if (! is_scalar($valor)) {
+            return null;
+        }
+
         $texto = preg_replace('/[^0-9,.\-]/', '', (string) $valor) ?? '';
 
         if ($texto === '' || $texto === '-') {
@@ -702,7 +752,12 @@ class ImportController extends Controller
             $this->guardarFilas('compras', $rows);
             session(['headers_compras' => $headers]);
 
-            return view('import.compras.map', compact('headers', 'camposSistema', 'sugerencias'));
+            return view('import.compras.map', [
+                'campos' => $camposSistema,
+                'obligatorios' => self::OBLIGATORIOS['compras'],
+                'headers' => $headers,
+                'sugerencias' => $sugerencias,
+            ]);
 
         } catch (ValidationException $e) {
             throw $e;
@@ -814,7 +869,12 @@ class ImportController extends Controller
             $this->guardarFilas('ventas', $rows);
             session(['headers_ventas' => $headers]);
 
-            return view('import.ventas.map', compact('headers', 'camposSistema', 'sugerencias'));
+            return view('import.ventas.map', [
+                'campos' => $camposSistema,
+                'obligatorios' => self::OBLIGATORIOS['ventas'],
+                'headers' => $headers,
+                'sugerencias' => $sugerencias,
+            ]);
 
         } catch (ValidationException $e) {
             throw $e;

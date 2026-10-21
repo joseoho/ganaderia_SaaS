@@ -1,4 +1,5 @@
 @extends('layouts.layout')
+@section('title', 'Mapear columnas de Compras')
 
 @section('content')
 
@@ -6,48 +7,20 @@
 
 <div class="card shadow-sm p-4">
 
+    <div class="alert alert-info mb-4">
+        <strong>Columnas detectadas en el archivo:</strong>
+        {{ implode(', ', $headers) }}
+    </div>
+
+    <p class="text-muted">
+        Las columnas marcadas con <span class="text-danger">*</span> son obligatorias:
+        una fila a la que le falte una se omite y se cuenta al final.
+    </p>
+
     <form action="{{ route('import.compras.preview') }}" method="POST">
         @csrf
 
-        <div class="mb-3">
-            <label>Proveedor</label>
-            <select name="map[proveedor]" class="form-select">
-                <option value="">-- No usar --</option>
-                @foreach($headers as $h)
-                    <option value="{{ $h }}">{{ $h }}</option>
-                @endforeach
-            </select>
-        </div>
-
-        <div class="mb-3">
-            <label>Descripción</label>
-            <select name="map[descripcion]" class="form-select">
-                <option value="">-- No usar --</option>
-                @foreach($headers as $h)
-                    <option value="{{ $h }}">{{ $h }}</option>
-                @endforeach
-            </select>
-        </div>
-
-        <div class="mb-3">
-            <label>Fecha</label>
-            <select name="map[fecha]" class="form-select">
-                <option value="">-- No usar --</option>
-                @foreach($headers as $h)
-                    <option value="{{ $h }}">{{ $h }}</option>
-                @endforeach
-            </select>
-        </div>
-
-        <div class="mb-3">
-            <label>Monto</label>
-            <select name="map[monto]" class="form-select">
-                <option value="">-- No usar --</option>
-                @foreach($headers as $h)
-                    <option value="{{ $h }}">{{ $h }}</option>
-                @endforeach
-            </select>
-        </div>
+        @include('import.parciales.mapa-campos')
 
         <button class="btn btn-primary">Vista previa</button>
     </form>
