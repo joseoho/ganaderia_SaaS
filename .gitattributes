@@ -6,6 +6,10 @@
 *.md diff=markdown
 *.php diff=php
 
+# Los .bat de Windows necesitan CRLF: cmd.exe se atraganta con un salto
+# de linea suelto en las etiquetas (goto) y en el final del archivo.
+*.bat text eol=crlf
+
 /.github export-ignore
 CHANGELOG.md export-ignore
 .styleci.yml export-ignore

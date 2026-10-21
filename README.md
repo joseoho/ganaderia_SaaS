@@ -7,6 +7,29 @@
 <a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
 </p>
 
+## Arrancar en local (Windows)
+
+La aplicación corre en XAMPP, en `C:\xampp\htdocs\ganaderia_SaaS`, y se sirve en
+`http://ganaderia_SaaS.test`. **Apache y MariaDB no arrancan solos** con Windows
+(no están instalados como servicios), así que después de encender el equipo:
+
+```bat
+scripts\arrancar-servicios.bat
+```
+
+Levanta solo lo que falte, espera a que los puertos 80 y 3306 escuchen y
+comprueba que la aplicación responda. Deja constancia de todo en
+`C:\xampp\logs\arranque-ganaderia.log`. Con `/q` no espera una tecla, que es lo
+que necesita el Programador de tareas.
+
+Dos cosas que conviene saber:
+
+- **PHP no es un servicio aparte**: el vhost lo ejecuta como CGI desde `C:\php84`
+  (la versión que pide el proyecto, no la 8.2 que trae XAMPP).
+- **npm no hace falta** para que la aplicación funcione: los estilos vienen de
+  CDN y `public/build` ya está compilado. Solo se usa con `npm run dev` mientras
+  se tocan CSS/JS.
+
 ## About Laravel
 
 Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
