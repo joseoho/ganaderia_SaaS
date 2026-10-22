@@ -2,6 +2,7 @@
 
 namespace Database\Seeders;
 
+use App\Enums\Rol;
 use App\Models\Animal;
 use App\Models\Compra;
 use App\Models\Gastos;
@@ -34,7 +35,7 @@ use Illuminate\Support\Facades\Hash;
  *  - Credenciales de acceso deterministas (ver README/entrega):
  *      admin@ganaderia.test / password   -> Ganaderia Demo
  *      admin@esperanza.test / password   -> Ganaderia La Esperanza
- *      usuario@ganaderia.test / usuario2026   -> Ganaderia La Esperanza
+ *      usuario@ganaderia.test / usuario2026 -> Ganaderia Demo (rol usuario)
  */
 class DatabaseSeeder extends Seeder
 {
@@ -75,6 +76,22 @@ class DatabaseSeeder extends Seeder
                     'rol' => User::ROL_ADMINISTRADOR,
                 ]
             );
+
+            // Una cuenta de rol `usuario` en la ganaderia Demo, para poder
+            // probar (o enseñar) los dos roles sin tener que crearla a mano.
+            if ($g['nombre'] === 'Ganaderia Demo') {
+                User::firstOrCreate(
+                    ['email' => 'usuario@ganaderia.test'],
+                    [
+                        'inquilino_id' => $inquilino->id,
+                        'name' => 'Usuario de Pruebas',
+                        'password' => Hash::make('usuario2026'),
+                        'email_verified_at' => now(),
+                        'rol' => Rol::Usuario->value,
+                        'activo' => true,
+                    ]
+                );
+            }
 
             // Si esta ganaderia ya tiene animales, no se vuelve a sembrar.
             if (Animal::where('inquilino_id', $inquilino->id)->exists()) {

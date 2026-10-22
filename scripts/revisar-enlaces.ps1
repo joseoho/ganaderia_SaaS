@@ -1,4 +1,9 @@
-# Rastrea enlaces locales de la aplicacion para encontrar botones muertos (404).
+# Revisa enlaces muertos: entra como un usuario, recorre las pantallas
+# principales y pide cada enlace local que encuentra, avisando de los 404/500.
+#
+# Uso:
+#   powershell -ExecutionPolicy Bypass -File scripts\revisar-enlaces.ps1
+#   powershell -ExecutionPolicy Bypass -File scripts\revisar-enlaces.ps1 -Email usuario@ganaderia.test -Password usuario2026
 param(
     [string]$Base = "http://ganaderia_SaaS.test",
     [string]$Email = "admin@ganaderia.test",
@@ -12,15 +17,15 @@ function Login {
     $r = Invoke-WebRequest -Uri "$Base/login" -WebSession $s -UseBasicParsing
     $t = ([regex]'name="_token"\s+value="([^"]+)"').Match($r.Content).Groups[1].Value
     try {
-        Invoke-WebRequest -Uri "$Base/login" -Method POST -Body @{ _token = $t; email = $Email; password = $Password } `
-            -WebSession $s -UseBasicParsing -MaximumRedirection 0 -ErrorAction Stop | Out-Null
+        Invoke-WebRequest -Uri "$Base/login" -Method POST -WebSession $s -UseBasicParsing -MaximumRedirection 0 -ErrorAction Stop `
+            -Body @{ _token = $t; email = $Email; password = $Password } | Out-Null
     } catch { }
     return $s
 }
 
-function Estado($sesion, $url) {
+function Estado($sesion, $ruta) {
     try {
-        $r = Invoke-WebRequest -Uri $url -WebSession $sesion -UseBasicParsing -MaximumRedirection 0 -ErrorAction Stop
+        $r = Invoke-WebRequest -Uri "$Base$ruta" -WebSession $sesion -UseBasicParsing -MaximumRedirection 0 -ErrorAction Stop
         return [int]$r.StatusCode
     } catch {
         $resp = $_.Exception.Response
@@ -38,33 +43,50 @@ $paginas = @(
     "/reproduccion", "/reproduccion/create", "/inventario", "/inventario/create",
     "/tratamientos", "/tratamientos/create", "/registro_vacunas", "/registro_vacunas/create",
     "/genealogia", "/notificaciones", "/reportes", "/importar", "/dashboard-reportes",
-    "/animales/etiquetas", "/reporte-general", "/reporte-porfecha"
+    "/animales/etiquetas", "/reporte-general", "/reporte-porfecha", "/usuarios"
 )
 
 $enlaces = @{}
+$sinRespuesta = @()
 
 foreach ($pagina in $paginas) {
-    $codigo = Estado $sesion "$Base$pagina"
-    if ($codigo -ne 200) { "{0,-28} -> {1}" -f $pagina, $codigo; continue }
+    $codigo = Estado $sesion $pagina
+    if ($codigo -ne 200) { $sinRespuesta += ("{0,-28} -> {1}" -f $pagina, $codigo); continue }
 
     $html = (Invoke-WebRequest -Uri "$Base$pagina" -WebSession $sesion -UseBasicParsing).Content
-    foreach ($m in [regex]::Matches($html, 'href="([^"#]+)"')) {
+
+    foreach ($m in [regex]::Matches($html, 'href="([^"]+)"')) {
         $href = $m.Groups[1].Value
-        if ($href -notmatch "^(/|https?://)") { continue }
-        if ($href -match "logout|\.jpg|\.png|\.svg|\.css|\.js|^mailto:|^javascript:") { continue }
-        if ($href -match "^(?i)https?://[^/]+(/.*)$") { $soloRuta = $Matches[1] } elseif ($href.StartsWith("/")) { $soloRuta = $href } else { continue }`n        if ($soloRuta -match "logout|\.jpg|\.png|\.svg|\.css|\.js|^mailto:|^javascript:") { continue }`n        $href = $soloRuta
-        if ($href -eq "" -or $href -eq "/") { continue }
-        if ($href -notmatch "login$") { $enlaces[$href] = $true }
+
+        if ($href -match '^(?i)https?://[^/]+(/.*)$') { $ruta = $Matches[1] }
+        elseif ($href -match '^/') { $ruta = $href }
+        else { continue }
+
+        if ($ruta -match 'logout|^/login|\.(jpg|jpeg|png|svg|css|js|ico)$') { continue }
+
+        $enlaces[$ruta] = $true
     }
 }
 
-"`n=== enlaces encontrados: " + $enlaces.Count + " ==="
-$malos = @()
-foreach ($enlace in ($enlaces.Keys | Sort-Object)) {
-    $codigo = Estado $sesion "$Base$enlace"
+if ($sinRespuesta.Count -gt 0) {
+    "=== pantallas que no responden 200 ==="
+    $sinRespuesta | ForEach-Object { $_ }
+    ""
+}
+
+"=== enlaces revisados: $($enlaces.Count) ==="
+
+$rotos = @()
+foreach ($ruta in ($enlaces.Keys | Sort-Object)) {
+    $codigo = Estado $sesion $ruta
     if ($codigo -eq 404 -or $codigo -eq 500 -or $codigo -eq -1) {
-        $malos += ("{0,-50} -> {1}" -f $enlace, $codigo)
+        $rotos += ("{0,-52} -> {1}" -f $ruta, $codigo)
     }
 }
 
-if ($malos.Count -eq 0) { "No hay enlaces roos." } else { "`n=== ENLACES QUE FALLAN ==="; $malos | ForEach-Object { $_ } }
+if ($rotos.Count -eq 0) {
+    "No hay enlaces rotos."
+} else {
+    "=== enlaces que fallan ==="
+    $rotos | ForEach-Object { $_ }
+}
