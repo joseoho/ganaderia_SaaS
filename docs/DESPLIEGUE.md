@@ -249,6 +249,19 @@ Crea la ganaderia y su administrador en una transaccion y muestra la contrasena
 generada una sola vez. Opciones: `--persona="Nombre Apellido"`,
 `--password=...`, `--sin-verificar`.
 
+En Windows, para no pelearse con la version de PHP (el proyecto pide 8.4 y el
+`php` del PATH suele ser el 8.2 de XAMPP), hay un envoltorio que ademas pide los
+datos y comprueba que MariaDB este arriba:
+
+```bat
+scripts\crear-finca.bat
+scripts\crear-finca.bat /q "Finca El Roble" dueno@correo.com   :: sin preguntas
+```
+
+El correo del administrador queda verificado: la cuenta la aprovisiona el
+operador de la plataforma y entrega la contrasena en mano. Si se prefiere que la
+confirme el propio dueno, usar `--sin-verificar` en el comando de artisan.
+
 ### Alta de un trabajador dentro de una ganaderia
 
 ```bash
