@@ -2,6 +2,9 @@
 
 namespace App\Models;
 
+use App\Enums\Permiso;
+use App\Enums\Rol;
+use App\Support\MatrizDePermisos;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -34,23 +37,8 @@ class User extends Authenticatable
 {
     use HasFactory, Notifiable;
 
-    /** Puede con todo dentro de su ganaderia, incluido borrar y gestionar el equipo. */
+    /** Rol del dueño de la ganaderia: puede con todo dentro de su ganaderia. */
     public const ROL_ADMINISTRADOR = 'administrador';
-
-    /**
-     * Trabajo del dia a dia: registrar, editar e importar. No borra.
-     *
-     * Se eligieron dos roles a proposito. Un sistema de permisos por accion
-     * habria que mantenerlo y hoy no hay ninguna necesidad real que lo pida;
-     * agregar un tercer rol es anadir una constante y una condicion.
-     */
-    public const ROL_OPERARIO = 'operario';
-
-    /** @var array<string, string> */
-    public const ROLES = [
-        self::ROL_ADMINISTRADOR => 'Administrador',
-        self::ROL_OPERARIO => 'Operario',
-    ];
 
     protected $table = 'users';
 
@@ -86,22 +74,42 @@ class User extends Authenticatable
     }
 
     /**
+     * El rol, siempre como enum y nunca como cadena suelta.
+     *
+     * Se llama `rolActual` y no `rol` a proposito: `rol` es la columna, y tener
+     * un metodo con el mismo nombre que un atributo se confunde al leer.
+     *
+     * Si la base trae un valor desconocido, `Rol::desde()` devuelve el rol de
+     * menos privilegio: un error de dedo en la tabla no puede dar administrador.
+     */
+    public function rolActual(): Rol
+    {
+        return Rol::desde($this->rol);
+    }
+
+    /**
      * Un rol desconocido (o vacio) NO da permisos de administrador: ante la
      * duda, se deniega.
      */
     public function esAdministrador(): bool
     {
-        return $this->rol === self::ROL_ADMINISTRADOR;
+        return $this->rolActual() === Rol::Administrador;
     }
 
-    public function esOperario(): bool
+    /**
+     * La unica pregunta que hace el resto de la aplicacion.
+     *
+     * Todo el control de acceso pasa por aqui, y de aqui a la matriz, que es la
+     * unica tabla donde se decide quien puede que.
+     */
+    public function puede(Permiso $permiso): bool
     {
-        return $this->rol === self::ROL_OPERARIO;
+        return MatrizDePermisos::concede($this->rolActual(), $permiso);
     }
 
     public function nombreDelRol(): string
     {
-        return self::ROLES[$this->rol] ?? ucfirst((string) $this->rol);
+        return $this->rolActual()->etiqueta();
     }
 
     protected function casts(): array

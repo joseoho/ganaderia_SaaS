@@ -77,11 +77,15 @@ Route::middleware(['auth', 'verified', 'tenant', 'solo-admin'])->group(function 
     Route::resource('animales', AnimalController::class)
         ->parameters(['animales' => 'animal']);
 
+    // Compras, ventas y gastos son DINERO: solo con el permiso `dinero.ver`
+    // (ver la matriz en app/Support/MatrizDePermisos.php).
     Route::resource('compras', CompraController::class)
-        ->parameters(['compras' => 'compra']);
+        ->parameters(['compras' => 'compra'])
+        ->middleware('can:dinero.ver');
 
     Route::resource('ventas', VentaController::class)
-        ->parameters(['ventas' => 'venta']);
+        ->parameters(['ventas' => 'venta'])
+        ->middleware('can:dinero.ver');
 
     Route::get('/dashboard', [DashboardController::class, 'index'])
         ->name('dashboard');
@@ -118,7 +122,8 @@ Route::middleware(['auth', 'verified', 'tenant', 'solo-admin'])->group(function 
     Route::post('potreros/{id}/salida', [PotreroController::class, 'salidaAnimales'])
         ->name('potreros.salida');
 
-    Route::resource('gastos', GastosController::class);
+    Route::resource('gastos', GastosController::class)
+        ->middleware('can:dinero.ver');
 
     // =============================
     //   REPORTES
@@ -142,13 +147,14 @@ Route::middleware(['auth', 'verified', 'tenant', 'solo-admin'])->group(function 
     Route::get('reportes/potreros', [ReporteController::class, 'reportePotreros'])->name('reportes.potreros');
     Route::get('reportes/potreros/generar', [ReporteController::class, 'generarPotreros'])->name('reportes.potreros.generar');
 
-    // Reporte compras
-    Route::get('reportes/compras', [ReporteController::class, 'reporteCompras'])->name('reportes.compras');
-    Route::get('reportes/compras/generar', [ReporteController::class, 'generarCompras'])->name('reportes.compras.generar');
+    // Reportes de DINERO: mismo permiso que las pantallas de las que salen.
+    // Los de produccion, potreros y animales no son dinero y quedan abiertos.
+    Route::get('reportes/compras', [ReporteController::class, 'reporteCompras'])->name('reportes.compras')->middleware('can:dinero.ver');
+    Route::get('reportes/compras/generar', [ReporteController::class, 'generarCompras'])->name('reportes.compras.generar')->middleware('can:dinero.ver');
 
     // Reporte ventas
-    Route::get('reportes/ventas', [ReporteController::class, 'reporteVentas'])->name('reportes.ventas');
-    Route::get('reportes/ventas/generar', [ReporteController::class, 'generarVentas'])->name('reportes.ventas.generar');
+    Route::get('reportes/ventas', [ReporteController::class, 'reporteVentas'])->name('reportes.ventas')->middleware('can:dinero.ver');
+    Route::get('reportes/ventas/generar', [ReporteController::class, 'generarVentas'])->name('reportes.ventas.generar')->middleware('can:dinero.ver');
 
     // Reporte producción carne
     Route::get('reportes/carne', [ReporteController::class, 'reporteCarne'])->name('reportes.carne');
@@ -160,7 +166,8 @@ Route::middleware(['auth', 'verified', 'tenant', 'solo-admin'])->group(function 
 
     // Reporte Financiero
     Route::get('reportes/financiero', [ReporteController::class, 'reporteFinanciero'])
-        ->name('reportes.financiero');
+        ->name('reportes.financiero')
+        ->middleware('can:dinero.ver');
 
     // =============================
     //   QR DE ANIMALES
@@ -186,7 +193,9 @@ Route::middleware(['auth', 'verified', 'tenant', 'solo-admin'])->group(function 
         ->name('reportes.dashboard');
 
     // /////Import Controller
-    Route::prefix('importar')->group(function () {
+    // La importacion escribe en masa y puede PISAR datos (animales por codigo):
+    // exige `datos.importar`, que hoy solo tiene el administrador.
+    Route::prefix('importar')->middleware('can:datos.importar')->group(function () {
 
         // Dashboard de importación
         Route::get('/', [ImportController::class, 'index'])->name('import.index');

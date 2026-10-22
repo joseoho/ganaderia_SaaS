@@ -18,45 +18,51 @@
 
     {{-- Compras y Gastos van en tarjetas separadas porque son dos cosas
          distintas, y porque el balance resta las dos: sin la de compras, el
-         balance no se puede cuadrar mirando la pantalla. --}}
-    <div class="col-md-4">
-        <div class="card shadow-sm text-center">
-            <div class="card-body">
-                <h5 class="card-title">Compras</h5>
-                <h2>${{ number_format($totalCompras, 2) }}</h2>
-            </div>
-        </div>
-    </div>
+         balance no se puede cuadrar mirando la pantalla.
 
-    <div class="col-md-4">
-        <div class="card shadow-sm text-center">
-            <div class="card-body">
-                <h5 class="card-title">Gastos operativos</h5>
-                <h2>${{ number_format($totalGastos, 2) }}</h2>
+         Todo esto es DINERO: sin el permiso `dinero.ver` no se pinta. Ocultarlo
+         no es la seguridad (las rutas responden 403 por su cuenta), es no
+         enseñarle al usuario cifras que no le tocan. --}}
+    @can('dinero.ver')
+        <div class="col-md-4">
+            <div class="card shadow-sm text-center">
+                <div class="card-body">
+                    <h5 class="card-title">Compras</h5>
+                    <h2>${{ number_format($totalCompras, 2) }}</h2>
+                </div>
             </div>
         </div>
-    </div>
 
-    <div class="col-md-4">
-        <div class="card shadow-sm text-center">
-            <div class="card-body">
-                <h5 class="card-title">Ventas</h5>
-                <h2>${{ number_format($totalVentas, 2) }}</h2>
+        <div class="col-md-4">
+            <div class="card shadow-sm text-center">
+                <div class="card-body">
+                    <h5 class="card-title">Gastos operativos</h5>
+                    <h2>${{ number_format($totalGastos, 2) }}</h2>
+                </div>
             </div>
         </div>
-    </div>
 
-    <div class="col-md-4">
-        <div class="card shadow-sm text-center bg-light">
-            <div class="card-body">
-                <h5 class="card-title">Balance Neto</h5>
-                <h2 class="{{ ($totalVentas - ($totalCompras + $totalGastos)) >= 0 ? 'text-success' : 'text-danger' }}">
-                    ${{ number_format($totalVentas - ($totalCompras + $totalGastos), 2) }}
-                </h2>
-                <small class="text-muted">Ventas − (compras + gastos)</small>
+        <div class="col-md-4">
+            <div class="card shadow-sm text-center">
+                <div class="card-body">
+                    <h5 class="card-title">Ventas</h5>
+                    <h2>${{ number_format($totalVentas, 2) }}</h2>
+                </div>
             </div>
         </div>
-    </div>
+
+        <div class="col-md-4">
+            <div class="card shadow-sm text-center bg-light">
+                <div class="card-body">
+                    <h5 class="card-title">Balance Neto</h5>
+                    <h2 class="{{ ($totalVentas - ($totalCompras + $totalGastos)) >= 0 ? 'text-success' : 'text-danger' }}">
+                        ${{ number_format($totalVentas - ($totalCompras + $totalGastos), 2) }}
+                    </h2>
+                    <small class="text-muted">Ventas − (compras + gastos)</small>
+                </div>
+            </div>
+        </div>
+    @endcan
 
     <div class="col-md-4">
         <div class="card shadow-sm text-center">
@@ -72,6 +78,8 @@
 <!-- Últimas actividades -->
 <div class="row">
 
+    {{-- La lista de gastos tambien lleva importes: mismo permiso. --}}
+    @can('dinero.ver')
     <div class="col-md-6">
         <div class="card shadow-sm mb-4">
             <div class="card-header bg-primary text-white">
@@ -97,6 +105,9 @@
         </div>
     </div>
 
+    @endcan
+
+    @can('dinero.ver')
     <div class="col-md-6">
         <div class="card shadow-sm mb-4">
             <div class="card-header bg-success text-white">
@@ -115,6 +126,7 @@
             </ul>
         </div>
     </div>
+    @endcan
     <div class="col-md-4">
     <div class="card shadow-sm text-center mb-4">
         <div class="card-header bg-primary text-white">

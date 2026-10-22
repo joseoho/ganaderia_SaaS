@@ -2,6 +2,7 @@
 
 namespace App\Console\Commands;
 
+use App\Enums\Rol;
 use App\Models\Inquilino;
 use App\Models\User;
 use Illuminate\Console\Command;
@@ -20,7 +21,7 @@ class CrearUsuario extends Command
     protected $signature = 'ganaderia:usuario
         {email : Correo del usuario}
         {nombre : Nombre y apellidos}
-        {--rol=operario : administrador|operario}
+        {--rol=usuario : administrador|usuario}
         {--inquilino= : Id de la ganaderia (si solo hay una, se usa esa)}
         {--password= : Contrasena; si no se indica se genera una}';
 
@@ -31,8 +32,8 @@ class CrearUsuario extends Command
         $email = (string) $this->argument('email');
         $rol = strtolower((string) $this->option('rol'));
 
-        if (! array_key_exists($rol, User::ROLES)) {
-            $this->error('Rol no valido. Opciones: '.implode(', ', array_keys(User::ROLES)));
+        if (! array_key_exists($rol, Rol::etiquetas())) {
+            $this->error('Rol no valido. Opciones: '.implode(', ', array_keys(Rol::etiquetas())));
 
             return self::FAILURE;
         }

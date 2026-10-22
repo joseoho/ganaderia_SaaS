@@ -2,6 +2,7 @@
 
 namespace App\Console\Commands;
 
+use App\Enums\Rol;
 use App\Models\User;
 use Illuminate\Console\Command;
 
@@ -13,7 +14,7 @@ use Illuminate\Console\Command;
  */
 class AsignarRol extends Command
 {
-    protected $signature = 'ganaderia:rol {email} {rol : administrador|operario}';
+    protected $signature = 'ganaderia:rol {email} {rol : administrador|usuario}';
 
     protected $description = 'Cambia el rol de un usuario de la ganaderia';
 
@@ -21,8 +22,8 @@ class AsignarRol extends Command
     {
         $rol = strtolower((string) $this->argument('rol'));
 
-        if (! array_key_exists($rol, User::ROLES)) {
-            $this->error('Rol no valido. Opciones: '.implode(', ', array_keys(User::ROLES)));
+        if (! array_key_exists($rol, Rol::etiquetas())) {
+            $this->error('Rol no valido. Opciones: '.implode(', ', array_keys(Rol::etiquetas())));
 
             return self::FAILURE;
         }

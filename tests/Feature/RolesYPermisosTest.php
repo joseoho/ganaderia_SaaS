@@ -11,10 +11,14 @@ use Illuminate\Support\Facades\Artisan;
 use Tests\TestCase;
 
 /**
- * Roles de la ganaderia: administrador y operario.
+ * Los dos roles de la ganaderia: administrador y usuario.
  *
- * El administrador puede con todo. El operario hace el trabajo del dia a dia
- * (crear, editar) pero NO borra. Ante un rol desconocido o vacio se deniega.
+ * El administrador es el dueño: dinero, borrados, importacion y gestion de la
+ * gente. El usuario hace el trabajo con los animales (animales, produccion,
+ * sanidad, potreros) y consulta informes. Ante un rol desconocido se deniega.
+ *
+ * Los permisos se deciden en App\Support\MatrizDePermisos; aqui se comprueba el
+ * comportamiento de la aplicacion, no la matriz en si (eso es PermisosTest).
  */
 class RolesYPermisosTest extends TestCase
 {
@@ -33,11 +37,18 @@ class RolesYPermisosTest extends TestCase
             ->firstOrFail();
     }
 
-    private function operario(): User
+    private function usuario(): User
     {
         return User::factory()->create([
             'inquilino_id' => $this->administrador->inquilino_id,
-            'rol' => User::ROL_OPERARIO,
+            'rol' => 'usuario',
+        ]);
+    }
+
+    private function animal(): \App\Models\Animal
+    {
+        return \App\Models\Animal::factory()->create([
+            'inquilino_id' => $this->administrador->inquilino_id,
         ]);
     }
 
@@ -49,7 +60,10 @@ class RolesYPermisosTest extends TestCase
 
     public function test_los_roles_estan_definidos(): void
     {
-        $this->assertSame(['administrador', 'operario'], array_keys(User::ROLES));
+        $this->assertSame(
+            ['administrador', 'usuario'],
+            array_keys(\App\Enums\Rol::etiquetas())
+        );
     }
 
     public function test_un_rol_desconocido_no_da_permisos_de_administrador(): void
@@ -60,7 +74,7 @@ class RolesYPermisosTest extends TestCase
         ]);
 
         $this->assertFalse($raro->esAdministrador(), 'Un rol desconocido no debe dar permisos.');
-        $this->assertSame('Jefe', $raro->nombreDelRol());
+        $this->assertSame('Usuario', $raro->nombreDelRol(), 'Se cae en el rol de menos privilegio.');
     }
 
     public function test_el_administrador_puede_borrar(): void
@@ -74,70 +88,32 @@ class RolesYPermisosTest extends TestCase
         $this->assertDatabaseMissing('ventas', ['id' => $venta->id]);
     }
 
-    public function test_el_operario_no_puede_borrar(): void
+    public function test_el_usuario_no_puede_borrar(): void
     {
-        $venta = Venta::factory()->create(['inquilino_id' => $this->administrador->inquilino_id]);
+        $potrero = Potrero::factory()->create(['inquilino_id' => $this->administrador->inquilino_id]);
 
-        $this->actingAs($this->operario())
-            ->delete("/ventas/{$venta->id}")
+        $this->actingAs($this->usuario())
+            ->delete("/potreros/{$potrero->id}")
             ->assertForbidden();
 
-        $this->assertDatabaseHas('ventas', ['id' => $venta->id]);
+        $this->assertDatabaseHas('potreros', ['id' => $potrero->id]);
     }
 
-    public function test_el_operario_no_puede_borrar_en_ningun_modulo(): void
+    public function test_el_usuario_hace_el_trabajo_con_los_animales(): void
     {
-        $operario = $this->operario();
+        $usuario = $this->usuario();
+        $animal = $this->animal();
 
-        $rutas = [
-            [Potrero::class, '/potreros/%d'],
-            [Venta::class, '/ventas/%d'],
-        ];
-
-        foreach ($rutas as [$modelo, $ruta]) {
-            $registro = $modelo::factory()->create(['inquilino_id' => $this->administrador->inquilino_id]);
-
-            $this->actingAs($operario)
-                ->delete(sprintf($ruta, $registro->id))
-                ->assertForbidden();
-
-            $this->assertDatabaseHas($registro->getTable(), ['id' => $registro->id]);
-        }
-    }
-
-    public function test_el_operario_si_puede_hacer_el_trabajo_del_dia_a_dia(): void
-    {
-        $operario = $this->operario();
-
-        // Listar, ver el formulario de creacion y crear.
-        $this->actingAs($operario)->get('/ventas')->assertOk();
-        $this->actingAs($operario)->get('/ventas/create')->assertOk();
-
-        $respuesta = $this->actingAs($operario)->post('/ventas', [
-            'cliente' => 'Cliente del operario',
-            'fecha' => '2026-03-01',
-            'descripcion' => 'Venta registrada por un operario',
-            'monto_total' => '150000',
-        ]);
-
-        $respuesta->assertSessionHasNoErrors();
-        $this->assertDatabaseHas('ventas', [
-            'cliente' => 'Cliente del operario',
-            'inquilino_id' => $this->administrador->inquilino_id,
-        ]);
-    }
-
-    public function test_el_operario_puede_editar(): void
-    {
-        $operario = $this->operario();
-        $venta = Venta::factory()->create(['inquilino_id' => $this->administrador->inquilino_id]);
-
-        $this->actingAs($operario)->get("/ventas/{$venta->id}/edit")->assertOk();
+        $this->actingAs($usuario)->get('/animales')->assertOk();
+        $this->actingAs($usuario)->get("/animales/{$animal->id}/edit")->assertOk();
+        $this->actingAs($usuario)->get('/produccion_leche')->assertOk();
+        $this->actingAs($usuario)->get('/potreros')->assertOk();
+        $this->actingAs($usuario)->get('/dashboard')->assertOk();
     }
 
     public function test_el_comando_de_rol_cambia_el_rol(): void
     {
-        $usuario = $this->operario();
+        $usuario = $this->usuario();
 
         $codigo = Artisan::call('ganaderia:rol', ['email' => $usuario->email, 'rol' => 'administrador']);
 
@@ -147,34 +123,34 @@ class RolesYPermisosTest extends TestCase
 
     public function test_el_comando_de_rol_rechaza_un_rol_inventado(): void
     {
-        $usuario = $this->operario();
+        $usuario = $this->usuario();
 
         $codigo = Artisan::call('ganaderia:rol', ['email' => $usuario->email, 'rol' => 'superjefe']);
 
         $this->assertSame(1, $codigo);
-        $this->assertTrue($usuario->fresh()->esOperario(), 'El rol no debia cambiar.');
+        $this->assertSame('Usuario', $usuario->fresh()->nombreDelRol(), 'El rol no debia cambiar.');
     }
 
     public function test_el_comando_de_rol_avisa_si_el_correo_no_existe(): void
     {
-        $codigo = Artisan::call('ganaderia:rol', ['email' => 'nadie@ejemplo.test', 'rol' => 'operario']);
+        $codigo = Artisan::call('ganaderia:rol', ['email' => 'nadie@ejemplo.test', 'rol' => 'usuario']);
 
         $this->assertSame(1, $codigo);
     }
 
     public function test_el_listado_de_usuarios_muestra_los_roles(): void
     {
-        $this->operario();
+        $this->usuario();
 
         Artisan::call('ganaderia:usuarios');
         $salida = Artisan::output();
 
         $this->assertStringContainsString('admin@ganaderia.test', $salida);
         $this->assertStringContainsString('Administrador', $salida);
-        $this->assertStringContainsString('Operario', $salida);
+        $this->assertStringContainsString('Usuario', $salida);
     }
 
-    public function test_el_comando_de_alta_crea_un_operario_en_la_ganaderia(): void
+    public function test_el_comando_de_alta_crea_un_usuario_en_la_ganaderia(): void
     {
         // Con dos ganaderias sembradas hay que indicar cual.
         $codigo = Artisan::call('ganaderia:usuario', [
@@ -190,7 +166,7 @@ class RolesYPermisosTest extends TestCase
 
         $this->assertNotNull($creado);
         $this->assertSame((int) $this->administrador->inquilino_id, (int) $creado->inquilino_id);
-        $this->assertTrue($creado->esOperario(), 'El alta debe entrar como operario por defecto.');
+        $this->assertSame('Usuario', $creado->nombreDelRol(), 'El alta entra como usuario por defecto.');
         $this->assertNull($creado->email_verified_at, 'El correo debe quedar pendiente de verificar.');
     }
 

@@ -81,12 +81,10 @@
                             </a>
                         </li>
                         
-                        <!-- Solo Admin -->
-                       {{-- @if(Auth::user()->rol === 'Administrador') --}}
-                            {{-- Compras y gastos son dos cosas distintas: una compra
-                                 tiene proveedor y un gasto tiene categoria. Estaban
-                                 mezclados: Compras estaba oculta del menu y el
-                                 reporte de compras leia la tabla de gastos. --}}
+                        <!-- Dinero: solo quien tiene el permiso (ver MatrizDePermisos) -->
+                       {{-- Compras y gastos son dos cosas distintas: una compra
+                             tiene proveedor y un gasto tiene categoria. --}}
+                        @can('dinero.ver')
                             <li class="nav-item">
                                 <a class="nav-link" href="/compras">
                                     <i class="fas fa-shopping-cart"></i> Compras
@@ -102,6 +100,7 @@
                                     <i class="fas fa-cash-register"></i> Ventas
                                 </a>
                             </li>
+                        @endcan
                             {{-- <li class="nav-item">
                                 <a class="nav-link" href="/movilizaciones">
                                     <i class="fas fa-truck-moving"></i> Movilizaciones
@@ -207,6 +206,7 @@
                                 <i class="fas fa-file-import"></i> Importar datos
                             </a>
                         </li> --}}
+                        @can('datos.importar')
                         <li class="nav-item dropdown">
     <a class="nav-link dropdown-toggle" href="#" id="importMenu" role="button" data-bs-toggle="dropdown" aria-expanded="false">
         <i class="fas fa-file-import"></i> Importar datos
@@ -247,6 +247,7 @@
 
     </ul>
 </li>
+                        @endcan
 
                     </ul>
                 </div>
