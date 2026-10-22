@@ -8,13 +8,16 @@ rem  8.4 y el `php` del PATH es el 8.2 de XAMPP, que falla con
 rem  "Composer detected issues... requires PHP >= 8.4.1".
 rem
 rem  Uso:
-rem    crear-finca.bat                      pide los datos por pantalla
-rem    crear-finca.bat "Finca" correo@x.com  sin preguntar (para scripts)
+rem    crear-finca.bat                          pide los datos por pantalla
+rem    crear-finca.bat /demo                    ademas carga datos de ejemplo
+rem    crear-finca.bat /q "Finca" correo@x.com [ /demo ]
 rem
-rem  Deja la finca creada y muestra las credenciales una sola vez.
-rem  El correo del administrador queda verificado: tu entregas la
-rem  contrasena en mano. Para que la confirme el propio dueno, usa
-rem  --sin-verificar en el comando de artisan.
+rem  Con datos de ejemplo la finca nace con potreros, animales,
+rem  produccion y finanzas, para poder ensenar el sistema el primer
+rem  dia. El panel lo avisa y se pueden borrar de un boton.
+rem
+rem  El correo del administrador queda verificado: la cuenta la
+rem  aprovisionas tu y entregas la contrasena en mano.
 rem ============================================================
 setlocal EnableExtensions EnableDelayedExpansion
 
@@ -32,6 +35,23 @@ echo  ============================================
 echo   Nueva ganaderia - Control Ganadero
 echo  ============================================
 echo.
+
+rem --- Argumentos: /q (sin pausa), /demo (datos de ejemplo) ------------
+set "SINPAUSA="
+set "DEMO="
+set "FINCA="
+set "EMAIL="
+
+:argumentos
+if "%~1"=="" goto :sin_mas_argumentos
+if /i "%~1"=="/q"    (set "SINPAUSA=1" & shift & goto :argumentos)
+if /i "%~1"=="/demo" (set "DEMO=1" & shift & goto :argumentos)
+if not defined FINCA (set "FINCA=%~1" & shift & goto :argumentos)
+if not defined EMAIL (set "EMAIL=%~1" & shift & goto :argumentos)
+shift
+goto :argumentos
+
+:sin_mas_argumentos
 
 rem --- Comprobaciones previas -------------------------------------------
 if not exist "%PHP%" (
@@ -55,14 +75,6 @@ if errorlevel 1 (
 )
 
 rem --- Datos ------------------------------------------------------------
-rem  /q: sin pausa al final (util para llamarlo desde otro script o una prueba).
-if /i "%~1"=="/q" (set "SINPAUSA=1" & shift) else (set "SINPAUSA=")
-
-set "FINCA=%~1"
-set "EMAIL=%~2"
-set "PERSONA="
-set "CLAVE="
-
 if not defined FINCA set /p "FINCA=Nombre de la ganaderia: "
 if not defined EMAIL set /p "EMAIL=Correo del administrador: "
 
@@ -75,10 +87,17 @@ if not defined EMAIL (
     goto :fin_error
 )
 
-if "%~1"=="" (
+if not defined SINPAUSA (
+    set "PERSONA="
+    set "CLAVE="
     set /p "PERSONA=Nombre de la persona (Enter para 'Administrador de la finca'): "
     echo    Contrasena: dejala vacia y se genera una aleatoria.
     set /p "CLAVE=Contrasena (Enter para generar): "
+
+    if not defined DEMO (
+        set /p "RESPUESTA=Cargar datos de ejemplo? (s/n): "
+        if /i "!RESPUESTA!"=="s" set "DEMO=1"
+    )
 )
 
 rem --- Alta --------------------------------------------------------------
@@ -86,8 +105,9 @@ echo.
 echo  Creando la ganaderia...
 
 set "ARGS="
-if defined PERSONA set ARGS=%ARGS% --persona="!PERSONA!"
-if defined CLAVE set ARGS=%ARGS% --password="!CLAVE!"
+if defined PERSONA set ARGS=!ARGS! --persona="!PERSONA!"
+if defined CLAVE set ARGS=!ARGS! --password="!CLAVE!"
+if defined DEMO set ARGS=!ARGS! --demo
 
 "%PHP%" artisan ganaderia:ganaderia "!FINCA!" "!EMAIL!"!ARGS!
 if errorlevel 1 (
@@ -104,6 +124,11 @@ echo    Contrasena:  si no la escribiste, esta arriba en la salida
 echo    Entra en:    http://ganaderia_SaaS.test/login
 echo  ============================================
 echo.
+if defined DEMO (
+    echo  La finca nace con datos de ejemplo. El panel lo avisa y se
+    echo  pueden borrar de un boton cuando cargues los datos reales.
+    echo.
+)
 echo  Comparte la contrasena por un canal privado y pide que la cambie.
 goto :fin
 

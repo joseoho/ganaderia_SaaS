@@ -256,7 +256,24 @@ datos y comprueba que MariaDB este arriba:
 ```bat
 scripts\crear-finca.bat
 scripts\crear-finca.bat /q "Finca El Roble" dueno@correo.com   :: sin preguntas
+scripts\crear-finca.bat /demo                                  :: con datos de ejemplo
 ```
+
+### Finca nueva con datos de ejemplo (`--demo`)
+
+Una finca vacia no se puede enseñar: el dueño abre el panel, ve ceros y no
+entiende que compro. Con `--demo` (o `/demo` en el script) nace con potreros,
+6 animales, produccion de leche y carne, sanidad, inventario y finanzas.
+
+```bash
+php artisan ganaderia:ganaderia "Finca El Roble" dueno@correo.com --demo
+```
+
+La finca queda marcada (`inquilinos.es_demo`) y el panel enseña un aviso con el
+boton **Borrar datos de ejemplo**: al pulsarlo se borran los datos de negocio de
+esa ganaderia (animales, potreros, produccion, finanzas) y se apaga el aviso. Las
+cuentas de usuario no se tocan. Una finca que no es demo no muestra el aviso y no
+se puede vaciar (responde 404), y solo el administrador puede hacerlo.
 
 El correo del administrador queda verificado: la cuenta la aprovisiona el
 operador de la plataforma y entrega la contrasena en mano. Si se prefiere que la

@@ -14,7 +14,25 @@ class Inquilino extends Model
         'nombre',
         'plan_suscripcion',
         'fecha_registro',
+        'es_demo',
     ];
+
+    /**
+     * Una ganadería marcada como demo enseña un aviso en el panel y se puede
+     * vaciar de un botón cuando el dueño cargue sus datos reales.
+     */
+    public function esDemo(): bool
+    {
+        return (bool) $this->es_demo;
+    }
+
+    protected function casts(): array
+    {
+        return [
+            'fecha_registro' => 'date',
+            'es_demo' => 'boolean',
+        ];
+    }
 
     // Relación: Un inquilino tiene muchos usuarios
     /** @return HasMany<User, $this> */
@@ -56,20 +74,5 @@ class Inquilino extends Model
     public function reportes(): HasMany
     {
         return $this->hasmany(Reporte::class, 'inquilino_id');
-    }
-
-    /**
-     * Tipos de dato, derivados del esquema real (Fase 4).
-     *
-     * Sin esto Eloquent devuelve las fechas como cadena, lo que hace
-     * fragiles las comparaciones y el formateo. Ojo: las vistas que pintan
-     * una fecha dentro de un <input type="date"> deben formatearla con
-     * ->format('Y-m-d'), o el navegador mostrara el campo vacio.
-     */
-    protected function casts(): array
-    {
-        return [
-            'fecha_registro' => 'date',
-        ];
     }
 }

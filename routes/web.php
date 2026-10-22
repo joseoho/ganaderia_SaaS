@@ -5,6 +5,7 @@ use App\Http\Controllers\AnimalEtiquetaController;
 use App\Http\Controllers\AnimalQrController;
 use App\Http\Controllers\CompraController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\DemoController;
 use App\Http\Controllers\GastosController;
 use App\Http\Controllers\GenealogiController;
 use App\Http\Controllers\ImportController;
@@ -93,6 +94,11 @@ Route::middleware(['auth', 'verified', 'tenant', 'solo-admin'])->group(function 
 
     Route::get('/dashboard', [DashboardController::class, 'index'])
         ->name('dashboard');
+
+    // Vaciar los datos de ejemplo de una ganaderia demo. Es un borrado masivo:
+    // la comprobacion de permiso va dentro del controlador (`registros.eliminar`)
+    // porque ademas exige que la ganaderia este marcada como demo.
+    Route::post('demo/vaciar', [DemoController::class, 'vaciar'])->name('demo.vaciar');
 
     // =============================
     //   USUARIOS DE LA GANADERIA

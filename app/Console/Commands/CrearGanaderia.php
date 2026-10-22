@@ -4,6 +4,7 @@ namespace App\Console\Commands;
 
 use App\Models\Inquilino;
 use App\Models\User;
+use App\Support\DatosDeEjemplo;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
@@ -29,7 +30,8 @@ class CrearGanaderia extends Command
         {email : Correo del administrador}
         {--persona= : Nombre de la persona (por defecto, el del administrador)}
         {--password= : Contrasena; si no se indica se genera una}
-        {--sin-verificar : Deja el correo pendiente de verificar}';
+        {--sin-verificar : Deja el correo pendiente de verificar}
+        {--demo : Siembra datos de ejemplo (potreros, animales, produccion, finanzas)}';
 
     protected $description = 'Crea una ganaderia y su usuario administrador';
 
@@ -71,12 +73,25 @@ class CrearGanaderia extends Command
 
         [$inquilino, $usuario] = $resultado;
 
+        // Los datos de ejemplo van FUERA de la transaccion del alta: si el
+        // sembrado fallara, la ganaderia y su administrador ya estan creados y
+        // se puede entrar igual (y volver a sembrar desde el panel despues).
+        if ($this->option('demo')) {
+            DatosDeEjemplo::sembrar($inquilino, $usuario, 'DEMO');
+            $inquilino->forceFill(['es_demo' => true])->save();
+        }
+
         $this->info(sprintf(
             'Ganaderia "%s" creada (id %d) con el administrador %s.',
             $inquilino->nombre,
             $inquilino->id,
             $usuario->email
         ));
+
+        if ($this->option('demo')) {
+            $this->line('Datos de ejemplo cargados: potreros, 6 animales, producción, sanidad y finanzas.');
+            $this->line('El panel lo avisará, y se pueden vaciar de un botón cuando cargues los datos reales.');
+        }
 
         if ($this->option('password') === null) {
             $this->line('Contrasena generada (se muestra una sola vez): <options=bold>'.$password.'</>');

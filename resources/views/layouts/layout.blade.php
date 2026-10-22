@@ -317,6 +317,29 @@
 
                 <!-- Contenido de las vistas -->
                 <div class="container-fluid">
+
+                    {{-- Aviso de datos de ejemplo. Solo aparece en una ganadería
+                         creada con --demo, hasta que se vacían. --}}
+                    @if(auth()->user()?->inquilino?->esDemo())
+                        <div class="alert alert-warning d-flex flex-wrap justify-content-between align-items-center gap-2">
+                            <div>
+                                <strong><i class="fas fa-flask me-1"></i> Esta ganadería tiene datos de ejemplo.</strong>
+                                Están para que puedas ver cómo funciona el sistema (animales, producción, informes).
+                                Cuando cargues los tuyos, bórralos para que los informes sean reales.
+                            </div>
+
+                            @can('registros.eliminar')
+                                <form method="POST" action="{{ route('demo.vaciar') }}"
+                                      onsubmit="return confirm('Se borrarán TODOS los datos de esta ganadería: animales, potreros, producción y finanzas. Las cuentas de usuario se conservan. ¿Seguir?')">
+                                    @csrf
+                                    <button class="btn btn-sm btn-outline-danger">
+                                        Borrar datos de ejemplo
+                                    </button>
+                                </form>
+                            @endcan
+                        </div>
+                    @endif
+
                     @yield('content')
                 </div>
             </main>
