@@ -18,6 +18,7 @@ use App\Http\Controllers\RegistroVacunaController;
 use App\Http\Controllers\ReporteController;
 use App\Http\Controllers\ReproduccionController;
 use App\Http\Controllers\TratamientoController;
+use App\Http\Controllers\UsuarioController;
 use App\Http\Controllers\VentaController;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
@@ -92,6 +93,18 @@ Route::middleware(['auth', 'verified', 'tenant', 'solo-admin'])->group(function 
 
     Route::get('/dashboard', [DashboardController::class, 'index'])
         ->name('dashboard');
+
+    // =============================
+    //   USUARIOS DE LA GANADERIA
+    // =============================
+    // Alta, cambio de rol y activacion/desactivacion de la gente. No hay
+    // `destroy` a proposito: las cuentas se desactivan, porque el historico
+    // (quien registro una venta, quien hizo un pesaje) apunta a ellas.
+    Route::middleware('can:usuarios.gestionar')->group(function () {
+        Route::resource('usuarios', UsuarioController::class)->except(['show', 'destroy']);
+        Route::patch('usuarios/{usuario}/estado', [UsuarioController::class, 'cambiarEstado'])
+            ->name('usuarios.estado');
+    });
 
     Route::resource('genealogia', GenealogiController::class)
         ->parameters(['genealogia' => 'genealogium']);

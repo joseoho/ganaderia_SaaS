@@ -104,17 +104,34 @@ Las puertas de Laravel se declaran solas: `AppServiceProvider` recorre
 - Página 403 que explica el motivo.
 - `PermisosTest` + guardarraíl de rutas.
 
-### Fase 2 — Gestión de la gente (siguiente)
+### Fase 2 — Gestión de la gente (hecha)
 
-Es lo que falta para que el rol `usuario` se pueda usar **sin consola**:
+Ya no hace falta la consola para dar de alta a un trabajador:
 
-- Pantalla de usuarios: listar, crear, cambiar rol y **desactivar** (nunca
-  borrar: los registros históricos apuntan a esa cuenta).
-- Invitación por correo con contraseña temporal.
-- Regla: un administrador no puede quitarse a sí mismo el rol si es el último
-  administrador de la ganadería.
-- `usuarios.gestionar` protege todo el módulo.
-- Auditoría mínima: quién creó, cambió de rol o desactivó a quién.
+- Pantalla `Usuarios` (`usuarios.gestionar`), en el menú solo para el administrador.
+- Listar, crear, cambiar rol y **desactivar** (nunca borrar: los registros
+  históricos —quién registró una venta, quién hizo un pesaje— apuntan a esa cuenta).
+- Al crear se elige la contraseña y se puede dar el correo por verificado (el
+  administrador responde por esa persona); si no se marca, la cuenta espera al
+  correo de verificación.
+- Una cuenta desactivada no inicia sesión: el filtro está en las credenciales, así
+  que el error es el mismo que con una contraseña equivocada.
+- Cambiar el correo de una cuenta invalida su verificación (el correo nuevo no es
+  el que se confirmó).
+
+Guardas que evitan quedarse fuera de la propia ganadería:
+
+1. Nadie se cambia el rol a sí mismo.
+2. Nadie desactiva su propia cuenta.
+3. La ganadería no puede quedarse sin administrador (ni al degradar ni al
+   desactivar al último activo). Es defensa en profundidad: por HTTP no se
+   alcanza, porque el único que podría dispararla es el propio administrador.
+4. Un administrador de A no puede tocar cuentas de B ni sabiendo el id: la
+   búsqueda va siempre dentro de su ganadería y responde 404, no 403.
+
+Pendiente para más adelante: auditoría de quién creó/cambió a quién, invitación
+por correo con caducidad (hoy la contraseña se comparte a mano), y cierre de las
+sesiones abiertas de una cuenta en el momento de desactivarla.
 
 ### Fase 3 — Cuando haya clientes grandes
 

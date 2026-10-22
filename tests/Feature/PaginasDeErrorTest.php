@@ -28,8 +28,21 @@ class PaginasDeErrorTest extends TestCase
     {
         $this->get('/una-ruta-que-no-existe-xyz')
             ->assertNotFound()
-            ->assertSee('Página no encontrada')
+            ->assertSee('Esa página no existe')
             ->assertSee('Volver al inicio');
+    }
+
+    /**
+     * El aviso de /register no puede hablar de "una página que no existe": ahí
+     * lo que pasa es que el registro está cerrado, y el usuario necesita saber a
+     * quién pedirle la cuenta.
+     */
+    public function test_el_registro_cerrado_explica_que_hay_que_pedir_la_cuenta(): void
+    {
+        $this->get('/register')
+            ->assertNotFound()
+            ->assertSee('El registro está cerrado')
+            ->assertSee('administrador de tu ganadería');
     }
 
     public function test_las_cinco_paginas_de_error_compilan(): void

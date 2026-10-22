@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Foundation\Auth\AuthenticatesUsers;
+use Illuminate\Http\Request;
 
 class LoginController extends Controller
 {
@@ -36,5 +37,22 @@ class LoginController extends Controller
     {
         $this->middleware('guest')->except('logout');
         $this->middleware('auth')->only('logout');
+    }
+
+    /**
+     * Una cuenta desactivada no puede iniciar sesion.
+     *
+     * Se filtra en las credenciales (y no despues de entrar) para que el error
+     * sea el mismo que con una contrasena equivocada: al que esta fuera no se le
+     * cuenta si la cuenta existe, esta desactivada o la clave esta mal.
+     *
+     * @return array<string, mixed>
+     */
+    protected function credentials(Request $request): array
+    {
+        return array_merge(
+            $request->only($this->username(), 'password'),
+            ['activo' => 1]
+        );
     }
 }

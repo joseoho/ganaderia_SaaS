@@ -187,6 +187,15 @@
                                 </a>
                             </li>
 
+                            {{-- Gestión de la gente: solo quien puede gestionar usuarios --}}
+                            @can('usuarios.gestionar')
+                                <li class="nav-item">
+                                    <a class="nav-link" href="{{ route('usuarios.index') }}">
+                                        <i class="fas fa-users-cog"></i> Usuarios
+                                    </a>
+                                </li>
+                            @endcan
+
                        {{-- @endif --}}
                         
                         <!-- Para todos los usuarios -->

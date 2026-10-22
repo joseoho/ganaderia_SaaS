@@ -34,6 +34,7 @@ use Illuminate\Support\Facades\Hash;
  *  - Credenciales de acceso deterministas (ver README/entrega):
  *      admin@ganaderia.test / password   -> Ganaderia Demo
  *      admin@esperanza.test / password   -> Ganaderia La Esperanza
+ *      usuario@ganaderia.test / usuario2026   -> Ganaderia La Esperanza
  */
 class DatabaseSeeder extends Seeder
 {

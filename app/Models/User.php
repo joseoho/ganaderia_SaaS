@@ -50,6 +50,7 @@ class User extends Authenticatable implements ContratoDeCorreoVerificado
         'password',
         'inquilino_id',
         'rol',
+        'activo',
     ];
 
     protected $hidden = [
@@ -114,11 +115,23 @@ class User extends Authenticatable implements ContratoDeCorreoVerificado
         return $this->rolActual()->etiqueta();
     }
 
+    /**
+     * Una cuenta desactivada no puede entrar, pero su historico sigue ahi.
+     *
+     * Se desactiva en vez de borrar: quien registro una venta o un pesaje tiene
+     * que seguir teniendo nombre en los informes.
+     */
+    public function estaActivo(): bool
+    {
+        return (bool) $this->activo;
+    }
+
     protected function casts(): array
     {
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
+            'activo' => 'boolean',
         ];
     }
 }

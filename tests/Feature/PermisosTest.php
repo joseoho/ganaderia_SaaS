@@ -210,6 +210,7 @@ class PermisosTest extends TestCase
             'reporte de ventas' => ['reportes.ventas', 'can:dinero.ver'],
             'reporte financiero' => ['reportes.financiero', 'can:dinero.ver'],
             'importacion' => ['import.', 'can:datos.importar'],
+            'usuarios' => ['usuarios.', 'can:usuarios.gestionar'],
         ];
     }
 
