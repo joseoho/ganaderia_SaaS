@@ -71,6 +71,16 @@
                             </div>
                         </div>
                     </form>
+
+                    {{-- Con el registro cerrado, aquí no hay enlace de alta: hay que
+                         decir a quién pedírsela, o el usuario se queda mirando la
+                         pantalla sin saber qué hacer. --}}
+                    @unless(config('app.registro_publico'))
+                        <p class="text-muted small text-center mt-3 mb-0">
+                            ¿No tienes cuenta? El administrador de tu ganadería te la crea
+                            desde <strong>Usuarios</strong>.
+                        </p>
+                    @endunless
                 </div>
             </div>
         </div>

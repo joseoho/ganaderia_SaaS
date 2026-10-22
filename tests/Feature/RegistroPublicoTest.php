@@ -43,9 +43,29 @@ class RegistroPublicoTest extends TestCase
         $this->assertNull(User::query()->where('email', 'pirata@ejemplo.test')->first());
     }
 
+    /**
+     * Con el registro cerrado, la pantalla de login no puede ofrecer NINGÚN
+     * enlace de alta. La prueba anterior solo miraba el texto «Crear una
+     * cuenta» y se le colaba el «Register» de la barra de navegación del
+     * layout, que llevaba a un 404.
+     */
     public function test_con_el_registro_cerrado_el_login_no_ofrece_crear_cuenta(): void
     {
-        $this->get('/login')->assertOk()->assertDontSee('Crear una cuenta');
+        $respuesta = $this->get('/login');
+
+        $respuesta->assertOk();
+        $respuesta->assertDontSee('Crear una cuenta');
+        $respuesta->assertDontSee('Registrarse');
+
+        // Y ningún enlace que apunte al alta, se llame como se llame.
+        $this->assertStringNotContainsString(
+            '/register',
+            (string) $respuesta->getContent(),
+            'El login no debe enlazar al registro cuando está cerrado.'
+        );
+
+        // Pero sí dice a quién pedirle la cuenta.
+        $respuesta->assertSee('El administrador de tu ganadería te la crea', false);
     }
 
     public function test_con_el_registro_abierto_la_pantalla_carga_y_no_lista_las_ganaderias(): void

@@ -39,13 +39,16 @@
                         @guest
                             @if (Route::has('login'))
                                 <li class="nav-item">
-                                    <a class="nav-link" href="{{ route('login') }}">{{ __('Login') }}</a>
+                                    <a class="nav-link" href="{{ route('login') }}">Iniciar sesión</a>
                                 </li>
                             @endif
 
-                            @if (Route::has('register'))
+                            {{-- Solo si el registro publico esta abierto. Si no, este
+                                 enlace llevaba a un 404 (el registro responde 404 a
+                                 proposito cuando esta cerrado). --}}
+                            @if (Route::has('register') && config('app.registro_publico'))
                                 <li class="nav-item">
-                                    <a class="nav-link" href="{{ route('register') }}">{{ __('Register') }}</a>
+                                    <a class="nav-link" href="{{ route('register') }}">Registrarse</a>
                                 </li>
                             @endif
                         @else
