@@ -120,19 +120,34 @@ Es lo que falta para que el rol `usuario` se pueda usar **sin consola**:
 
 - Multi-finca por cuenta (el veterinario que atiende varios hatos).
 - Roles por finca, no por cuenta.
-- Verificación de correo real y 2FA para el administrador.
+- 2FA para el administrador.
+
+### Fase 1.5 — Verificación de correo (hecha)
+
+Estaba apagada de facto: `User` no implementaba `MustVerifyEmail` y el
+middleware `verified` no bloqueaba nada. Ahora:
+
+- `User` implementa el contrato y usa el trait `MustVerifyEmail`.
+- Rutas de verificación activas (`Auth::routes(['verify' => true])`): aviso,
+  enlace firmado y reenvío.
+- `/home` exige `verified`, así que quien se registra cae en el aviso.
+- La pantalla de aviso es propia (no usa el layout del panel: quien no está
+  verificado no debe ver el menú).
+- El enlace lleva caducidad (60 min) y firma; un enlace manipulado responde 403.
+
+Pendiente de infraestructura, no de código: en producción hay que configurar
+**SMTP** de verdad. Con `MAIL_MAILER=log` el enlace solo se escribe en
+`storage/logs/laravel.log`, que sirve para probar pero no para un cliente.
 
 ## Decisiones abiertas (revisar antes de comercializar)
 
-1. **La verificación de correo está apagada de facto.** `User` no implementa
-   `MustVerifyEmail`, así que el middleware `verified` no bloquea y una cuenta
-   sin verificar entra al panel (comprobado: 200). `docs/DESPLIEGUE.md` afirma lo
-   contrario. Hay que decidir: implementarla de verdad antes de abrir el registro
-   público, o quitar el middleware y no prometer verificación.
-2. **El QR público de edición** (`animal/qr/{id}/editar-todo`) permite editar los
+1. **El QR público de edición** (`animal/qr/{id}/editar-todo`) permite editar los
    datos de un animal desde un enlace sin sesión. Hoy queda fuera de esta matriz
    por ser una ruta pública; hay que decidir si se firma el enlace, se limita en
    el tiempo o se exige sesión.
-3. **El usuario no ve el dinero.** Si en la práctica el operario necesita
+2. **El usuario no ve el dinero.** Si en la práctica el operario necesita
    registrar gastos de campo, se parte el permiso en `dinero.ver` y
    `dinero.registrar` (la matriz ya está preparada para eso).
+3. **Contraseñas y sesiones:** falta decidir si se exige una contraseña mínima
+   más fuerte (hoy 8 caracteres) y si se cierran las sesiones al cambiar la
+   contraseña.

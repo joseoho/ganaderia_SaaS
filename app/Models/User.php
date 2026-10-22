@@ -5,6 +5,8 @@ namespace App\Models;
 use App\Enums\Permiso;
 use App\Enums\Rol;
 use App\Support\MatrizDePermisos;
+use Illuminate\Auth\MustVerifyEmail;
+use Illuminate\Contracts\Auth\MustVerifyEmail as ContratoDeCorreoVerificado;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -33,9 +35,9 @@ use Illuminate\Notifications\Notifiable;
  * con actingAs) y `AislamientoMultiTenantTest` (exige que User NO tenga el
  * filtro, para que a nadie se le ocurra volver a ponerselo).
  */
-class User extends Authenticatable
+class User extends Authenticatable implements ContratoDeCorreoVerificado
 {
-    use HasFactory, Notifiable;
+    use HasFactory, MustVerifyEmail, Notifiable;
 
     /** Rol del dueño de la ganaderia: puede con todo dentro de su ganaderia. */
     public const ROL_ADMINISTRADOR = 'administrador';

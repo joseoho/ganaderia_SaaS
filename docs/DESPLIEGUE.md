@@ -270,10 +270,38 @@ Para abrirlo, en el `.env` del servidor:
 REGISTRO_PUBLICO=true
 ```
 
-y **asegurate antes de que el correo funciona** (la verificacion de email es
-obligatoria para entrar al panel). Con el registro abierto, cada alta crea su
-propia ganaderia y queda como su administrador, y las peticiones van limitadas a
-10 por minuto.
+y **asegurate antes de que el correo funciona**. Con el registro abierto, cada
+alta crea su propia ganaderia y queda como su administrador, y las peticiones van
+limitadas a 10 por minuto.
+
+### Verificacion de correo
+
+Es **obligatoria para entrar al panel** (`User` implementa `MustVerifyEmail` y las
+rutas del panel llevan el middleware `verified`). Quien se registra cae en
+`/email/verify`, y desde ahi puede reenviarse el enlace.
+
+Tres cosas que tienen que estar bien en el servidor o nadie podra entrar:
+
+```dotenv
+# 1. El correo tiene que salir de verdad (aqui un ejemplo con SMTP)
+MAIL_MAILER=smtp
+MAIL_HOST=smtp.tu-proveedor.com
+MAIL_PORT=587
+MAIL_USERNAME=...
+MAIL_PASSWORD=...
+MAIL_FROM_ADDRESS="no-responder@tudominio.com"
+
+# 2. APP_URL tiene que ser la direccion REAL: el enlace de verificacion se
+#    firma con ella. Si dice localhost, el enlace no abre desde el correo.
+APP_URL=https://tudominio.com
+```
+
+3. El proveedor de correo debe aceptar el remitente y no marcarlo como spam.
+   Si el correo cae en spam, el usuario se queda fuera y no lo sabra.
+
+Para **probar en local sin servidor de correo**, deja `MAIL_MAILER=log`: el
+mensaje completo (con el enlace) se escribe en `storage/logs/laravel.log` y se
+puede abrir pegandolo en el navegador.
 ---
 
 ## Anexo: ensayo de despliegue (comprobado en local)

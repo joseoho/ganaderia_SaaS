@@ -41,7 +41,7 @@ Route::get('/', function () {
 // `registro-abierto` responde 404 si REGISTRO_PUBLICO esta desactivado; asi el
 // interruptor se decide en cada peticion (y se puede probar) en vez de al
 // arrancar la aplicacion. El limite de intentos frena las altas automatizadas.
-Auth::routes(['register' => false]);
+Auth::routes(['register' => false, 'verify' => true]);
 
 Route::get('register', [App\Http\Controllers\Auth\RegisterController::class, 'showRegistrationForm'])
     ->middleware(['guest', 'registro-abierto'])
@@ -52,8 +52,11 @@ Route::post('register', [App\Http\Controllers\Auth\RegisterController::class, 'r
 
 // El middleware se declara en la ruta (estilo Laravel 11+) en lugar del
 // constructor del controlador, que es la forma antigua.
+//
+// `verified` en /home es lo que cierra el circulo: recien registrado, el usuario
+// cae en /home y desde ahi se le manda a verificar el correo.
 Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])
-    ->middleware(['auth', 'tenant'])
+    ->middleware(['auth', 'verified', 'tenant'])
     ->name('home');
 
 // =============================
