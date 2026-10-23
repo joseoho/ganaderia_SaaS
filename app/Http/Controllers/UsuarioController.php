@@ -6,6 +6,7 @@ use App\Enums\Rol;
 use App\Http\Requests\StoreUsuarioRequest;
 use App\Http\Requests\UpdateUsuarioRequest;
 use App\Models\User;
+use App\Support\LimitesDePlan;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -83,6 +84,11 @@ class UsuarioController extends Controller
 
     public function store(StoreUsuarioRequest $request): RedirectResponse
     {
+        // Tope del plan: no se pueden dar de alta mas cuentas de las contratadas.
+        if (! LimitesDePlan::puedeCrearUsuarios(Auth::user()->inquilino)) {
+            return back()->withInput()->with('warning', LimitesDePlan::mensajeUsuarios(Auth::user()->inquilino));
+        }
+
         $datos = $request->validated();
 
         $usuario = new User([

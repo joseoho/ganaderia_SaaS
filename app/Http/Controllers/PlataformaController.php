@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Enums\Permiso;
 use App\Models\Pago;
+use App\Models\Plan;
 use App\Models\Suscripcion;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -111,5 +112,42 @@ class PlataformaController extends Controller
         ])->save();
 
         return back()->with('success', 'Pago rechazado. El cliente verá el motivo en su pantalla.');
+    }
+
+    /** Planes y precios: lo que se cobra y cuánto cabe en cada uno. */
+    public function planes(): View
+    {
+        return view('plataforma.planes', [
+            'planes' => Plan::query()->orderBy('orden')->get(),
+        ]);
+    }
+
+    public function actualizarPlan(Request $request, Plan $plan): RedirectResponse
+    {
+        abort_unless(Auth::user()->puede(Permiso::PlataformaEditarPlanes), 403);
+
+        $datos = $request->validate([
+            'nombre' => ['required', 'string', 'max:60'],
+            'precio_usd' => ['required', 'numeric', 'min:0', 'max:100000'],
+            'dias' => ['required', 'integer', 'min:1', 'max:365'],
+            'limite_animales' => ['nullable', 'integer', 'min:1', 'max:1000000'],
+            'limite_usuarios' => ['nullable', 'integer', 'min:1', 'max:1000'],
+            'activo' => ['nullable', 'boolean'],
+        ], [
+            'precio_usd.min' => 'El precio no puede ser negativo.',
+            'dias.max' => 'Un periodo de más de 365 días no tiene sentido.',
+            'limite_animales.min' => 'El límite de animales debe ser al menos 1 (o déjalo vacío para "sin límite").',
+        ]);
+
+        $plan->update([
+            'nombre' => $datos['nombre'],
+            'precio_usd' => $datos['precio_usd'],
+            'dias' => $datos['dias'],
+            'limite_animales' => $datos['limite_animales'] ?? null,
+            'limite_usuarios' => $datos['limite_usuarios'] ?? null,
+            'activo' => $request->boolean('activo'),
+        ]);
+
+        return back()->with('success', 'Plan actualizado: '.$plan->nombre.'. Los cambios valen para las próximas renovaciones.');
     }
 }

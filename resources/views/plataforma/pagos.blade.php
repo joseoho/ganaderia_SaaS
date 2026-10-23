@@ -16,6 +16,7 @@
 <nav class="navbar navbar-dark bg-dark mb-4">
     <div class="container">
         <span class="navbar-brand">Plataforma · Pagos</span>
+        <a href="{{ route('plataforma.planes') }}" class="btn btn-sm btn-outline-light">Planes</a>
         <form method="POST" action="{{ url('/logout') }}">
             @csrf
             <button class="btn btn-sm btn-outline-light">Cerrar sesión</button>

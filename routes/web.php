@@ -279,6 +279,10 @@ Route::middleware(['auth', 'verified', 'can:plataforma.ver_pagos'])
     ->name('plataforma.')
     ->group(function () {
         Route::get('pagos', [PlataformaController::class, 'pagos'])->name('pagos');
+        Route::get('planes', [PlataformaController::class, 'planes'])->name('planes');
+        Route::put('planes/{plan}', [PlataformaController::class, 'actualizarPlan'])
+            ->middleware('can:plataforma.editar_planes')
+            ->name('planes.update');
         Route::get('pagos/{pago}/comprobante', [PlataformaController::class, 'comprobante'])->name('comprobante');
         Route::post('pagos/{pago}/aprobar', [PlataformaController::class, 'aprobar'])->name('aprobar');
         Route::post('pagos/{pago}/rechazar', [PlataformaController::class, 'rechazar'])->name('rechazar');

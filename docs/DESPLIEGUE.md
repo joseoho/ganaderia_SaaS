@@ -403,3 +403,19 @@ php artisan ganaderia:operador "pagos@tudominio.com" "Nombre Apellido"   # crea 
 - Planes y precios estan en la tabla `planes` (se siembran Basico 12 USD y
   Profesional 25 USD). Cambiarlos es un `UPDATE` hasta que exista pantalla de
   administracion.
+
+### Limites del plan, planes y avisos (fase B)
+
+- Cada plan tiene **precio, duracion y topes** de animales y usuarios. Al llegar
+  al tope, la app avisa y no deja crear mas (los datos existentes no se tocan).
+- El operador edita los planes en `/plataforma/planes`. Los cambios valen para las
+  **proximas renovaciones**: un periodo ya pagado conserva su precio.
+- La pantalla de suscripcion muestra el consumo: «9 de 300 animales · 2 de 6
+  usuarios».
+- Los avisos de vencimiento (7, 3, 1 y 0 dias) los crea el comando
+  `php artisan suscripciones:avisar`, programado a las 08:00. **Necesita el cron
+  de Laravel** en el servidor, o no se ejecuta nunca:
+
+```
+* * * * * cd /ruta/al/proyecto && php artisan schedule:run >> /dev/null 2>&1
+```

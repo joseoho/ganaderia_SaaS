@@ -25,6 +25,7 @@ use Illuminate\Support\Facades\Hash;
  *      admin@ganaderia.test / password   -> Ganaderia Demo
  *      admin@esperanza.test / password   -> Ganaderia La Esperanza
  *      usuario@ganaderia.test / usuario2026 -> Ganaderia Demo (rol usuario)
+ *      pagos@ganaderia.test / operador-2026 -> Ganaderia Demo (rol usuario, para probar pagos)
  */
 class DatabaseSeeder extends Seeder
 {
@@ -69,7 +70,16 @@ class DatabaseSeeder extends Seeder
             // Cada finca sembrada nace con un periodo vigente: sin suscripcion
             // el panel queda en solo lectura y la Demo no serviria para nada.
             if (! $inquilino->suscripciones()->exists()) {
+                // El plan de la finca es el que declara su plan_suscripcion:
+                // la Demo es profesional (mas cupo) y La Esperanza basico.
                 $plan = Plan::query()->where('activo', true)->orderBy('orden')->first();
+                $porNombre = Plan::query()
+                    ->whereRaw('LOWER(nombre) = ?', [strtolower((string) $g['plan_suscripcion'])])
+                    ->first();
+
+                if ($porNombre !== null) {
+                    $plan = $porNombre;
+                }
 
                 if ($plan !== null) {
                     Suscripcion::create([

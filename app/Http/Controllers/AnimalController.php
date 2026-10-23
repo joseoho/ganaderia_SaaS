@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Requests\StoreAnimalRequest;
 use App\Http\Requests\UpdateAnimalRequest;
 use App\Models\Animal;
+use App\Support\LimitesDePlan;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -58,6 +59,11 @@ class AnimalController extends Controller
 
     public function store(StoreAnimalRequest $request)
     {
+
+        // Tope del plan: se comprueba antes de crear, para no dejar nada a medias.
+        if (! LimitesDePlan::puedeCrearAnimales(Auth::user()->inquilino)) {
+            return back()->withInput()->with('warning', LimitesDePlan::mensajeAnimales(Auth::user()->inquilino));
+        }
 
         $data = $request->validated();
         // Agregar el inquilino_id a los datos

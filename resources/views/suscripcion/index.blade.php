@@ -13,6 +13,8 @@
             <div class="card-body">
                 <h5 class="card-title mb-3">Estado</h5>
 
+                <p class="small text-muted mb-2">{{ \App\Support\LimitesDePlan::resumen($inquilino) }}</p>
+
                 @if($vigente)
                     <p class="mb-1">
                         <span class="badge bg-success">Activa</span>

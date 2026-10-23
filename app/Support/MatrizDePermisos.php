@@ -39,7 +39,11 @@ final class MatrizDePermisos
 
             // El operador de la plataforma cobra: ve los comprobantes de todas
             // las fincas y los aprueba o rechaza. Nada mas.
-            Rol::Operador => [Permiso::PlataformaVerPagos, Permiso::PlataformaGestionarPagos],
+            Rol::Operador => [
+                Permiso::PlataformaVerPagos,
+                Permiso::PlataformaGestionarPagos,
+                Permiso::PlataformaEditarPlanes,
+            ],
         };
     }
 

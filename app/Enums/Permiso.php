@@ -39,6 +39,9 @@ enum Permiso: string
     /** Aprobar o rechazar un pago: es lo que da luz verde al servicio. */
     case PlataformaGestionarPagos = 'plataforma.gestionar_pagos';
 
+    /** Editar planes y precios. */
+    case PlataformaEditarPlanes = 'plataforma.editar_planes';
+
     /**
      * Los permisos de plataforma no son de una finca: un administrador de
      * ganaderia no debe ver los pagos de las demas.
@@ -46,7 +49,7 @@ enum Permiso: string
     public function esDePlataforma(): bool
     {
         return match ($this) {
-            self::PlataformaVerPagos, self::PlataformaGestionarPagos => true,
+            self::PlataformaVerPagos, self::PlataformaGestionarPagos, self::PlataformaEditarPlanes => true,
             default => false,
         };
     }
@@ -61,6 +64,7 @@ enum Permiso: string
             self::ReportesVer => 'Ver reportes',
             self::PlataformaVerPagos => 'Ver pagos de las fincas',
             self::PlataformaGestionarPagos => 'Aprobar o rechazar pagos',
+            self::PlataformaEditarPlanes => 'Editar planes y precios',
         };
     }
 }
