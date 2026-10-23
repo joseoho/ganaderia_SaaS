@@ -266,4 +266,30 @@ class SuscripcionTest extends TestCase
         $this->assertTrue($inquilino->tieneSuscripcionVigente());
         $this->assertSame(0, Animal::where('inquilino_id', $inquilino->id)->count());
     }
+
+    /**
+     * Regresión: el operador no tiene ganadería, así que si entra en una
+     * pantalla de finca el filtro de tenant (que falla cerrado) reventaba con un
+     * 500 («Consulta a [App\Models\Tratamiento] sin ganaderia activa»).
+     */
+    public function test_el_operador_va_a_su_panel_y_no_revienta_en_las_pantallas_de_finca(): void
+    {
+        $operador = $this->operador();
+
+        // Al entrar, directo a pagos (no a /home de una finca).
+        $this->post('/login', ['email' => $operador->email, 'password' => 'password'])
+            ->assertRedirect(route('plataforma.pagos'));
+
+        // Y si abre una pantalla de finca, se le devuelve a su panel.
+        foreach (['/home', '/dashboard', '/reportes', '/tratamientos'] as $ruta) {
+            $this->actingAs($operador)->get($ruta)->assertRedirect(route('plataforma.pagos'));
+        }
+    }
+
+    public function test_una_cuenta_sin_ganaderia_que_no_es_operador_recibe_un_403_claro(): void
+    {
+        $suelto = User::factory()->create(['inquilino_id' => null, 'rol' => 'usuario']);
+
+        $this->actingAs($suelto)->get('/tratamientos')->assertForbidden();
+    }
 }

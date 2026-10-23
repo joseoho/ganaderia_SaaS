@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Auth;
 use App\Http\Controllers\Controller;
 use Illuminate\Foundation\Auth\AuthenticatesUsers;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class LoginController extends Controller
 {
@@ -27,6 +28,20 @@ class LoginController extends Controller
      * @var string
      */
     protected $redirectTo = '/home';
+
+    /**
+     * A dónde va cada uno al entrar.
+     *
+     * El operador de la plataforma no tiene ganadería: si lo mandáramos a /home
+     * acabaría en el panel de una finca que no es suya, y el filtro de tenant
+     * (que falla cerrado) reventaría en la primera consulta. Va directo a pagos.
+     */
+    protected function redirectPath(): string
+    {
+        return Auth::user()?->esOperador()
+            ? route('plataforma.pagos')
+            : $this->redirectTo;
+    }
 
     /**
      * Create a new controller instance.
