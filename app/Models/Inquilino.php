@@ -75,4 +75,37 @@ class Inquilino extends Model
     {
         return $this->hasmany(Reporte::class, 'inquilino_id');
     }
+
+    // =============================
+    //   SUSCRIPCIÓN Y PAGOS
+    // =============================
+
+    /** @return HasMany<Suscripcion, $this> */
+    public function suscripciones(): HasMany
+    {
+        return $this->hasMany(Suscripcion::class, 'inquilino_id');
+    }
+
+    /** @return HasMany<Pago, $this> */
+    public function pagos(): HasMany
+    {
+        return $this->hasMany(Pago::class, 'inquilino_id');
+    }
+
+    /** La suscripción que manda: la que termina más tarde. */
+    public function suscripcionActual(): ?Suscripcion
+    {
+        return $this->suscripciones()->orderByDesc('fin')->first();
+    }
+
+    public function planActual(): ?Plan
+    {
+        return $this->suscripcionActual()?->plan;
+    }
+
+    /** Sin suscripción se considera vencida: ante la duda, no dar servicio. */
+    public function tieneSuscripcionVigente(): bool
+    {
+        return $this->suscripcionActual()?->estaVigente() ?? false;
+    }
 }

@@ -61,8 +61,15 @@ class RolesYPermisosTest extends TestCase
     public function test_los_roles_estan_definidos(): void
     {
         $this->assertSame(
-            ['administrador', 'usuario'],
+            ['administrador', 'usuario', 'operador'],
             array_keys(\App\Enums\Rol::etiquetas())
+        );
+
+        // Dentro de una ganadería solo se reparten los dos de finca: el operador
+        // es de la plataforma y no se asigna desde Usuarios.
+        $this->assertSame(
+            ['administrador', 'usuario'],
+            array_column(\App\Enums\Rol::deFinca(), 'value')
         );
     }
 

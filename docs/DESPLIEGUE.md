@@ -378,3 +378,28 @@ Aviso de despliegue: el limite real de tamano lo pone PHP
 (`upload_max_filesize`, 2 MB de fabrica), no la validacion de la aplicacion. Si
 se van a importar archivos mayores, hay que subir `upload_max_filesize` y
 `post_max_size` en el `php.ini` del servidor.
+
+### Cobro por comprobante
+
+El cobro es manual y asistido, como en las apps de servicios publicos: el
+cliente paga (Pago Movil, transferencia, Zelle o USDT) y sube el comprobante;
+el operador lo revisa y da luz verde.
+
+```bash
+php artisan ganaderia:operador "pagos@tudominio.com" "Nombre Apellido"   # crea la cuenta que cobra
+```
+
+- El operador **no pertenece a ninguna ganaderia** y solo entra a
+  `/plataforma/pagos`: ve el comprobante de cada pago y aprueba o rechaza con un
+  motivo (que el cliente lee en su pantalla).
+- Aprobar **extiende la suscripcion** desde el final del periodo actual (o desde
+  hoy si ya vencio).
+- Cada finca nace con **14 dias de prueba**; si vence, queda en **modo lectura**
+  (consulta y exporta, no registra) hasta que se apruebe un pago.
+- Los comprobantes se guardan en `storage/app/private/comprobantes/` y se sirven
+  por una ruta autenticada: no hay URL publica.
+- La **referencia del banco es unica**: el mismo comprobante no se puede subir
+  dos veces.
+- Planes y precios estan en la tabla `planes` (se siembran Basico 12 USD y
+  Profesional 25 USD). Cambiarlos es un `UPDATE` hasta que exista pantalla de
+  administracion.

@@ -29,7 +29,7 @@ class StoreUsuarioRequest extends FormRequest
         return [
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'string', 'email', 'max:255', 'unique:users,email'],
-            'rol' => ['required', Rule::in(array_column(Rol::cases(), 'value'))],
+            'rol' => ['required', Rule::in(array_column(Rol::deFinca(), 'value'))],
             'password' => ['required', 'string', 'min:8', 'confirmed'],
             // El administrador que da de alta a un trabajador responde por el:
             // si lo marca, la cuenta entra sin esperar al correo.

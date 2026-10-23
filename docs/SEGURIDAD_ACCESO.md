@@ -19,6 +19,7 @@ pruebas.
 |---|---|---|
 | **administrador** | El dueño de la ganadería | Todo: dinero, borrados, importación, usuarios |
 | **usuario** | Quien trabaja con los animales | Animales, producción, sanidad, potreros e informes de producción |
+| **operador** | El dueño de la plataforma (cobra) | Ver comprobantes de todas las fincas y aprobarlos o rechazarlos. No ve los datos de ninguna finca |
 
 Un `rol` desconocido (una fila vieja, un POST manipulado) se trata **siempre**
 como `usuario`, nunca como administrador: un error de dedo no puede dar permiso

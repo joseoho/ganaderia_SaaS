@@ -100,6 +100,15 @@ class User extends Authenticatable implements ContratoDeCorreoVerificado
     }
 
     /**
+     * El operador de la plataforma (el que cobra). No pertenece a ninguna
+     * ganadería: `inquilino_id` es nulo y no entra al panel de una finca.
+     */
+    public function esOperador(): bool
+    {
+        return $this->rolActual() === Rol::Operador;
+    }
+
+    /**
      * La unica pregunta que hace el resto de la aplicacion.
      *
      * Todo el control de acceso pasa por aqui, y de aqui a la matriz, que es la

@@ -4,6 +4,8 @@ namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
 use App\Models\Inquilino;
+use App\Models\Plan;
+use App\Models\Suscripcion;
 use App\Models\User;
 use Illuminate\Foundation\Auth\RegistersUsers;
 use Illuminate\Support\Facades\DB;
@@ -82,7 +84,7 @@ class RegisterController extends Controller
                 'fecha_registro' => now()->toDateString(),
             ]);
 
-            return User::create([
+            $usuario = User::create([
                 'name' => $data['name'],
                 'email' => $data['email'],
                 'password' => Hash::make($data['password']),
@@ -90,6 +92,21 @@ class RegisterController extends Controller
                 // Quien crea la ganaderia es su administrador.
                 'rol' => User::ROL_ADMINISTRADOR,
             ]);
+
+            // Prueba gratis de 14 dias, igual que en el alta por consola.
+            $plan = Plan::query()->where('activo', true)->orderBy('orden')->first();
+
+            if ($plan !== null) {
+                Suscripcion::create([
+                    'inquilino_id' => $inquilino->id,
+                    'plan_id' => $plan->id,
+                    'inicio' => now()->toDateString(),
+                    'fin' => now()->addDays(14)->toDateString(),
+                    'es_prueba' => true,
+                ]);
+            }
+
+            return $usuario;
         });
     }
 }

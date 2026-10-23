@@ -12,12 +12,14 @@ use App\Http\Controllers\ImportController;
 use App\Http\Controllers\InventarioInsumoController;
 use App\Http\Controllers\MovilizacionController;
 use App\Http\Controllers\NotificacionController;
+use App\Http\Controllers\PlataformaController;
 use App\Http\Controllers\PotreroController;
 use App\Http\Controllers\ProduccionCarneController;
 use App\Http\Controllers\ProduccionLecheController;
 use App\Http\Controllers\RegistroVacunaController;
 use App\Http\Controllers\ReporteController;
 use App\Http\Controllers\ReproduccionController;
+use App\Http\Controllers\SuscripcionController;
 use App\Http\Controllers\TratamientoController;
 use App\Http\Controllers\UsuarioController;
 use App\Http\Controllers\VentaController;
@@ -66,7 +68,7 @@ Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])
 // =============================
 // `solo-admin` limita los borrados (verbo DELETE) al administrador de la
 // ganaderia; el resto del panel queda abierto al operario.
-Route::middleware(['auth', 'verified', 'tenant', 'solo-admin'])->group(function () {
+Route::middleware(['auth', 'verified', 'tenant', 'suscripcion', 'solo-admin'])->group(function () {
 
     Route::resource('notificaciones', NotificacionController::class)
         ->parameters(['notificaciones' => 'notificacion']);
@@ -94,6 +96,17 @@ Route::middleware(['auth', 'verified', 'tenant', 'solo-admin'])->group(function 
 
     Route::get('/dashboard', [DashboardController::class, 'index'])
         ->name('dashboard');
+
+    // =============================
+    //   SUSCRIPCIÓN Y COBRO
+    // =============================
+    // El estado lo ve cualquiera de la finca (también cuando está vencida: es la
+    // pantalla a la que se redirige). Subir el pago, solo el administrador: es
+    // dinero y compromete a la finca.
+    Route::get('suscripcion', [SuscripcionController::class, 'index'])->name('suscripcion.index');
+    Route::post('suscripcion/pagos', [SuscripcionController::class, 'storePago'])
+        ->middleware('can:usuarios.gestionar')
+        ->name('suscripcion.pagos.store');
 
     // Vaciar los datos de ejemplo de una ganaderia demo. Es un borrado masivo:
     // la comprobacion de permiso va dentro del controlador (`registros.eliminar`)
@@ -255,3 +268,18 @@ Route::middleware(['auth', 'verified', 'tenant', 'solo-admin'])->group(function 
         Route::post('/ventas/import', [ImportController::class, 'ventasImport'])->name('import.ventas.import');
     });
 }); // ← ESTE ES EL ÚNICO CIERRE CORRECTO
+
+// =============================
+//   PLATAFORMA (el operador que cobra)
+// =============================
+// Fuera del grupo de la finca a proposito: el operador no tiene ganaderia, asi
+// que no pasa por `tenant` ni por la comprobacion de suscripcion.
+Route::middleware(['auth', 'verified', 'can:plataforma.ver_pagos'])
+    ->prefix('plataforma')
+    ->name('plataforma.')
+    ->group(function () {
+        Route::get('pagos', [PlataformaController::class, 'pagos'])->name('pagos');
+        Route::get('pagos/{pago}/comprobante', [PlataformaController::class, 'comprobante'])->name('comprobante');
+        Route::post('pagos/{pago}/aprobar', [PlataformaController::class, 'aprobar'])->name('aprobar');
+        Route::post('pagos/{pago}/rechazar', [PlataformaController::class, 'rechazar'])->name('rechazar');
+    });

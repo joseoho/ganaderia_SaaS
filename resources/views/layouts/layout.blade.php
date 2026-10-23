@@ -195,6 +195,11 @@
                                     </a>
                                 </li>
                             @endcan
+                            <li class="nav-item">
+                                <a class="nav-link" href="{{ route('suscripcion.index') }}">
+                                    <i class="fas fa-credit-card"></i> Suscripción
+                                </a>
+                            </li>
 
                        {{-- @endif --}}
                         
@@ -337,6 +342,28 @@
                                     </button>
                                 </form>
                             @endcan
+                        </div>
+                    @endif
+
+                    {{-- Aviso de suscripción: vencida (solo lectura) o a punto de
+                         vencer. Enlaza a la pantalla donde se sube el comprobante. --}}
+                    @php($inquilinoActual = auth()->user()?->inquilino)
+                    @if($inquilinoActual !== null && ! $inquilinoActual->tieneSuscripcionVigente())
+                        <div class="alert alert-danger d-flex flex-wrap justify-content-between align-items-center gap-2">
+                            <div>
+                                <strong><i class="fas fa-lock me-1"></i> La suscripción venció.</strong>
+                                La finca está en <strong>modo lectura</strong>: puedes consultar y exportar todo,
+                                pero no registrar nada nuevo.
+                            </div>
+                            <a href="{{ route('suscripcion.index') }}" class="btn btn-sm btn-light">Ver suscripción</a>
+                        </div>
+                    @elseif($inquilinoActual?->suscripcionActual()?->estaPorVencer(5))
+                        <div class="alert alert-warning d-flex flex-wrap justify-content-between align-items-center gap-2">
+                            <div>
+                                <strong><i class="fas fa-clock me-1"></i> Tu suscripción vence pronto.</strong>
+                                Quedan {{ $inquilinoActual->suscripcionActual()->diasRestantes() }} días.
+                            </div>
+                            <a href="{{ route('suscripcion.index') }}" class="btn btn-sm btn-outline-dark">Renovar</a>
                         </div>
                     @endif
 

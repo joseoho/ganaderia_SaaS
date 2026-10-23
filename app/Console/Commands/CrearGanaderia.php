@@ -3,6 +3,8 @@
 namespace App\Console\Commands;
 
 use App\Models\Inquilino;
+use App\Models\Plan;
+use App\Models\Suscripcion;
 use App\Models\User;
 use App\Support\DatosDeEjemplo;
 use Illuminate\Console\Command;
@@ -67,6 +69,20 @@ class CrearGanaderia extends Command
 
             $usuario->email_verified_at = $verificado ? now() : null;
             $usuario->save();
+
+            // Prueba gratis de 14 dias: la venta no depende de que paguen el
+            // primer dia, y el operador puede extenderla aprobando un pago.
+            $plan = Plan::query()->where('activo', true)->orderBy('orden')->first();
+
+            if ($plan !== null) {
+                Suscripcion::create([
+                    'inquilino_id' => $inquilino->id,
+                    'plan_id' => $plan->id,
+                    'inicio' => now()->toDateString(),
+                    'fin' => now()->addDays(14)->toDateString(),
+                    'es_prueba' => true,
+                ]);
+            }
 
             return [$inquilino, $usuario];
         });

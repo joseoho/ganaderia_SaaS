@@ -5,6 +5,8 @@ namespace Database\Seeders;
 use App\Enums\Rol;
 use App\Models\Animal;
 use App\Models\Inquilino;
+use App\Models\Plan;
+use App\Models\Suscripcion;
 use App\Models\User;
 use App\Support\DatosDeEjemplo;
 use Illuminate\Database\Seeder;
@@ -64,6 +66,21 @@ class DatabaseSeeder extends Seeder
                 ]
             );
 
+            // Cada finca sembrada nace con un periodo vigente: sin suscripcion
+            // el panel queda en solo lectura y la Demo no serviria para nada.
+            if (! $inquilino->suscripciones()->exists()) {
+                $plan = Plan::query()->where('activo', true)->orderBy('orden')->first();
+
+                if ($plan !== null) {
+                    Suscripcion::create([
+                        'inquilino_id' => $inquilino->id,
+                        'plan_id' => $plan->id,
+                        'inicio' => now()->subDays(10)->toDateString(),
+                        'fin' => now()->addDays(80)->toDateString(),
+                        'es_prueba' => true,
+                    ]);
+                }
+            }
             // Una cuenta de rol `usuario` en la ganaderia Demo, para poder
             // probar (o enseñar) los dos roles sin tener que crearla a mano.
             if ($g['nombre'] === 'Ganaderia Demo') {

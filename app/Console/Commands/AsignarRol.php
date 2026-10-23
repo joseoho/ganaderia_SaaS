@@ -22,8 +22,8 @@ class AsignarRol extends Command
     {
         $rol = strtolower((string) $this->argument('rol'));
 
-        if (! array_key_exists($rol, Rol::etiquetas())) {
-            $this->error('Rol no valido. Opciones: '.implode(', ', array_keys(Rol::etiquetas())));
+        if (! in_array($rol, array_column(Rol::deFinca(), 'value'), true)) {
+            $this->error('Rol no valido. Opciones: '.implode(', ', array_column(Rol::deFinca(), 'value')));
 
             return self::FAILURE;
         }

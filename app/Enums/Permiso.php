@@ -31,6 +31,26 @@ enum Permiso: string
     /** Ver los informes de produccion, potreros y animales. */
     case ReportesVer = 'reportes.ver';
 
+    // --- Plataforma (el operador que cobra), fuera de las ganaderias ---
+
+    /** Ver los comprobantes de pago de todas las fincas. */
+    case PlataformaVerPagos = 'plataforma.ver_pagos';
+
+    /** Aprobar o rechazar un pago: es lo que da luz verde al servicio. */
+    case PlataformaGestionarPagos = 'plataforma.gestionar_pagos';
+
+    /**
+     * Los permisos de plataforma no son de una finca: un administrador de
+     * ganaderia no debe ver los pagos de las demas.
+     */
+    public function esDePlataforma(): bool
+    {
+        return match ($this) {
+            self::PlataformaVerPagos, self::PlataformaGestionarPagos => true,
+            default => false,
+        };
+    }
+
     public function etiqueta(): string
     {
         return match ($this) {
@@ -39,6 +59,8 @@ enum Permiso: string
             self::DatosImportar => 'Importar archivos',
             self::UsuariosGestionar => 'Gestionar usuarios',
             self::ReportesVer => 'Ver reportes',
+            self::PlataformaVerPagos => 'Ver pagos de las fincas',
+            self::PlataformaGestionarPagos => 'Aprobar o rechazar pagos',
         };
     }
 }

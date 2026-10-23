@@ -21,6 +21,8 @@ return Application::configure(basePath: dirname(__DIR__))
             'solo-admin' => \App\Http\Middleware\SoloAdministradorPuedeBorrar::class,
             // Puerta del registro publico (REGISTRO_PUBLICO).
             'registro-abierto' => \App\Http\Middleware\RegistroPublicoAbierto::class,
+            // Sin suscripcion vigente la finca queda en solo lectura.
+            'suscripcion' => \App\Http\Middleware\SuscripcionActiva::class,
         ]);
 
         // Detras de un proxy inverso (balanceador, Cloudflare, nginx delante)

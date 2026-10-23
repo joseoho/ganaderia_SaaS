@@ -24,13 +24,22 @@ final class MatrizDePermisos
     public static function permisosDe(Rol $rol): array
     {
         return match ($rol) {
-            // El administrador es el dueno de la ganaderia: puede con todo.
-            Rol::Administrador => Permiso::cases(),
+            // El administrador es el dueno de la ganaderia: puede con todo lo de
+            // SU finca. Los permisos de plataforma quedan fuera a proposito: los
+            // pagos de las demas ganaderias no son asunto suyo.
+            Rol::Administrador => array_values(array_filter(
+                Permiso::cases(),
+                fn (Permiso $permiso): bool => ! $permiso->esDePlataforma()
+            )),
 
             // El usuario hace el trabajo del dia a dia con los animales:
             // registra produccion y sanidad, y consulta informes. No ve dinero,
             // no borra, no importa y no toca a la gente.
             Rol::Usuario => [Permiso::ReportesVer],
+
+            // El operador de la plataforma cobra: ve los comprobantes de todas
+            // las fincas y los aprueba o rechaza. Nada mas.
+            Rol::Operador => [Permiso::PlataformaVerPagos, Permiso::PlataformaGestionarPagos],
         };
     }
 

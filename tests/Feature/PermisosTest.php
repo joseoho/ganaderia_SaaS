@@ -49,12 +49,17 @@ class PermisosTest extends TestCase
     //  La matriz
     // ------------------------------------------------------------------
 
-    public function test_el_administrador_tiene_todos_los_permisos(): void
+    public function test_el_administrador_tiene_todos_los_permisos_de_su_finca(): void
     {
         foreach (Permiso::cases() as $permiso) {
-            $this->assertTrue(
+            // Los de plataforma NO son del administrador de una finca: los pagos
+            // de las demás ganaderías no son asunto suyo.
+            $esperado = ! $permiso->esDePlataforma();
+
+            $this->assertSame(
+                $esperado,
                 MatrizDePermisos::concede(Rol::Administrador, $permiso),
-                'Al administrador le falta '.$permiso->value
+                'Permiso mal concedido al administrador: '.$permiso->value
             );
         }
 

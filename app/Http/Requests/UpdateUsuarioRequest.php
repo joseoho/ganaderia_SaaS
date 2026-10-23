@@ -34,7 +34,7 @@ class UpdateUsuarioRequest extends FormRequest
                 'required', 'string', 'email', 'max:255',
                 Rule::unique('users', 'email')->ignore($id),
             ],
-            'rol' => ['required', Rule::in(array_column(Rol::cases(), 'value'))],
+            'rol' => ['required', Rule::in(array_column(Rol::deFinca(), 'value'))],
             'password' => ['nullable', 'string', 'min:8', 'confirmed'],
         ];
     }
