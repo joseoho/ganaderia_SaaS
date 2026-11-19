@@ -419,3 +419,15 @@ php artisan ganaderia:operador "pagos@tudominio.com" "Nombre Apellido"   # crea 
 ```
 * * * * * cd /ruta/al/proyecto && php artisan schedule:run >> /dev/null 2>&1
 ```
+
+### Avisos del cobro
+
+- **Al cliente**: cuando se aprueba o se rechaza un pago se le crea una
+  notificación dentro de la app con el número de referencia y, si es rechazo, el
+  motivo completo. Aparece en el contador de «Notificaciones» del panel y en la
+  pantalla de suscripción.
+- **Al operador**: cuando una finca sube un comprobante se le manda un correo con
+  finca, plan, monto, referencia y el enlace al panel. Con `MAIL_MAILER=log` el
+  mensaje queda en `storage/logs/laravel.log`; en producción necesita SMTP.
+  Si el correo falla, el comprobante igual queda guardado y el pago sigue su
+  curso: el aviso nunca bloquea la subida.

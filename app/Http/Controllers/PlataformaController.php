@@ -6,6 +6,7 @@ use App\Enums\Permiso;
 use App\Models\Pago;
 use App\Models\Plan;
 use App\Models\Suscripcion;
+use App\Support\Avisos;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -86,7 +87,15 @@ class PlataformaController extends Controller
             ])->save();
         });
 
-        return back()->with('success', 'Pago aprobado: la ganadería quedó activa hasta el '.$pago->fresh()->inquilino->suscripcionActual()?->fin->format('d/m/Y').'.');
+        // El cliente se entera sin tener que entrar a mirar.
+        $fin = $pago->fresh()->inquilino->suscripcionActual()?->fin?->format('d/m/Y');
+
+        Avisos::alAdministrador(
+            $pago->inquilino,
+            'Pago aprobado (referencia '.$pago->referencia.'). La ganadería quedó activa hasta el '.$fin.'.'
+        );
+
+        return back()->with('success', 'Pago aprobado: la ganadería quedó activa hasta el '.$fin.'.');
     }
 
     public function rechazar(Request $request, Pago $pago): RedirectResponse
@@ -111,7 +120,12 @@ class PlataformaController extends Controller
             'revisado_en' => now(),
         ])->save();
 
-        return back()->with('success', 'Pago rechazado. El cliente verá el motivo en su pantalla.');
+        Avisos::alAdministrador(
+            $pago->inquilino,
+            'Pago rechazado (referencia '.$pago->referencia.'): '.$datos['motivo_rechazo'].' Sube otro comprobante cuando lo tengas.'
+        );
+
+        return back()->with('success', 'Pago rechazado. El cliente verá el motivo en su pantalla y en sus avisos.');
     }
 
     /** Planes y precios: lo que se cobra y cuánto cabe en cada uno. */

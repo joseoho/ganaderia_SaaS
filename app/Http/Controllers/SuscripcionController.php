@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Pago;
 use App\Models\Plan;
+use App\Support\Avisos;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -77,6 +78,22 @@ class SuscripcionController extends Controller
             'estado' => Pago::ESTADO_PENDIENTE,
             'notas' => $datos['notas'] ?? null,
         ]);
+
+        // Aviso al operador: el comprobante ya está guardado, pero nadie lo
+        // revisa si no se le dice. Si el correo falla, el pago sigue su curso.
+        Avisos::alOperador(
+            'Nuevo comprobante de pago: '.$inquilino->nombre,
+            sprintf(
+                "La ganadería %s subió un comprobante.\n\nPlan: %s\nMonto: %s %s\nReferencia: %s\nMétodo: %s\n\nRevísalo en %s",
+                $inquilino->nombre,
+                Plan::query()->find($datos['plan_id'])->nombre ?? '—',
+                $datos['moneda'],
+                number_format((float) $datos['monto'], 2),
+                $datos['referencia'],
+                Pago::METODOS[$datos['metodo']] ?? $datos['metodo'],
+                url('/plataforma/pagos')
+            )
+        );
 
         return redirect()
             ->route('suscripcion.index')
