@@ -65,7 +65,13 @@ return [
     |
     */
 
-    'timezone' => 'UTC',
+    /*
+    | La zona de la finca, no UTC: las fechas de negocio (vencimientos, avisos,
+    | «hoy» en los informes) tienen que coincidir con el dia del ganadero. Con
+    | UTC, a partir de las 20:00 de Venezuela el «hoy» del sistema era el dia
+    | siguiente y los avisos de vencimiento no encontraban la suscripcion.
+    */
+    'timezone' => env('APP_TIMEZONE', 'America/Caracas'),
 
     /*
     |--------------------------------------------------------------------------
