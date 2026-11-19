@@ -40,6 +40,12 @@
     </div>
 </form>
 
+@if(($pendientesDelUsuario = auth()->user()->notificaciones()->where('estado', 'pendiente')->count()) > 0)
+    <form method="POST" action="{{ route('notificaciones.leer.todas') }}" class="d-inline">
+        @csrf
+        <button class="btn btn-outline-secondary mb-3">Marcar todas como leídas ({{ $pendientesDelUsuario }})</button>
+    </form>
+@endif
 <a href="{{ route('notificaciones.create') }}" class="btn btn-success mb-3">Nueva Notificación</a>
 
 <div class="table-responsive">

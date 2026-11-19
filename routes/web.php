@@ -72,6 +72,10 @@ Route::middleware(['auth', 'verified', 'tenant', 'suscripcion', 'solo-admin'])->
 
     Route::resource('notificaciones', NotificacionController::class)
         ->parameters(['notificaciones' => 'notificacion']);
+
+    // Baja el contador del menú: marca como leídos los avisos del usuario.
+    Route::post('notificaciones/leer-todas', [NotificacionController::class, 'marcarTodasLeidas'])
+        ->name('notificaciones.leer.todas');
     // =============================
     //   ETIQUETAS QR
     // =============================

@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Requests\StoreNotificacionRequest;
 use App\Http\Requests\UpdateNotificacionRequest;
 use App\Models\Notificacion;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -113,5 +114,23 @@ class NotificacionController extends Controller
 
         return redirect()->route('notificaciones.index')->with('success', 'Notificación eliminada');
 
+    }
+
+    /**
+     * Marca como leídas todas las notificaciones pendientes del usuario.
+     *
+     * Sin esto, los avisos del cobro (vencimiento, pago aprobado o rechazado) se
+     * quedan en "pendiente" para siempre y el contador del menú nunca baja.
+     */
+    public function marcarTodasLeidas(): RedirectResponse
+    {
+        $actualizadas = Notificacion::query()
+            ->where('usuario_id', Auth::id())
+            ->where('estado', 'pendiente')
+            ->update(['estado' => 'leida']);
+
+        return back()->with('success', $actualizadas > 0
+            ? 'Avisos marcados como leídos: '.$actualizadas.'.'
+            : 'No tenías avisos pendientes.');
     }
 }

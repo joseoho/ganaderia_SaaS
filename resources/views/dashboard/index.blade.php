@@ -65,12 +65,15 @@
     @endcan
 
     <div class="col-md-4">
-        <div class="card shadow-sm text-center">
-            <div class="card-body">
-                <h5 class="card-title">Notificaciones Pendientes</h5>
-                <h2>{{ $notificacionesPendientes }}</h2>
+        <a href="{{ route('notificaciones.index') }}" class="text-decoration-none text-reset">
+            <div class="card shadow-sm text-center h-100">
+                <div class="card-body">
+                    <h5 class="card-title">Notificaciones Pendientes</h5>
+                    <h2>{{ $notificacionesPendientes }}</h2>
+                    <small class="text-muted">Ver avisos</small>
+                </div>
             </div>
-        </div>
+        </a>
     </div>
 
 </div>

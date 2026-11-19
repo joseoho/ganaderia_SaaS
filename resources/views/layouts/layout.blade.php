@@ -171,11 +171,17 @@
                             
                             
                             <!-- Gestión -->
-                            {{-- <li class="nav-item">
-                                <a class="nav-link" href="/notificaciones">
-                                    <i class="fas fa-bell"></i> Notificaciones
+                            {{-- Avisos: los de vencimiento de la suscripción y los del
+                                 pago (aprobado o rechazado) se crean aquí. --}}
+                            @php($avisosPendientes = auth()->user()?->notificaciones()->where('estado', 'pendiente')->count() ?? 0)
+                            <li class="nav-item">
+                                <a class="nav-link d-flex justify-content-between align-items-center" href="{{ route('notificaciones.index') }}">
+                                    <span><i class="fas fa-bell"></i> Notificaciones</span>
+                                    @if($avisosPendientes > 0)
+                                        <span class="badge bg-danger rounded-pill">{{ $avisosPendientes }}</span>
+                                    @endif
                                 </a>
-                            </li> --}}
+                            </li>
                             <li class="nav-item">
                                 <a class="nav-link" href="/genealogia">
                                     <i class="fas fa-sitemap"></i> Genealogía
